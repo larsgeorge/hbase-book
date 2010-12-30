@@ -41,7 +41,7 @@
 
   <repositories>
     <repository>
-      <id>cloudera</id>
+      <id>cloudera-releases</id>
       <url>https://repository.cloudera.com/content/repositories/releases/</url>
       <releases>
         <enabled>true</enabled>
@@ -51,7 +51,7 @@
       </snapshots>
     </repository>
     <repository>
-      <id>cloudera</id>
+      <id>cloudera-third-party</id>
       <url>https://repository.cloudera.com/content/repositories/third-party/</url>
       <releases>
         <enabled>true</enabled>
