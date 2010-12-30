@@ -1,0 +1,82 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>com.larsgeorge</groupId>
+  <artifactId>hbase-book</artifactId>
+  <version>1.0</version>
+  <packaging>pom</packaging>
+
+  <name>hbase-book</name>
+  <url>http://hbasebook.com</url>
+
+  <scm>
+    <connection>scm:git:git://github.com/larsgeorge/hbase-book.git</connection>
+    <developerConnection>scm:git:git@github.com:larsgeorge/hbase-book.git</developerConnection>
+    <url>http://github.com/larsgeorge/hbase-book</url>
+  </scm>
+
+  <properties>
+    <jdkLevel>1.6</jdkLevel>
+    <requiredMavenVersion>[2.1,)</requiredMavenVersion>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.build.outputEncoding>UTF-8</project.build.outputEncoding>
+  </properties>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>2.3.1</version>
+        <configuration>
+          <source>${jdkLevel}</source>
+          <target>${jdkLevel}</target>
+          <showDeprecation>true</showDeprecation>
+          <showWarnings>true</showWarnings>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+  <repositories>
+    <repository>
+      <id>cloudera</id>
+      <url>https://repository.cloudera.com/content/repositories/releases/</url>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </repository>
+    <repository>
+      <id>cloudera</id>
+      <url>https://repository.cloudera.com/content/repositories/third-party/</url>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </repository>
+  </repositories>
+
+  <dependencies>
+    <dependency>
+      <groupId>com.cloudera.hadoop</groupId>
+      <artifactId>hadoop-core</artifactId>
+      <version>0.20.2-737</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.cloudera.hbase</groupId>
+      <artifactId>hbase</artifactId>
+      <version>0.89.20100924-28</version>
+    </dependency>
+  </dependencies>
+
+  <modules>
+    <module>ch04</module>
+  </modules>
+</project>
