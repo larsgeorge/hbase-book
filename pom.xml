@@ -67,7 +67,6 @@
       <groupId>com.cloudera.hadoop</groupId>
       <artifactId>hadoop-core</artifactId>
       <version>0.20.2-737</version>
-      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>com.cloudera.hbase</groupId>
