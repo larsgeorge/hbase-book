@@ -1,5 +1,4 @@
 // cc GetExample Example application inserting data into HBase
-// vv GetExample
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.client.Get;
@@ -12,8 +11,15 @@ import java.io.IOException;
 public class GetExample {
 
   public static void main(String[] args) throws IOException {
+    // vv GetExample
     Configuration conf = HBaseConfiguration.create(); // co GetExample-1-CreateConf Create the configuration.
 
+    // ^^ GetExample
+    HBaseHelper helper = HBaseHelper.getHelper(conf);
+    if (!helper.existsTable("testtable")) {
+      helper.createTable("testtable", "colfam1");
+    }
+    // vv GetExample
     HTable table = new HTable(conf, "testtable"); // co GetExample-2-NewTable Instantiate a new client connection.
 
     Get get = new Get(Bytes.toBytes("row1")); // co GetExample-3-NewGet Create get with specific row.
@@ -26,6 +32,6 @@ public class GetExample {
       Bytes.toBytes("qual1")); // co GetExample-6-GetValue Get a specific value for the given column.
 
     System.out.println("Value: " + Bytes.toString(val)); // co GetExample-7-Print Print out the value while converting it back.
+    // ^^ GetExample
   }
 }
-// ^^ GetExample

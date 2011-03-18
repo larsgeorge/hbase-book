@@ -13,6 +13,11 @@ public class PutExample {
   public static void main(String[] args) throws IOException {
     Configuration conf = HBaseConfiguration.create(); // co PutExample-1-CreateConf Create the configuration.
 
+    // ^^ PutExample
+    HBaseHelper helper = HBaseHelper.getHelper(conf);
+    helper.dropTable("testtable");
+    helper.createTable("testtable", "colfam1");
+    // vv PutExample
     HTable table = new HTable(conf, "testtable"); // co PutExample-2-NewTable Instantiate a new client connection.
 
     Put put = new Put(Bytes.toBytes("row1")); // co PutExample-3-NewPut Create put with specific row.
