@@ -91,12 +91,9 @@ public class HBaseHelper {
           long t = ts[v < ts.length ? v : ts.length - 1];
           put.add(Bytes.toBytes(fam), Bytes.toBytes(qual), t,
             Bytes.toBytes(val));
-          System.out.println("add: " + row + " " + fam + " " + qual +
-            " " + t + " " + val);
           v++;
         }
       }
-      System.out.println("put: " + put);
       tbl.put(put);
     }
     tbl.close();
