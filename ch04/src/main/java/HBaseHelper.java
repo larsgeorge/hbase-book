@@ -55,13 +55,23 @@ public class HBaseHelper {
 
   public void fillTable(String table, int startRow, int endRow, int numCols,
                         String... colfams) throws IOException {
+    fillTable(table, startRow, endRow, numCols, false, colfams);
+  }
+  public void fillTable(String table, int startRow, int endRow, int numCols,
+                        boolean setTimestamp, String... colfams)
+  throws IOException {
     HTable tbl = new HTable(conf, table);
     for (int row = startRow; row <= endRow; row++) {
       for (int col = 0; col < numCols; col++) {
         Put put = new Put(Bytes.toBytes("row-" + row));
         for (String cf : colfams) {
-          put.add(Bytes.toBytes(cf), Bytes.toBytes("col-" + col),
-            Bytes.toBytes("val-" + row + "." + col));
+          if (setTimestamp) {
+            put.add(Bytes.toBytes(cf), Bytes.toBytes("col-" + col),
+              col, Bytes.toBytes("val-" + row + "." + col));
+          } else {
+            put.add(Bytes.toBytes(cf), Bytes.toBytes("col-" + col),
+              Bytes.toBytes("val-" + row + "." + col));
+          }
         }
         tbl.put(put);
       }
