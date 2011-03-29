@@ -12,6 +12,7 @@ import org.apache.hadoop.hbase.util.Bytes;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 public class HBaseHelper {
 
@@ -76,17 +77,21 @@ public class HBaseHelper {
                         String... colfams)
   throws IOException {
     HTable tbl = new HTable(conf, table);
+    Random rnd = new Random();
     for (int row = startRow; row <= endRow; row++) {
       for (int col = 0; col < numCols; col++) {
         Put put = new Put(Bytes.toBytes("row-" + padNum(row, pad)));
         for (String cf : colfams) {
+          String colName = "col-" + padNum(col, pad);
+          String val = "val-" + (random ?
+            Integer.toString(rnd.nextInt(numCols)) :
+            padNum(row, pad) + "." + padNum(col, pad));
           if (setTimestamp) {
-            put.add(Bytes.toBytes(cf), Bytes.toBytes("col-" + padNum(col, pad)),
-              col, Bytes.toBytes("val-" + padNum(row, pad) + "." +
-              padNum(col, pad)));
+            put.add(Bytes.toBytes(cf), Bytes.toBytes(colName),
+              col, Bytes.toBytes(val));
           } else {
-            put.add(Bytes.toBytes(cf), Bytes.toBytes("col-" + padNum(col, pad)),
-              Bytes.toBytes("val-" + padNum(row, pad) + "." + padNum(col, pad)));
+            put.add(Bytes.toBytes(cf), Bytes.toBytes(colName),
+              Bytes.toBytes(val));
           }
         }
         tbl.put(put);
