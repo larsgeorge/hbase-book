@@ -11,6 +11,7 @@ import org.apache.hadoop.hbase.filter.CompareFilter;
 import org.apache.hadoop.hbase.filter.Filter;
 import org.apache.hadoop.hbase.filter.FilterList;
 import org.apache.hadoop.hbase.filter.QualifierFilter;
+import org.apache.hadoop.hbase.filter.RegexStringComparator;
 import org.apache.hadoop.hbase.filter.RowFilter;
 import org.apache.hadoop.hbase.filter.WhileMatchFilter;
 import org.apache.hadoop.hbase.util.Bytes;
@@ -35,16 +36,16 @@ public class FilterListExample {
     // vv FilterListExample
     List<Filter> filters = new ArrayList<Filter>();
 
-    Filter filter1 = new RowFilter(CompareFilter.CompareOp.NOT_EQUAL,
+    Filter filter1 = new RowFilter(CompareFilter.CompareOp.GREATER_OR_EQUAL,
       new BinaryComparator(Bytes.toBytes("row-03")));
     filters.add(filter1);
 
     Filter filter2 = new RowFilter(CompareFilter.CompareOp.LESS_OR_EQUAL,
-      new BinaryComparator(Bytes.toBytes("row-05")));
+      new BinaryComparator(Bytes.toBytes("row-06")));
     filters.add(filter2);
 
-    Filter filter3 = new QualifierFilter(CompareFilter.CompareOp.LESS_OR_EQUAL,
-      new BinaryComparator(Bytes.toBytes("col-02")));
+    Filter filter3 = new QualifierFilter(CompareFilter.CompareOp.EQUAL,
+      new RegexStringComparator("col-0[03]"));
     filters.add(filter3);
 
     FilterList filterList1 = new FilterList(filters);
