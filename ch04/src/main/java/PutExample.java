@@ -11,21 +11,21 @@ import java.io.IOException;
 public class PutExample {
 
   public static void main(String[] args) throws IOException {
-    Configuration conf = HBaseConfiguration.create(); // co PutExample-1-CreateConf Create the configuration.
+    Configuration conf = HBaseConfiguration.create(); // co PutExample-1-CreateConf Create the required configuration.
 
     // ^^ PutExample
     HBaseHelper helper = HBaseHelper.getHelper(conf);
     helper.dropTable("testtable");
     helper.createTable("testtable", "colfam1");
     // vv PutExample
-    HTable table = new HTable(conf, "testtable"); // co PutExample-2-NewTable Instantiate a new client connection.
+    HTable table = new HTable(conf, "testtable"); // co PutExample-2-NewTable Instantiate a new client.
 
     Put put = new Put(Bytes.toBytes("row1")); // co PutExample-3-NewPut Create put with specific row.
 
     put.add(Bytes.toBytes("colfam1"), Bytes.toBytes("qual1"),
-      Bytes.toBytes("val1")); // co PutExample-4-AddCol Add a column to the put.
+      Bytes.toBytes("val1")); // co PutExample-4-AddCol Add a column, whose name is "colfam1:qual1", to the put.
 
-    table.put(put); // co PutExample-5-DoPut Store row with column into HBase.
+    table.put(put); // co PutExample-5-DoPut Store row with column into the HBase table.
   }
 }
 // ^^ PutExample
