@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configurations>
+  <configuration>
+    <name>Hush</name>
+    <description>Configuration for the HBase URL Shortener.</description>
+    <zookeeper_quorum>localhost</zookeeper_quorum>
+    <zookeeper_client_port>2181</zookeeper_client_port>
+    <schema>
+      <table>
+        <name>surl</name>
+        <description>The Short ID to URLs mapping table, keyed by
+          shortId.</description>
+        <column_family>
+          <name>url</name>
+          <description>The long URL</description>
+          <!-- Default: 3 -->
+          <max_versions>1</max_versions>
+          <!-- Default: None -->
+          <compression/>
+          <!-- Default: false -->
+          <in_memory/>
+          <!-- Default: true -->
+          <block_cache_enabled/>
+          <!-- Default: 64k -->
+          <block_size/>
+          <!-- Default: Integer.MAX_VALUE (forever), set to 12 months -->
+          <time_to_live>31449600</time_to_live>
+          <!-- Default: false -->
+          <bloom_filter/>
+          <!-- Default: 0 -->
+          <scope/>
+        </column_family>
+      </table>
+      <table>
+        <name>user</name>
+        <description>The user table, keyed by username.</description>
+        <column_family>
+          <name>data</name>
+          <description>Stores the user data</description>
+          <!-- Default: 3 -->
+          <max_versions>3</max_versions>
+          <!-- Default: None -->
+          <compression/>
+          <!-- Default: false -->
+          <in_memory/>
+          <!-- Default: true -->
+          <block_cache_enabled/>
+          <!-- Default: 64k -->
+          <block_size/>
+          <!-- Default: Integer.MAX_VALUE (forever) -->
+          <time_to_live/>
+          <!-- Default: false -->
+          <bloom_filter/>
+          <!-- Default: 0 -->
+          <scope/>
+        </column_family>
+        <column_family>
+          <name>acl</name>
+          <description>Stores the user's ACL</description>
+          <!-- Default: 3 -->
+          <max_versions>3</max_versions>
+          <!-- Default: None -->
+          <compression/>
+          <!-- Default: false -->
+          <in_memory/>
+          <!-- Default: true -->
+          <block_cache_enabled/>
+          <!-- Default: 64k -->
+          <block_size/>
+          <!-- Default: Integer.MAX_VALUE (forever) -->
+          <time_to_live/>
+          <!-- Default: false -->
+          <bloom_filter/>
+          <!-- Default: 0 -->
+          <scope/>
+        </column_family>
+      </table>
+      <table>
+        <name>vdom</name>
+        <description>The vanity domain table, keyed by
+          vanityDomain.</description>
+        <column_family>
+          <name>owner</name>
+          <description>Links to userId of user table</description>
+          <!-- Default: 3 -->
+          <max_versions>1</max_versions>
+          <!-- Default: None -->
+          <compression/>
+          <!-- Default: false -->
+          <in_memory/>
+          <!-- Default: true -->
+          <block_cache_enabled/>
+          <!-- Default: 64k -->
+          <block_size/>
+          <!-- Default: Integer.MAX_VALUE (forever) -->
+          <time_to_live/>
+          <!-- Default: false -->
+          <bloom_filter/>
+          <!-- Default: 0 -->
+          <scope/>
+        </column_family>
+      </table>
+      <table>
+        <name>rvdom</name>
+        <description>The reverse vanity domain table, keyed by
+          domain.</description>
+        <column_family>
+          <name>vdom</name>
+          <description>Links to vanityDomain of vdom table</description>
+          <!-- Default: 3 -->
+          <max_versions>1</max_versions>
+          <!-- Default: None -->
+          <compression/>
+          <!-- Default: false -->
+          <in_memory/>
+          <!-- Default: true -->
+          <block_cache_enabled/>
+          <!-- Default: 64k -->
+          <block_size/>
+          <!-- Default: Integer.MAX_VALUE (forever) -->
+          <time_to_live/>
+          <!-- Default: false -->
+          <bloom_filter/>
+          <!-- Default: 0 -->
+          <scope/>
+        </column_family>
+      </table>
+      <table>
+        <name>usersurl</name>
+        <description>The mapping of user.userId to surl.shortId, keeps the
+          usage statistics.</description>
+        <column_family>
+          <name>std</name>
+          <description>Daily usage statistics</description>
+          <!-- Default: 3 -->
+          <max_versions>1</max_versions>
+          <!-- Default: None -->
+          <compression/>
+          <!-- Default: false -->
+          <in_memory/>
+          <!-- Default: true -->
+          <block_cache_enabled/>
+          <!-- Default: 64k -->
+          <block_size/>
+          <!-- Default: Integer.MAX_VALUE (forever), set to 7 days -->
+          <time_to_live>604800</time_to_live>
+          <!-- Default: false -->
+          <bloom_filter/>
+          <!-- Default: 0 -->
+          <scope/>
+        </column_family>
+        <column_family>
+          <name>stw</name>
+          <description>Weekly usage statistics</description>
+          <!-- Default: 3 -->
+          <max_versions>1</max_versions>
+          <!-- Default: None -->
+          <compression/>
+          <!-- Default: false -->
+          <in_memory/>
+          <!-- Default: true -->
+          <block_cache_enabled/>
+          <!-- Default: 64k -->
+          <block_size/>
+          <!-- Default: Integer.MAX_VALUE (forever), set to 4 weeks -->
+          <time_to_live>2419200</time_to_live>
+          <!-- Default: false -->
+          <bloom_filter/>
+          <!-- Default: 0 -->
+          <scope/>
+        </column_family>
+        <column_family>
+          <name>stm</name>
+          <description>Monthly usage statistics</description>
+          <!-- Default: 3 -->
+          <max_versions>1</max_versions>
+          <!-- Default: None -->
+          <compression/>
+          <!-- Default: false -->
+          <in_memory/>
+          <!-- Default: true -->
+          <block_cache_enabled/>
+          <!-- Default: 64k -->
+          <block_size/>
+          <!-- Default: Integer.MAX_VALUE (forever), set to 12 months -->
+          <time_to_live>31449600</time_to_live>
+          <!-- Default: false -->
+          <bloom_filter/>
+          <!-- Default: 0 -->
+          <scope/>
+        </column_family>
+      </table>
+    </schema>
+  </configuration>
+</configurations>
