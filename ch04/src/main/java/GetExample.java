@@ -20,7 +20,7 @@ public class GetExample {
       helper.createTable("testtable", "colfam1");
     }
     // vv GetExample
-    HTable table = new HTable(conf, "testtable"); // co GetExample-2-NewTable Instantiate a new client connection.
+    HTable table = new HTable(conf, "testtable"); // co GetExample-2-NewTable Instantiate a new table reference.
 
     Get get = new Get(Bytes.toBytes("row1")); // co GetExample-3-NewGet Create get with specific row.
 
