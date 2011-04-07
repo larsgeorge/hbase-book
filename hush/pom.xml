@@ -33,6 +33,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.build.outputEncoding>UTF-8</project.build.outputEncoding>
     <jetty.version>7.3.1.v20110307</jetty.version>
+    <hbase.version>0.91.0-SNAPSHOT</hbase.version>
   </properties>
 
   <build>
@@ -66,7 +67,7 @@
     <dependency>
       <groupId>org.apache.hbase</groupId>
       <artifactId>hbase</artifactId>
-      <version>0.90.1-CDH3B4</version>
+      <version>${hbase.version}</version>
       <exclusions>
         <exclusion>
           <groupId>com.google.protobuf</groupId>
@@ -174,6 +175,11 @@
       <groupId>tomcat</groupId>
       <artifactId>jasper-compiler</artifactId>
       <version>5.5.23</version>
+    </dependency>
+    <dependency>
+      <groupId>commons-configuration</groupId>
+      <artifactId>commons-configuration</artifactId>
+      <version>1.6</version>
     </dependency>
     <dependency>
       <groupId>commons-cli</groupId>
