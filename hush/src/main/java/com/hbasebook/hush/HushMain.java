@@ -1,5 +1,6 @@
 package com.hbasebook.hush;
 
+import com.hbasebook.hush.schema.SchemaManager;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
@@ -28,6 +29,10 @@ public class HushMain {
     // get HBase configuration and shared resource manager
     Configuration conf = HBaseConfiguration.create();
     ResourceManager manager = ResourceManager.getInstance(conf);
+
+    // create or update the schema
+    SchemaManager schemaManager = new SchemaManager(conf, "schema.xml");
+    schemaManager.process();
 
     // set up command line options
     Options options = new Options();
