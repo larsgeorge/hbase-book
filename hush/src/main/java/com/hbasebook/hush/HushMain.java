@@ -72,7 +72,7 @@ public class HushMain {
     WebAppContext wac = new WebAppContext();
     wac.setContextPath("/");
     // expanded war or path of war file
-    wac.setWar("./src/main/webapp");
+    wac.setWar("./hush/src/main/webapp");
     server.setHandler(wac);
 
     // start the server
