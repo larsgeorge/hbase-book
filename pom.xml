@@ -290,5 +290,7 @@
 
   <modules>
     <module>ch04</module>
+    <module>ch11</module>
+    <module>hush</module>
   </modules>
 </project>
