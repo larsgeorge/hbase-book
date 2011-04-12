@@ -32,10 +32,16 @@ public class HBaseLoginService extends MappedLoginService {
 
   @Override
   protected UserIdentity loadUser(String username) {
+    HTablePool pool;
     try {
-      ResourceManager rm = ResourceManager.getInstance(configuration);
-      HTablePool pool = rm.getTablePool();
-      HTableInterface table = pool.getTable(UserTable.NAME);
+      pool = ResourceManager.getInstance(configuration).getTablePool();
+    } catch (IOException e) {
+      LOG.error(String.format("Unable to get user '%s'", username), e);
+      return null;
+    }
+
+    HTableInterface table = pool.getTable(UserTable.NAME);
+    try {
 
       Get get = new Get(Bytes.toBytes(username));
       get.addColumn(UserTable.DATA_FAMILY, UserTable.CREDENTIALS);
@@ -57,13 +63,16 @@ public class HBaseLoginService extends MappedLoginService {
     } catch (Exception e) {
       LOG.error(String.format("Unable to get user '%s'", username), e);
       return null;
+    } finally {
+      if (table != null) {
+        pool.putTable(table);
+      }
     }
   }
 
   @Override
   protected void loadUsers() throws IOException {
-    ResourceManager rm = ResourceManager.getInstance(configuration);
-    HTablePool pool = rm.getTablePool();
+    HTablePool pool = ResourceManager.getInstance(configuration).getTablePool();
     HTableInterface table = pool.getTable(UserTable.NAME);
 
     Scan scan = new Scan();
@@ -91,6 +100,10 @@ public class HBaseLoginService extends MappedLoginService {
     }
     if (errors > 0) {
       LOG.error(String.format("Encountered %d errors in loadUser", errors));
+    }
+
+    if (table != null) {
+      pool.putTable(table);
     }
   }
 }
