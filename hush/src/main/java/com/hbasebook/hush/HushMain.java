@@ -1,6 +1,7 @@
 package com.hbasebook.hush;
 
-import com.hbasebook.hush.schema.SchemaManager;
+import java.io.IOException;
+
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
@@ -10,10 +11,19 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
+import org.apache.hadoop.hbase.client.Get;
+import org.apache.hadoop.hbase.client.HTableInterface;
+import org.apache.hadoop.hbase.client.HTablePool;
+import org.apache.hadoop.hbase.client.Put;
+import org.apache.hadoop.hbase.util.Bytes;
+import org.eclipse.jetty.security.LoginService;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.nio.SelectChannelConnector;
 import org.eclipse.jetty.webapp.WebAppContext;
+
+import com.hbasebook.hush.schema.SchemaManager;
+import com.hbasebook.hush.table.UserTable;
 
 public class HushMain {
 
@@ -23,13 +33,32 @@ public class HushMain {
     System.exit(exitCode);
   }
 
+  private static void createAdminUser(ResourceManager resourceManager)
+      throws IOException {
+    HTablePool pool = resourceManager.getTablePool();
+    HTableInterface table = pool.getTable(UserTable.NAME);
+    byte[] ADMIN_LOGIN = Bytes.toBytes("admin");
+    byte[] ADMIN_PASSWORD = ADMIN_LOGIN;
+    byte[] ADMIN_ROLES = Bytes.toBytes("admin,user");
+
+    if (!table.exists(new Get(ADMIN_LOGIN))) {
+      Put put = new Put(ADMIN_LOGIN);
+      put.add(UserTable.DATA_FAMILY, UserTable.CREDENTIALS, ADMIN_PASSWORD);
+      put.add(UserTable.DATA_FAMILY, UserTable.ROLES, ADMIN_ROLES);
+      table.put(put);
+      table.flushCommits();
+    }
+  }
+
   public static void main(String[] args) throws Exception {
     Log LOG = LogFactory.getLog(HushMain.class);
 
     // get HBase configuration and shared resource manager
+    LOG.info("Initializing HBase");
     Configuration conf = HBaseConfiguration.create();
     ResourceManager manager = ResourceManager.getInstance(conf);
 
+    LOG.info("Creating/updating HBase schema");
     // create or update the schema
     SchemaManager schemaManager = new SchemaManager(conf, "schema.xml");
     schemaManager.process();
@@ -50,13 +79,14 @@ public class HushMain {
     // user provided value precedes config value
     if (commandLine != null && commandLine.hasOption("port")) {
       String val = commandLine.getOptionValue("port");
-      manager.getConfiguration().setInt("hush.port",
-        Integer.parseInt(val));
+      manager.getConfiguration().setInt("hush.port", Integer.parseInt(val));
       LOG.debug("Port set to: " + val);
     }
 
     // get port to bind to
     int port = manager.getConfiguration().getInt("hush.port", 8080);
+
+    LOG.info("Web server setup.");
 
     // create server and configure basic settings
     Server server = new Server();
@@ -65,15 +95,23 @@ public class HushMain {
     // set up connector
     Connector connector = new SelectChannelConnector();
     connector.setPort(port);
-    //connector.setHost("127.0.0.1");
+    // connector.setHost("127.0.0.1");
     server.addConnector(connector);
 
     // set up context
     WebAppContext wac = new WebAppContext();
     wac.setContextPath("/");
+
     // expanded war or path of war file
     wac.setWar("./hush/src/main/webapp");
     server.setHandler(wac);
+
+    // configure security
+    LOG.info("Configuring security.");
+    createAdminUser(manager);
+    LoginService loginService = new HBaseLoginService("HBaseRealm", conf);
+    server.addBean(loginService);
+    wac.getSecurityHandler().setLoginService(loginService);
 
     // start the server
     server.start();
