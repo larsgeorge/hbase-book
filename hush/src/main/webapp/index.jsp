@@ -1,10 +1,10 @@
-<%@ page contentType="text/html;charset=UTF-8"
-  import="org.apache.hadoop.hbase.client.HTable"
-  import="com.hbasebook.hush.ResourceManager"
-  import="com.hbasebook.hush.table.ShortUrlTable"
-  import="org.apache.hadoop.hbase.client.Put"
-%>
+<%@ page contentType="text/html;charset=UTF-8" %>
+<%@ page import="org.apache.hadoop.hbase.client.HTable" %>
+<%@ page import="com.hbasebook.hush.ResourceManager" %>
+<%@ page import="com.hbasebook.hush.table.ShortUrlTable" %>
+<%@ page import="org.apache.hadoop.hbase.client.Put" %>
 <%@ page import="org.apache.hadoop.hbase.util.Bytes" %>
+<%@ page import="java.security.Principal" %>
 <%
   String url = request.getParameter("url");
   String newShortId = null;
@@ -19,6 +19,7 @@
     table.flushCommits();
     manager.putTable(table);
   }
+  Principal principal = request.getUserPrincipal();
 %>
 <html>
 <body>
@@ -36,8 +37,12 @@
   <a href="http://<%=request.getHeader("Host")%>/<%= newShortId%>">http://<%=request.getHeader("Host")%>/<%= newShortId%></a>
 </p>
 <% } %>
-<p>You can track your own URLs by <a href="signup.jsp">signing up</a> or
-    <a href="/admin/home.jsp">logging in</a>. </p>
+<p><% if (principal != null) { %>
+You are logged in as <a href="/user/links.jsp"><%= principal %></a>  (<a href="logout.jsp">log out</a>).
+<% } else { %>
+You can track your own URLs by <a href="signup.jsp">signing up</a> or
+    <a href="/admin/home.jsp">logging in</a>.
+<% } %></p>
 <p/>
 <p/>
 <p/>
