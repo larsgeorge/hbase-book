@@ -28,7 +28,7 @@
 <p>Shorten your URLs! Paste or type a URL into the box below and press the "Shorten" button.</p>
 
 <p>
-<form action="index.jsp">
+<form action="/index.jsp">
     URL: <input type="text" name="url"> <input type="submit" name="Shorten!">
 </form>
 </p>
@@ -38,10 +38,10 @@
 </p>
 <% } %>
 <p><% if (principal != null) { %>
-You are logged in as <a href="/user/links.jsp"><%= principal %></a>  (<a href="logout.jsp">log out</a>).
+You are logged in as <a href="/user/links.jsp"><%= principal %></a>  (<a href="/logout.jsp">log out</a>).
 <% } else { %>
-You can track your own URLs by <a href="signup.jsp">signing up</a> or
-    <a href="/admin/home.jsp">logging in</a>.
+You can track your own URLs by <a href="/signup.jsp">signing up</a> or
+    <a href="/user">logging in</a>.
 <% } %></p>
 <p/>
 <p/>
