@@ -38,7 +38,7 @@
 </p>
 <% } %>
 <p><% if (principal != null) { %>
-You are logged in as <a href="/user/links.jsp"><%= principal %></a>  (<a href="/logout.jsp">log out</a>).
+You are logged in as <a href="/user"><%= principal %></a>  (<a href="/logout.jsp">log out</a>).
 <% } else { %>
 You can track your own URLs by <a href="/signup.jsp">signing up</a> or
     <a href="/user">logging in</a>.
