@@ -1,11 +1,6 @@
 package com.hbasebook.hush.servlet.filter;
 
-import com.hbasebook.hush.ResourceManager;
-import com.hbasebook.hush.table.ShortUrlTable;
-import org.apache.hadoop.hbase.client.Get;
-import org.apache.hadoop.hbase.client.HTable;
-import org.apache.hadoop.hbase.client.Result;
-import org.apache.hadoop.hbase.util.Bytes;
+import java.io.IOException;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -15,7 +10,14 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
+
+import org.apache.hadoop.hbase.client.Get;
+import org.apache.hadoop.hbase.client.HTable;
+import org.apache.hadoop.hbase.client.Result;
+import org.apache.hadoop.hbase.util.Bytes;
+
+import com.hbasebook.hush.ResourceManager;
+import com.hbasebook.hush.table.ShortUrlTable;
 
 /**
  * The filter handles the short Id to URL redirects.
@@ -28,14 +30,14 @@ public class RedirectFilter implements Filter {
 
   @Override
   public void doFilter(ServletRequest request, ServletResponse response,
-                       FilterChain chain) throws IOException, ServletException {
+      FilterChain chain) throws IOException, ServletException {
     final HttpServletRequest httpRequest = (HttpServletRequest) request;
     final HttpServletResponse httpResponse = (HttpServletResponse) response;
 
     String uri = httpRequest.getRequestURI();
     // check if the request shall pass
-    if (uri.equals("/") || uri.contains("/user") || uri.contains("/admin") ||
-        uri.endsWith(".jsp")) {
+    if (uri.equals("/") || uri.contains("/user") || uri.contains("/admin")
+        || uri.endsWith(".jsp") || uri.endsWith(".css")) {
       chain.doFilter(request, response);
     } else {
       // otherwise assume it is a short Id - acquire resources
@@ -48,7 +50,8 @@ public class RedirectFilter implements Filter {
         Result result = table.get(get);
         if (!result.isEmpty()) {
           // something was found, use it to redirect
-          byte[] value = result.getValue(ShortUrlTable.DATA_FAMILY, ShortUrlTable.URL);
+          byte[] value = result.getValue(ShortUrlTable.DATA_FAMILY,
+              ShortUrlTable.URL);
           if (value.length > 0) {
             String url = Bytes.toString(value);
             httpResponse.sendRedirect(url);
