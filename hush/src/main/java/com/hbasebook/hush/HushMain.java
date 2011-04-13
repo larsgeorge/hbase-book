@@ -13,8 +13,6 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.HTable;
-import org.apache.hadoop.hbase.client.HTableInterface;
-import org.apache.hadoop.hbase.client.HTablePool;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.eclipse.jetty.security.LoginService;
@@ -104,7 +102,7 @@ public class HushMain {
     wac.setContextPath("/");
 
     // expanded war or path of war file
-    wac.setWar("./hush/src/main/webapp");
+    wac.setWar("src/main/webapp");
     server.setHandler(wac);
 
     // configure security
