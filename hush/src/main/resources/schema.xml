@@ -11,8 +11,8 @@
         shortId.
       </description>
       <column_family>
-        <name>url</name>
-        <description>The long URL</description>
+        <name>data</name>
+        <description>Contains the "url", i.e. the long URL</description>
         <!-- Default: 3 -->
         <max_versions>1</max_versions>
         <!-- Default: None -->
@@ -187,6 +187,31 @@
         <block_size/>
         <!-- Default: Integer.MAX_VALUE (forever), set to 12 months -->
         <time_to_live>31449600</time_to_live>
+        <!-- Default: false -->
+        <bloom_filter/>
+        <!-- Default: 0 -->
+        <scope/>
+      </column_family>
+    </table>
+    <table>
+      <name>hush</name>
+      <description>The system table, holding central configuration
+        details.</description>
+      <column_family>
+        <name>cnt</name>
+        <description>Keeps the global counters.</description>
+        <!-- Default: 3 -->
+        <max_versions>1</max_versions>
+        <!-- Default: None -->
+        <compression/>
+        <!-- Default: false -->
+        <in_memory/>
+        <!-- Default: true -->
+        <block_cache_enabled/>
+        <!-- Default: 64k -->
+        <block_size/>
+        <!-- Default: Integer.MAX_VALUE (forever) -->
+        <time_to_live/>
         <!-- Default: false -->
         <bloom_filter/>
         <!-- Default: 0 -->

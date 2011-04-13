@@ -12,6 +12,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.client.Get;
+import org.apache.hadoop.hbase.client.HTable;
 import org.apache.hadoop.hbase.client.HTableInterface;
 import org.apache.hadoop.hbase.client.HTablePool;
 import org.apache.hadoop.hbase.client.Put;
@@ -35,8 +36,7 @@ public class HushMain {
 
   private static void createAdminUser(ResourceManager resourceManager)
       throws IOException {
-    HTablePool pool = resourceManager.getTablePool();
-    HTableInterface table = pool.getTable(UserTable.NAME);
+    HTable table = resourceManager.getTable(UserTable.NAME);
     byte[] ADMIN_LOGIN = Bytes.toBytes("admin");
     byte[] ADMIN_PASSWORD = ADMIN_LOGIN;
     byte[] ADMIN_ROLES = Bytes.toBytes("admin,user");
@@ -48,6 +48,7 @@ public class HushMain {
       table.put(put);
       table.flushCommits();
     }
+    resourceManager.putTable(table);
   }
 
   public static void main(String[] args) throws Exception {
@@ -109,7 +110,7 @@ public class HushMain {
     // configure security
     LOG.info("Configuring security.");
     createAdminUser(manager);
-    LoginService loginService = new HBaseLoginService("HBaseRealm", conf);
+    LoginService loginService = new HBaseLoginService("HBaseRealm");
     server.addBean(loginService);
     wac.getSecurityHandler().setLoginService(loginService);
 

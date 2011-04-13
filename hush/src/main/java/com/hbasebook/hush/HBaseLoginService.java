@@ -5,10 +5,8 @@ import java.util.Iterator;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.client.Get;
-import org.apache.hadoop.hbase.client.HTableInterface;
-import org.apache.hadoop.hbase.client.HTablePool;
+import org.apache.hadoop.hbase.client.HTable;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.Scan;
@@ -22,27 +20,18 @@ import com.hbasebook.hush.table.UserTable;
 public class HBaseLoginService extends MappedLoginService {
   private final Log LOG = LogFactory.getLog(HBaseLoginService.class);
 
-  private Configuration configuration = null;
-
-  public HBaseLoginService(String name, Configuration configuration) {
+  public HBaseLoginService(String name) {
     super();
     setName(name);
-    this.configuration = configuration;
   }
 
   @Override
   protected UserIdentity loadUser(String username) {
-    HTablePool pool;
+    ResourceManager manager = null;
+    HTable table = null;
     try {
-      pool = ResourceManager.getInstance(configuration).getTablePool();
-    } catch (IOException e) {
-      LOG.error(String.format("Unable to get user '%s'", username), e);
-      return null;
-    }
-
-    HTableInterface table = pool.getTable(UserTable.NAME);
-    try {
-
+      manager = ResourceManager.getInstance();
+      table = manager.getTable(UserTable.NAME);
       Get get = new Get(Bytes.toBytes(username));
       get.addColumn(UserTable.DATA_FAMILY, UserTable.CREDENTIALS);
       get.addColumn(UserTable.DATA_FAMILY, UserTable.ROLES);
@@ -53,27 +42,28 @@ public class HBaseLoginService extends MappedLoginService {
       }
 
       String credentials = Bytes.toString(result.getValue(
-          UserTable.DATA_FAMILY, UserTable.CREDENTIALS));
+        UserTable.DATA_FAMILY, UserTable.CREDENTIALS));
       String roles = Bytes.toString(result.getValue(UserTable.DATA_FAMILY,
-          UserTable.ROLES));
+        UserTable.ROLES));
 
-      return putUser(username, Credential.getCredential(credentials), roles
-          .split(","));
-
+      return putUser(username, Credential.getCredential(credentials),
+        roles.split(","));
     } catch (Exception e) {
       LOG.error(String.format("Unable to get user '%s'", username), e);
       return null;
     } finally {
-      if (table != null) {
-        pool.putTable(table);
+      try {
+        manager.putTable(table);
+      } catch (Exception e) {
+        // ignore
       }
     }
   }
 
   @Override
   protected void loadUsers() throws IOException {
-    HTablePool pool = ResourceManager.getInstance(configuration).getTablePool();
-    HTableInterface table = pool.getTable(UserTable.NAME);
+    ResourceManager manager = ResourceManager.getInstance();
+    HTable table = manager.getTable(UserTable.NAME);
 
     Scan scan = new Scan();
     scan.addColumn(UserTable.DATA_FAMILY, UserTable.CREDENTIALS);
@@ -88,11 +78,11 @@ public class HBaseLoginService extends MappedLoginService {
         try {
           String username = Bytes.toString(result.getRow());
           String credentials = Bytes.toString(result.getValue(
-              UserTable.DATA_FAMILY, UserTable.CREDENTIALS));
+            UserTable.DATA_FAMILY, UserTable.CREDENTIALS));
           String roles = Bytes.toString(result.getValue(UserTable.DATA_FAMILY,
-              UserTable.ROLES));
+            UserTable.ROLES));
           putUser(username, Credential.getCredential(credentials), roles
-              .split(","));
+            .split(","));
         } catch (Exception e) {
           errors++;
         }
@@ -102,8 +92,6 @@ public class HBaseLoginService extends MappedLoginService {
       LOG.error(String.format("Encountered %d errors in loadUser", errors));
     }
 
-    if (table != null) {
-      pool.putTable(table);
-    }
+    manager.putTable(table);
   }
 }
