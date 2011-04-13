@@ -148,7 +148,7 @@ public class SchemaManager {
           }
           for (final HColumnDescriptor col : delCols) {
             LOG.info("Found removed column -> " + col);
-            hbaseAdmin.deleteColumn(schema.getName(), col.getNameAsString() + ":");
+            hbaseAdmin.deleteColumn(schema.getName(), col.getNameAsString());
           }
         } else if (!hasSameProperties(desc, d)) {
           LOG.info("Found different table properties...");
