@@ -1,6 +1,7 @@
 package com.hbasebook.hush.servlet.filter;
 
 import java.io.IOException;
+import java.security.Principal;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -45,7 +46,8 @@ public class RedirectFilter implements Filter {
       HTable table = manager.getTable(ShortUrlTable.NAME);
       try {
         // get the short Id to URL mapping
-        Get get = new Get(Bytes.toBytes(uri.substring(1)));
+        byte[] shortId = Bytes.toBytes(uri.substring(1));
+        Get get = new Get(shortId);
         get.addColumn(ShortUrlTable.DATA_FAMILY, ShortUrlTable.URL);
         Result result = table.get(get);
         if (!result.isEmpty()) {
@@ -60,7 +62,9 @@ public class RedirectFilter implements Filter {
             httpResponse.sendError(501);
           }
           // update counters
-          // TODO
+          Principal principal = httpRequest.getUserPrincipal();
+          String user = principal != null ? principal.getName() : null;
+          manager.getCounters().incrementUsage(user, shortId);
         } else {
           // if the short Id was bogus show a "shush" (our fail whale)
           httpResponse.sendError(404);

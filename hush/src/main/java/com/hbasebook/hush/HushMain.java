@@ -2,6 +2,7 @@ package com.hbasebook.hush;
 
 import java.io.IOException;
 
+import com.hbasebook.hush.servlet.security.HBaseLoginService;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
@@ -52,15 +53,16 @@ public class HushMain {
   public static void main(String[] args) throws Exception {
     Log LOG = LogFactory.getLog(HushMain.class);
 
-    // get HBase configuration and shared resource manager
+    // get HBase configuration
     LOG.info("Initializing HBase");
     Configuration conf = HBaseConfiguration.create();
-    ResourceManager manager = ResourceManager.getInstance(conf);
-
-    LOG.info("Creating/updating HBase schema");
     // create or update the schema
+    LOG.info("Creating/updating HBase schema");
     SchemaManager schemaManager = new SchemaManager(conf, "schema.xml");
     schemaManager.process();
+
+    ResourceManager manager = ResourceManager.getInstance(conf);
+    manager.init();
 
     // set up command line options
     Options options = new Options();

@@ -6,7 +6,7 @@ body {
 
 p,h1,form,button {
 	border: 0;
-	margin: 0;
+  margin-bottom: 15;
 	padding: 0;
 }
 
