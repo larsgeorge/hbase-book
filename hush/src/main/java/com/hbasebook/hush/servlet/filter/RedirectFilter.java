@@ -49,6 +49,7 @@ public class RedirectFilter implements Filter {
         byte[] shortId = Bytes.toBytes(uri.substring(1));
         Get get = new Get(shortId);
         get.addColumn(ShortUrlTable.DATA_FAMILY, ShortUrlTable.URL);
+        get.addColumn(ShortUrlTable.DATA_FAMILY, ShortUrlTable.USER_ID);
         Result result = table.get(get);
         if (!result.isEmpty()) {
           // something was found, use it to redirect
@@ -62,9 +63,9 @@ public class RedirectFilter implements Filter {
             httpResponse.sendError(501);
           }
           // update counters
-          Principal principal = httpRequest.getUserPrincipal();
-          String user = principal != null ? principal.getName() : null;
-          manager.getCounters().incrementUsage(user, shortId);
+          byte[] userName = result.getValue(ShortUrlTable.DATA_FAMILY,
+            ShortUrlTable.USER_ID);
+          manager.getCounters().incrementUsage(userName, shortId);
         } else {
           // if the short Id was bogus show a "shush" (our fail whale)
           httpResponse.sendError(404);

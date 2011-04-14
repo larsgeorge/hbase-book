@@ -17,7 +17,7 @@ public class Counters {
   private final Log LOG = LogFactory.getLog(Counters.class);
 
   private static final byte[] ZERO = new byte[]{0};
-  private static final String DEFAULT_USER = "@@@DEF";
+  private static final byte[] DEFAULT_USER = Bytes.toBytes("@@@DEF");
 
   public enum ColumnQualifier {
     DAY("yyyyMMdd"),
@@ -57,7 +57,7 @@ public class Counters {
     }
   }
 
-  public void incrementUsage(String user, byte[] shortId) throws IOException {
+  public void incrementUsage(byte[] user, byte[] shortId) throws IOException {
     ResourceManager manager = ResourceManager.getInstance();
     HTable table = manager.getTable(UserShortUrlTable.NAME);
     Date date = new Date();
@@ -75,7 +75,7 @@ public class Counters {
     table.increment(increment);
   }
 
-  private byte[] getRowKey(String user, byte[] shortId) {
-    return Bytes.add(Bytes.toBytes(user), ZERO, shortId);
+  private byte[] getRowKey(byte[] user, byte[] shortId) {
+    return Bytes.add(user, ZERO, shortId);
   }
 }
