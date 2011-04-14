@@ -1,8 +1,9 @@
-package com.hbasebook.hush;
+package com.hbasebook.hush.servlet.security;
 
 import java.io.IOException;
 import java.util.Iterator;
 
+import com.hbasebook.hush.ResourceManager;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.hbase.client.Get;
