@@ -1,7 +1,6 @@
 package com.hbasebook.hush.servlet.filter;
 
 import java.io.IOException;
-import java.security.Principal;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
