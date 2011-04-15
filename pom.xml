@@ -7,7 +7,7 @@
   <version>1.0</version>
   <packaging>pom</packaging>
 
-  <name>hbase-book</name>
+  <name>HBase Book</name>
   <url>http://hbasebook.com</url>
 
   <scm>
