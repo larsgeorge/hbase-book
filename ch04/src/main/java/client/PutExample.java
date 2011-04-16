@@ -7,7 +7,9 @@ import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.client.HTable;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.util.Bytes;
+// ^^ PutExample
 import util.HBaseHelper;
+// vv PutExample
 
 import java.io.IOException;
 
