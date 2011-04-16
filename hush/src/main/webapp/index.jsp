@@ -41,9 +41,11 @@
     URL: <input type="text" name="url"> <input type="submit" name="submit" title="Hush!">
 </form>
 </p>
-<% if (newShortId != null) { %>
+<% if (newShortId != null) {
+     String newUrl = "http://" + request.getHeader("Host") + "/" + newShortId;
+%>
 <p>Your new shortened URL is:
-  <a href="http://<%=request.getHeader("Host")%>/<%= newShortId%>">http://<%=request.getHeader("Host")%>/<%= newShortId%></a>
+  <a href="<%=newUrl%>" target="_blank"><%=newUrl%></a>
 </p>
 <% } %>
 <p><% if (principal != null) { %>
