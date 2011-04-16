@@ -123,10 +123,10 @@
   </form>
 </div>
 <% } else { %>
-  <h1>Welcome <%= firstName%></h1>
+  <h1>Welcome <%= firstName%>!</h1>
 
   <p>Thank you for singing up! You will be redirected to your account page...</p>
-  <p>(Click <a href="/user">here</a> if you are stuck here for more than 5 seconds)</p>
+  <p>(Click <a href="/user">here</a> if this takes for more than 5 seconds)</p>
 <script type="text/javascript">
   function Redirect() {
     location.href = "/user";
