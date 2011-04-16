@@ -33,23 +33,6 @@ public class HushMain {
     System.exit(exitCode);
   }
 
-  private static void createAdminUser(ResourceManager resourceManager)
-      throws IOException {
-    HTable table = resourceManager.getTable(UserTable.NAME);
-    byte[] ADMIN_LOGIN = Bytes.toBytes("admin");
-    byte[] ADMIN_PASSWORD = ADMIN_LOGIN;
-    byte[] ADMIN_ROLES = Bytes.toBytes("admin,user");
-
-    if (!table.exists(new Get(ADMIN_LOGIN))) {
-      Put put = new Put(ADMIN_LOGIN);
-      put.add(UserTable.DATA_FAMILY, UserTable.CREDENTIALS, ADMIN_PASSWORD);
-      put.add(UserTable.DATA_FAMILY, UserTable.ROLES, ADMIN_ROLES);
-      table.put(put);
-      table.flushCommits();
-    }
-    resourceManager.putTable(table);
-  }
-
   public static void main(String[] args) throws Exception {
     Log LOG = LogFactory.getLog(HushMain.class);
 
@@ -109,8 +92,8 @@ public class HushMain {
 
     // configure security
     LOG.info("Configuring security.");
-    createAdminUser(manager);
     LoginService loginService = new HBaseLoginService("HBaseRealm");
+    ((HBaseLoginService) loginService).createAdminUser();
     server.addBean(loginService);
     wac.getSecurityHandler().setLoginService(loginService);
 

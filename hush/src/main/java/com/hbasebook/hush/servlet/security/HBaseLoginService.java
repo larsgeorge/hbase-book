@@ -8,6 +8,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.HTable;
+import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.Scan;
@@ -92,7 +93,33 @@ public class HBaseLoginService extends MappedLoginService {
     if (errors > 0) {
       LOG.error(String.format("Encountered %d errors in loadUser", errors));
     }
-
     manager.putTable(table);
+  }
+
+  public void createAdminUser() throws IOException {
+    ResourceManager manager = ResourceManager.getInstance();
+    HTable table = manager.getTable(UserTable.NAME);
+    try {
+      byte[] ADMIN_LOGIN = Bytes.toBytes("admin");
+      byte[] ADMIN_PASSWORD = ADMIN_LOGIN;
+
+      Put put = new Put(ADMIN_LOGIN);
+      put.add(UserTable.DATA_FAMILY, UserTable.CREDENTIALS, ADMIN_PASSWORD);
+      put.add(UserTable.DATA_FAMILY, UserTable.ROLES, UserTable.ADMIN_ROLES);
+      boolean hasPut = table.checkAndPut(ADMIN_LOGIN, UserTable.DATA_FAMILY,
+        UserTable.ROLES, null, put);
+      if (hasPut) {
+        LOG.info("Admin user initialized.");
+      }
+    } catch (Exception e) {
+      LOG.error("Unable to initialize admin user.", e);
+      throw new IOException(e);
+    } finally {
+      try {
+        manager.putTable(table);
+      } catch (Exception e) {
+        // ignore
+      }
+    }
   }
 }
