@@ -6,6 +6,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.hbase.client.HTable;
 import org.apache.hadoop.hbase.client.Increment;
+import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.util.Bytes;
 
@@ -35,6 +36,61 @@ public class Counters {
     }
   }
 
+  private static final String baseDigits =
+    "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+
+  public static String longToString(long number, int base, boolean reverse) {
+    String result = number == 0 ? "0" : "";
+    while (number != 0) {
+      int mod = (int) number % base;
+      if (reverse) {
+        result += baseDigits.charAt(mod);
+      } else {
+        result = baseDigits.charAt(mod) + result;
+      }
+      number = number / base;
+    }
+    return result;
+  }
+
+  public static long parseLong(String number, int base, boolean reverse) {
+    int length = number.length();
+    int index = length;
+    int result = 0;
+    int multiplier = 1;
+    while (index-- > 0) {
+      int pos = reverse ? number.length() - (index + 1) : index;
+      result += baseDigits.indexOf(number.charAt(pos)) * multiplier;
+      multiplier = multiplier * base;
+    }
+    return result;
+  }
+
+  public void init() throws IOException {
+    ResourceManager manager = ResourceManager.getInstance();
+    HTable table = manager.getTable(HushTable.NAME);
+    try {
+      Put put = new Put(HushTable.GLOBAL_ROW_KEY);
+      byte[] value = Bytes.toBytes(parseLong("7330", 62, false));
+      put.add(HushTable.COUNTERS_FAMILY, HushTable.SHORT_ID, value);
+      boolean hasPut = table.checkAndPut(HushTable.GLOBAL_ROW_KEY,
+        HushTable.COUNTERS_FAMILY,
+        HushTable.SHORT_ID, null, put);
+      if (hasPut) {
+        LOG.info("Short Id counter initialized.");
+      }
+    } catch (Exception e) {
+      LOG.error("Unable to initialize Short Id.", e);
+      throw new IOException(e);
+    } finally {
+      try {
+        manager.putTable(table);
+      } catch (Exception e) {
+        // ignore
+      }
+    }
+  }
+
   public byte[] getShortId(long incrBy) throws IOException {
     ResourceManager manager = ResourceManager.getInstance();
     HTable table = manager.getTable(HushTable.NAME);
@@ -44,7 +100,7 @@ public class Counters {
       Result result = table.increment(increment);
       long id = Bytes.toLong(result.getValue(
         HushTable.COUNTERS_FAMILY, HushTable.SHORT_ID));
-      return Bytes.toBytes(Long.toString(id, 36));
+      return Bytes.toBytes(longToString(id, 62, true));
     } catch (Exception e) {
       LOG.error("Unable to a new short Id.", e);
       throw new IOException(e);

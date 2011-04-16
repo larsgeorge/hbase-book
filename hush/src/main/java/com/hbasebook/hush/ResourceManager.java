@@ -42,7 +42,7 @@ public class ResourceManager {
   }
 
   void init() throws IOException {
-    getShortId(Long.parseLong("1336", 36));
+    counters.init();
   }
 
   public HTablePool getTablePool() {
