@@ -60,8 +60,8 @@
     <auth-method>FORM</auth-method>
     <realm-name>HBaseRealm</realm-name>
     <form-login-config>
-      <form-login-page>/login.jsp</form-login-page>
-      <form-error-page>/error.jsp</form-error-page>
+      <form-login-page>/signup.jsp</form-login-page>
+      <form-error-page>/signup.jsp?error=We could not log you in.</form-error-page>
     </form-login-config>
 
   </login-config>
