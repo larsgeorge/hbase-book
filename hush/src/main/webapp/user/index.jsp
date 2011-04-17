@@ -20,7 +20,7 @@
   HTable shortUrltable = manager.getTable(ShortUrlTable.NAME);
 
   byte[] startRow = Bytes.toBytes(userName);
-  byte[] one = new byte[] { 1 };
+  byte[] one = new byte[]{1};
   byte[] stopRow = Bytes.add(startRow, one);
 
   Scan scan = new Scan(startRow, stopRow);
@@ -46,27 +46,32 @@
   <link href="/style.css" rel="stylesheet" type="text/css"/>
 </head>
 <body>
-<h2>My Links</h2>
-<p>
-<ul>
-<%
-  for (Object object : getResults) {
-    if (object instanceof Result) {
-      Result result = (Result) object;
-%>
-  <li>
-    Short Id: <%= Bytes.toString(result.getRow()) %>
-    URL: <%= Bytes.toString(result.getValue(ShortUrlTable.DATA_FAMILY, ShortUrlTable.URL)) %>
-  </li>
-<%
+<jsp:include page="/include/header.jsp"/>
+<div class="main">
+  <h2>My Links</h2>
+
+  <p>
+  <ul>
+    <%
+      for (Object object : getResults) {
+        if (object instanceof Result) {
+          Result result = (Result) object;
+    %>
+    <li>
+      Short Id: <%= Bytes.toString(result.getRow()) %>
+      URL: <%= Bytes.toString(result.getValue(ShortUrlTable.DATA_FAMILY, ShortUrlTable.URL)) %>
+    </li>
+    <%
     } else {
-%>
-  ERROR
-<%
-    }
-  }
-%>
-</ul>
-</p>
+    %>
+    ERROR
+    <%
+        }
+      }
+    %>
+  </ul>
+  </p>
+</div>
+<jsp:include page="/include/footer.jsp"/>
 </body>
 </html>

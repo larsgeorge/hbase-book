@@ -34,31 +34,27 @@
   <link href="/style.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
+<jsp:include page="/include/header.jsp"/>
+<div class="main">
+
+<div align="center">
 <h2>Welcome to the HBase URL Shortener</h2>
+<div id="shorten">
+	<p>Shorten your URLs!</p>
+	<form action="/index.jsp" method="post">
+		<input type="text" size="80" name="url" />
+		<input type="submit" value="Shorten it" />
+	</form>
+	<% if (newShortId != null) {
+	     String newUrl = "http://" + request.getHeader("Host") + "/" + newShortId;
+	%>
+	  <p>Your new shortened URL is:</p>
+	  <input type="text" size="50" value="<%= newUrl %>" disabled="disabled"/>
+	<% } %>
+</div>
+</div>
 
-<p>Shorten your URLs! Paste or type a URL into the box below and press the "Shorten" button.</p>
-
-<p>
-<form action="/index.jsp" method="post">
-    URL: <input type="text" name="url"> <input type="submit" name="submit" title="Hush!">
-</form>
-</p>
-<% if (newShortId != null) {
-     String newUrl = "http://" + request.getHeader("Host") + "/" + newShortId;
-%>
-<p>Your new shortened URL is:
-  <a href="<%=newUrl%>" target="_blank"><%=newUrl%></a>
-</p>
-<% } %>
-<p><% if (principal != null) { %>
-You are logged in as <a href="/user"><%= principal %></a>  (<a href="/logout.jsp">log out</a>).
-<% } else { %>
-You can track your own URLs by <a href="/signup.jsp">signing up</a> or
-    <a href="/user">logging in</a>.
-<% } %></p>
-<p/>
-<p/>
-<p/>
-<p>Visit <a href="http://hbasebook.com">HBase Book Online</a> for more information.</p>
+</div><!--  main -->
+<jsp:include page="/include/footer.jsp"/>
 </body>
 </html>

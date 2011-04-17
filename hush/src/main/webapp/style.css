@@ -2,17 +2,72 @@ body {
 	font-family: "Lucida Grande", "Lucida Sans Unicode", Verdana, Arial,
 		Helvetica, sans-serif;
 	font-size: 12px;
+	margin: 0;
+}
+
+.main {
+	margin: 10px;
 }
 
 p,h1,form,button {
 	border: 0;
-  margin-bottom: 15;
+	margin-bottom: 15px;
 	padding: 0;
 }
 
 .spacer {
 	clear: both;
 	height: 1px;
+}
+
+#shorten div {
+	width: 400px;
+	border: solid 1px #ddddf2;
+	align: center;
+}
+
+#shorten button {
+	width: 100px;
+	height: 20px;
+	background: #666666 url(img/button.png) no-repeat;
+	text-align: center;
+	color: #FFFFFF;
+	font-size: 11px;
+	font-weight: bold;
+}
+
+/* ----------- Header/Footer ----------- */
+#header {
+	width: 100%;
+	text-align: right;
+	background-color: #f2dddd;
+	border-bottom: solid 1px #ddddf2;
+	font-size: 11px;
+}
+
+#header span {
+	padding-right: 10px;
+}
+
+#header a {
+	text-decoration: none;
+}
+
+#footer {
+	position: absolute;
+	bottom: 0;
+	width: 100%;
+	text-align: center;
+	background-color: #f2dddd;
+	border-top: solid 1px #ddddf2;
+	font-size: 11px;
+	width: 100%;
+}
+
+/* ----------- Error ----------- */
+#error {
+	text-align: center;
+	color: red;
 }
 
 /* ----------- My Form ----------- */

@@ -59,80 +59,97 @@
   <link href="/style.css" rel="stylesheet" type="text/css"/>
 </head>
 <body>
-<% if (!success) { %>
-<div id="stylized" class="myform">
-  <form id="form" method="post" name="form" action="/signup.jsp">
-    <h1>Sign up</h1>
+<div class="main">
+  <jsp:include page="/include/error.jsp"/>
+  <% if (!success) { %>
+  <div id="stylized" class="myform">
+    <form id="form" method="post" name="form" action="j_security_check">
+      <h1>Existing users</h1>
 
-    <p>Enter your information below</p>
+      <p>Enter your credentials</p>
+      <label>Username</label>
+      <input type="text" name="j_username" id="username"/>
 
-    <label>Username
-      <span class="small">Your login</span>
-      <% if (errors.get(1)) { %>
-      <span class="error">*required</span>
-      <% } %>
-    </label>
-    <input type="text" name="username" id="username"
-           value="<%= userName%>"/>
+      <label>Password</label>
+      <input type="password" name="j_password" id="password"/>
 
-    <label>First Name
-      <span class="small"></span>
-      <% if (errors.get(2)) { %>
-      <span class="error">*required</span>
-      <% } %>
-    </label>
-    <input type="text" name="firstName" id="firstName"
-           value="<%= firstName%>"/>
+      <button type="submit">Log In</button>
+      <div class="spacer"></div>
+    </form>
+    <form id="form" method="post" name="form" action="/signup.jsp">
+      <h1>New Users</h1>
 
-    <label>Last Name
-      <span class="small"></span>
-      <% if (errors.get(3)) { %>
-      <span class="error">*required</span>
-      <% } %>
-    </label>
-    <input type="text" name="lastName" id="lastName"
-           value="<%= lastName%>"/>
+      <p>Register by filling the form below</p>
 
-    <label>Email
-      <span class="small"></span>
-      <% if (errors.get(4)) { %>
-      <span class="error">*required</span>
-      <% } %>
-    </label>
-    <input type="text" name="email" id="email"
-           value="<%= email%>"/>
+      <label>Username
+        <span class="small">Your login</span>
+        <% if (errors.get(1)) { %>
+        <span class="error">*required</span>
+        <% } %>
+      </label>
+      <input type="text" name="username" id="username"
+             value="<%= userName%>"/>
 
-    <label>Password
-      <span class="small">Make it good!</span>
-      <% if (errors.get(5)) { %>
-      <span class="error">Please enter a password.</span>
-      <% } %>
-    </label>
-    <input type="password" name="password" id="password"/>
+      <label>First Name
+        <span class="small"></span>
+        <% if (errors.get(2)) { %>
+        <span class="error">*required</span>
+        <% } %>
+      </label>
+      <input type="text" name="firstName" id="firstName"
+             value="<%= firstName%>"/>
 
-    <label>Confirm Password
-      <span class="small"></span>
-      <% if (errors.get(0)) { %>
-      <span class="error">password mismatch</span>
-      <% } %>
-    </label>
-    <input type="password" name="confirmPassword" id="confirmPassword"/>
+      <label>Last Name
+        <span class="small"></span>
+        <% if (errors.get(3)) { %>
+        <span class="error">*required</span>
+        <% } %>
+      </label>
+      <input type="text" name="lastName" id="lastName"
+             value="<%= lastName%>"/>
 
-    <button name="submit" type="submit">Sign Up</button>
-    <div class="spacer"></div>
-  </form>
-</div>
-<% } else { %>
+      <label>Email
+        <span class="small"></span>
+        <% if (errors.get(4)) { %>
+        <span class="error">*required</span>
+        <% } %>
+      </label>
+      <input type="text" name="email" id="email"
+             value="<%= email%>"/>
+
+      <label>Password
+        <span class="small">Make it good!</span>
+        <% if (errors.get(5)) { %>
+        <span class="error">Please enter a password.</span>
+        <% } %>
+      </label>
+      <input type="password" name="password" id="password"/>
+
+      <label>Confirm Password
+        <span class="small"></span>
+        <% if (errors.get(0)) { %>
+        <span class="error">password mismatch</span>
+        <% } %>
+      </label>
+      <input type="password" name="confirmPassword" id="confirmPassword"/>
+
+      <button name="submit" type="submit">Sign Up</button>
+      <div class="spacer"></div>
+    </form>
+  </div>
+  <% } else { %>
   <h1>Welcome <%= firstName%>!</h1>
 
   <p>Thank you for singing up! You will be redirected to your account page...</p>
+
   <p>(Click <a href="/user">here</a> if this takes for more than 5 seconds)</p>
-<script type="text/javascript">
-  function Redirect() {
-    location.href = "/user";
-  }
-  setTimeout('Redirect()', 4000);
-</script>
-<% } %>
+  <script type="text/javascript">
+    function Redirect() {
+      location.href = "/user";
+    }
+    setTimeout('Redirect()', 4000);
+  </script>
+  <% } %>
+</div>
 </body>
 </html>
