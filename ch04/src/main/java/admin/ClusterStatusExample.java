@@ -26,7 +26,7 @@ public class ClusterStatusExample {
     System.out.println("Avg Load: " + status.getAverageLoad());
     System.out.println("HBase Version: " + status.getHBaseVersion());
     System.out.println("Version: " + status.getVersion());
-    System.out.println("No. Servers:: " + status.getServers());
+    System.out.println("No. Servers: " + status.getServers());
     System.out.println("No. Dead Servers: " + status.getDeadServers());
     System.out.println("Dead Servers: " + status.getDeadServerNames());
     System.out.println("No. Regions: " + status.getRegionsCount());
