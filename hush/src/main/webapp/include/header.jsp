@@ -3,14 +3,13 @@
   Principal principal = request.getUserPrincipal();
 %>
 <div id="header">
+  <span>
   <a href="/">Home</a> -
 <% if (principal != null) { %>
-  <span>
-    Welcome, <a href="/user"><%= principal %></a>!&nbsp;&nbsp;&nbsp;<a href="/logout.jsp">Sign off</a>
-  </span>
+    Welcome, <a href="/user"><%= principal %>
+  </a>!&nbsp;&nbsp;&nbsp;<a href="/logout.jsp">Sign off</a>
 <% } else { %>
-  <span>
     <a href="/signup.jsp">Sign in</a>
-  </span>
 <% } %>
+  </span>
 </div>

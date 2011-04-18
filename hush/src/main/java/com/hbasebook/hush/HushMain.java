@@ -1,7 +1,5 @@
 package com.hbasebook.hush;
 
-import java.io.IOException;
-
 import com.hbasebook.hush.servlet.security.HBaseLoginService;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.HelpFormatter;
@@ -12,10 +10,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
-import org.apache.hadoop.hbase.client.Get;
-import org.apache.hadoop.hbase.client.HTable;
-import org.apache.hadoop.hbase.client.Put;
-import org.apache.hadoop.hbase.util.Bytes;
 import org.eclipse.jetty.security.LoginService;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Server;
@@ -23,16 +17,31 @@ import org.eclipse.jetty.server.nio.SelectChannelConnector;
 import org.eclipse.jetty.webapp.WebAppContext;
 
 import com.hbasebook.hush.schema.SchemaManager;
-import com.hbasebook.hush.table.UserTable;
 
+/**
+ * Main application class for Hush - The HBase URL Shortener.
+ */
 public class HushMain {
 
+  /**
+   * Helper method to print out the command line arguments available.
+   *
+   * @param options  The command line argument definition.
+   * @param exitCode  The exit code to use when exiting the application.
+   */
   private static void printUsageAndExit(Options options, int exitCode) {
     HelpFormatter formatter = new HelpFormatter();
     formatter.printHelp("HushMain", options, true);
     System.exit(exitCode);
   }
 
+  /**
+   * Main entry point to application. Sets up the resources and launches
+   * the Jetty server.
+   *
+   * @param args  The command line arguments.
+   * @throws Exception When there is an issue launching the application.
+   */
   public static void main(String[] args) throws Exception {
     Log LOG = LogFactory.getLog(HushMain.class);
 
