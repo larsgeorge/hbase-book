@@ -62,12 +62,14 @@ public class ClusterStatusExample {
         HServerLoad.RegionLoad regionLoad = entry.getValue(); // co ClusterStatusExample-5-RegionLoad Get the load details for the current region.
 
         System.out.println("Name: " + Bytes.toStringBinary(regionLoad.getName()));
-        System.out.println("Memstore Size (MB): " + regionLoad.getMemStoreSizeMB());
-        System.out.println("No. Requests: " + regionLoad.getRequestsCount());
         System.out.println("No. Stores: " + regionLoad.getStores());
-        System.out.println("Storefile Index Size (MB): " + regionLoad.getStorefileIndexSizeMB());
         System.out.println("No. Storefiles: " + regionLoad.getStorefiles());
         System.out.println("Storefile Size (MB): " + regionLoad.getStorefileSizeMB());
+        System.out.println("Storefile Index Size (MB): " + regionLoad.getStorefileIndexSizeMB());
+        System.out.println("Memstore Size (MB): " + regionLoad.getMemStoreSizeMB());
+        System.out.println("No. Requests: " + regionLoad.getRequestsCount());
+        System.out.println("No. Read Requests: " + regionLoad.getReadRequestsCount());
+        System.out.println("No. Write Requests: " + regionLoad.getWriteRequestsCount());
         System.out.println();
       }
     }
