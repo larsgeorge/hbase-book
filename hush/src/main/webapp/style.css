@@ -1,146 +1,146 @@
 body {
-	font-family: "Lucida Grande", "Lucida Sans Unicode", Verdana, Arial,
-		Helvetica, sans-serif;
-	font-size: 12px;
-	margin: 0;
+  font-family: "Lucida Grande", "Lucida Sans Unicode", Verdana, Arial,
+    Helvetica, sans-serif;
+  font-size: 12px;
+  margin: 0;
 }
 
 .main {
-	margin: 10px;
+  margin: 10px;
 }
 
 p,h1,form,button {
-	border: 0;
-	margin-bottom: 15px;
-	padding: 0;
+  border: 0;
+  margin-bottom: 15px;
+  padding: 0;
 }
 
 .spacer {
-	clear: both;
-	height: 1px;
+  clear: both;
+  height: 1px;
 }
 
 #shorten div {
-	width: 400px;
-	border: solid 1px #ddddf2;
-	align: center;
+  width: 400px;
+  border: solid 1px #ddddf2;
+  align: center;
 }
 
 #shorten button {
-	width: 100px;
-	height: 20px;
-	background: #666666 url(img/button.png) no-repeat;
-	text-align: center;
-	color: #FFFFFF;
-	font-size: 11px;
-	font-weight: bold;
+  width: 100px;
+  height: 20px;
+  background: #666666 url(img/button.png) no-repeat;
+  text-align: center;
+  color: #FFFFFF;
+  font-size: 11px;
+  font-weight: bold;
 }
 
 /* ----------- Header/Footer ----------- */
 #header {
-	width: 100%;
-	text-align: right;
-	background-color: #f2dddd;
-	border-bottom: solid 1px #ddddf2;
-	font-size: 11px;
+  width: 100%;
+  height: 20px;
+  text-align: right;
+  background-color: #add8e6;
+  font-size: 11px;
 }
 
 #header span {
-	padding-right: 10px;
+  padding-right: 10px;
+  vertical-align: middle;
 }
 
 #header a {
-	text-decoration: none;
+  text-decoration: none;
 }
 
 #footer {
-	position: absolute;
-	bottom: 0;
-	width: 100%;
-	text-align: center;
-	background-color: #f2dddd;
-	border-top: solid 1px #ddddf2;
-	font-size: 11px;
-	width: 100%;
+  width: 100%;
+  position: absolute;
+  bottom: 0;
+  text-align: center;
+  background-color: #add8e6;
+  font-size: 11px;
 }
+
 
 /* ----------- Error ----------- */
 #error {
-	text-align: center;
-	color: red;
+  text-align: center;
+  color: red;
 }
 
 /* ----------- My Form ----------- */
 .myform {
-	margin: 0 auto;
-	width: 400px;
-	padding: 14px;
+  margin: 0 auto;
+  width: 400px;
+  padding: 14px;
 }
 
 /* ----------- stylized ----------- */
 #stylized {
-	border: solid 2px #b7ddf2;
-	background: #ebf4fb;
+  border: solid 2px #b7ddf2;
+  background: #ebf4fb;
 }
 
 #stylized h1 {
-	font-size: 14px;
-	font-weight: bold;
-	margin-bottom: 8px;
+  font-size: 14px;
+  font-weight: bold;
+  margin-bottom: 8px;
 }
 
 #stylized p {
-	font-size: 11px;
-	color: #666666;
-	margin-bottom: 20px;
-	border-bottom: solid 1px #b7ddf2;
-	padding-bottom: 10px;
+  font-size: 11px;
+  color: #666666;
+  margin-bottom: 20px;
+  border-bottom: solid 1px #b7ddf2;
+  padding-bottom: 10px;
 }
 
 #stylized label {
-	display: block;
-	font-weight: bold;
-	text-align: right;
-	width: 140px;
-	float: left;
+  display: block;
+  font-weight: bold;
+  text-align: right;
+  width: 140px;
+  float: left;
 }
 
 #stylized .small {
-	color: #666666;
-	display: block;
-	font-size: 11px;
-	font-weight: normal;
-	text-align: right;
-	width: 140px;
+  color: #666666;
+  display: block;
+  font-size: 11px;
+  font-weight: normal;
+  text-align: right;
+  width: 140px;
 }
 
 #stylized .error {
-	color: #ff0000;
-	display: block;
-	font-size: 11px;
-	font-weight: normal;
-	text-align: right;
-	width: 140px;
+  color: #ff0000;
+  display: block;
+  font-size: 11px;
+  font-weight: normal;
+  text-align: right;
+  width: 140px;
 }
 
 #stylized input {
-	float: left;
-	font-size: 12px;
-	padding: 4px 2px;
-	border: solid 1px #aacfe4;
-	width: 200px;
-	margin: 2px 0 20px 10px;
+  float: left;
+  font-size: 12px;
+  padding: 4px 2px;
+  border: solid 1px #aacfe4;
+  width: 200px;
+  margin: 2px 0 20px 10px;
 }
 
 #stylized button {
-	clear: both;
-	margin-left: 150px;
-	width: 125px;
-	height: 31px;
-	background: #666666 url(img/button.png) no-repeat;
-	text-align: center;
-	line-height: 31px;
-	color: #FFFFFF;
-	font-size: 11px;
-	font-weight: bold;
+  clear: both;
+  margin-left: 150px;
+  width: 125px;
+  height: 31px;
+  background: #666666 url(img/button.png) no-repeat;
+  text-align: center;
+  line-height: 31px;
+  color: #FFFFFF;
+  font-size: 11px;
+  font-weight: bold;
 }
