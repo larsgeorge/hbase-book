@@ -1,8 +1,5 @@
 package com.hbasebook.hush;
 
-import java.io.IOException;
-
-import com.hbasebook.hush.servlet.security.HBaseLoginService;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
@@ -12,10 +9,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
-import org.apache.hadoop.hbase.client.Get;
-import org.apache.hadoop.hbase.client.HTable;
-import org.apache.hadoop.hbase.client.Put;
-import org.apache.hadoop.hbase.util.Bytes;
 import org.eclipse.jetty.security.LoginService;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Server;
@@ -23,7 +16,7 @@ import org.eclipse.jetty.server.nio.SelectChannelConnector;
 import org.eclipse.jetty.webapp.WebAppContext;
 
 import com.hbasebook.hush.schema.SchemaManager;
-import com.hbasebook.hush.table.UserTable;
+import com.hbasebook.hush.servlet.security.HBaseLoginService;
 
 public class HushMain {
 
@@ -96,6 +89,10 @@ public class HushMain {
     ((HBaseLoginService) loginService).createAdminUser();
     server.addBean(loginService);
     wac.getSecurityHandler().setLoginService(loginService);
+
+    // test data
+    DomainManager dm = new DomainManager(manager);
+    dm.createTestData();
 
     // start the server
     server.start();

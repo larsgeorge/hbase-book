@@ -54,35 +54,14 @@
         <!-- Default: 0 -->
         <scope/>
       </column_family>
-      <column_family>
-        <name>acl</name>
-        <description>Stores the user's ACL</description>
-        <!-- Default: 3 -->
-        <max_versions>3</max_versions>
-        <!-- Default: None -->
-        <compression/>
-        <!-- Default: false -->
-        <in_memory/>
-        <!-- Default: true -->
-        <block_cache_enabled/>
-        <!-- Default: 64k -->
-        <block_size/>
-        <!-- Default: Integer.MAX_VALUE (forever) -->
-        <time_to_live/>
-        <!-- Default: false -->
-        <bloom_filter/>
-        <!-- Default: 0 -->
-        <scope/>
-      </column_family>
     </table>
     <table>
-      <name>vdom</name>
-      <description>The vanity domain table, keyed by
-        vanityDomain.
+      <name>sdom</name>
+      <description>The short (vanity) domain table, keyed by shortDomain.
       </description>
       <column_family>
-        <name>owner</name>
-        <description>Links to userId of user table</description>
+        <name>domains</name>
+        <description>One qualifier per long domain. Value is timestamp.</description>
         <!-- Default: 3 -->
         <max_versions>1</max_versions>
         <!-- Default: None -->
@@ -102,13 +81,12 @@
       </column_family>
     </table>
     <table>
-      <name>rvdom</name>
-      <description>The reverse vanity domain table, keyed by
-        domain.
+      <name>ldom</name>
+      <description>The domain table, keyed by long domain. (Reverse index of sdom table.)
       </description>
       <column_family>
-        <name>vdom</name>
-        <description>Links to vanityDomain of vdom table</description>
+        <name>data</name>
+        <description>Link to key of vdom table</description>
         <!-- Default: 3 -->
         <max_versions>1</max_versions>
         <!-- Default: None -->
