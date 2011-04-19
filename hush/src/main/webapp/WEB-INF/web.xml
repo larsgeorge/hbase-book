@@ -36,16 +36,6 @@
     <welcome-file>index.jsp</welcome-file>
   </welcome-file-list>
 
-  <!--
-    <security-constraint> <web-resource-collection>
-    <web-resource-name>User Page</web-resource-name>
-    <url-pattern>/user/*</url-pattern> </web-resource-collection>
-    <auth-constraint> <role-name>user</role-name> </auth-constraint>
-    </security-constraint> <login-config>
-    <auth-method>BASIC</auth-method> <realm-name>HBaseRealm</realm-name>
-    </login-config>
-  -->
-
   <security-constraint>
     <web-resource-collection>
       <web-resource-name>User Page</web-resource-name>
@@ -53,6 +43,16 @@
     </web-resource-collection>
     <auth-constraint>
       <role-name>user</role-name>
+    </auth-constraint>
+  </security-constraint>
+
+  <security-constraint>
+    <web-resource-collection>
+      <web-resource-name>Admin Page</web-resource-name>
+      <url-pattern>/admin/*</url-pattern>
+    </web-resource-collection>
+    <auth-constraint>
+      <role-name>admin</role-name>
     </auth-constraint>
   </security-constraint>
 

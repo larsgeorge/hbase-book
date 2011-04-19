@@ -20,12 +20,11 @@
 <jsp:include page="/include/header.jsp"/>
 <div class="main">
   <jsp:include page="/include/error.jsp"/>
-  <table cellpadding="0" cellspacing="0" border="0">
+  <table id="domains" cellpadding="0" cellspacing="0" border="0">
     <thead>
       <tr>
         <td>Short Domain</td>
         <td>Original Domain</td>
-        <td>&nbsp;</td>
       </tr>
     </thead>
     <tbody>
@@ -33,25 +32,27 @@
   for (ShortDomain sdom : list) {
 %>
       <tr>
-        <td><%= sdom.getShortDomain() %></td>
-        <td>
-          <table cellpadding="0" cellspacing="0" border="0">
+        <td class="shortDomainCell">
+        	<span class="shortDomain"><%= sdom.getShortDomain() %></span>
+        	<span class="shortDomainActions">
+		        <a href="/admin/domains.jsp?action=deleteShortDomain&value=<%= sdom.getShortDomain() %>">[ delete ]</a>
+        	</span>
+        </td>
+        <td class="longDomainCell">
+          <ul>
 <%
       List<String> domains = sdom.getDomains();      
 	  for (String domain : domains) {
 %>
-          
-            <tr>
-              <td><%= domain %></td>
-              <td><a href="/admin/domains.jsp?action=deleteLongDomain&value=<%=domain %>">[ delete ]</a></td>
-            </tr>
+			<li>
+				<span class="longDomain"><%= domain %></span>
+	            <span class="longDomainActions"><a href="/admin/domains.jsp?action=deleteLongDomain&value=<%=domain %>">[ delete ]</a></span>
+            </li>          
 <%
 	  }
 %>
-          </table>
+          </ul>
         </td>
-        <td><%= sdom.getShortDomain() %></td>
-        <td><a href="/admin/domains.jsp?action=deleteShortDomain&value=<%= sdom.getShortDomain() %>">[ delete ]</a></td>
       </tr>
 <%
   }
