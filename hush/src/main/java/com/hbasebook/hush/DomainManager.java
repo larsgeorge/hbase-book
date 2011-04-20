@@ -106,6 +106,7 @@ public class DomainManager {
       Put longPut = new Put(longBytes);
       longPut.add(LongDomainTable.DATA_FAMILY, LongDomainTable.SHORT_DOMAIN,
           shortBytes);
+      longTable.put(longPut);
 
       longTable.flushCommits();
       shortTable.flushCommits();
@@ -132,8 +133,11 @@ public class DomainManager {
         byte[] shortBytes = result.getValue(LongDomainTable.DATA_FAMILY,
             LongDomainTable.SHORT_DOMAIN);
 
+        Delete d = new Delete(shortBytes);
+        d.deleteColumn(ShortDomainTable.DOMAINS_FAMILY, longBytes);
+        shortTable.delete(d);
+
         longTable.delete(new Delete(longBytes));
-        shortTable.delete(new Delete(shortBytes));
 
         longTable.flushCommits();
         shortTable.flushCommits();
