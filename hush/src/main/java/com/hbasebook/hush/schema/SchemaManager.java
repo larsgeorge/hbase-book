@@ -16,6 +16,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 public class SchemaManager {
   private static final Log LOG = LogFactory.getLog(SchemaManager.class);
@@ -61,6 +62,16 @@ public class SchemaManager {
       }
       if (config.containsKey(base + "read_only")) {
         ts.setReadOnly(config.getBoolean(base + "read_only"));
+      }
+      int idx = 0;
+      while (true) {
+        String kvKey = base + "key_value" + (idx++ == 0 ? "" : idx);
+        if (config.containsKey(kvKey)) {
+          String[] kv = config.getString(kvKey).split("=", 2);
+          ts.addKeyValue(kv[0], kv.length > 1 ? kv[1] : null);
+        } else {
+          break;
+        }
       }
       final int maxCols = config.getMaxIndex(base + "column_family");
       for (int c = 0; c <= maxCols; c++) {
@@ -185,6 +196,9 @@ public class SchemaManager {
     desc.setMaxFileSize(schema.getMaxFileSize());
     desc.setMemStoreFlushSize(schema.getMemStoreFlushSize());
     desc.setReadOnly(schema.isReadOnly());
+    for (Map.Entry<String, String> entry : schema.getKeyValues().entrySet()) {
+      desc.setValue(entry.getKey(), entry.getValue());
+    }
     final Collection<ColumnDefinition> cols = schema.getColumns();
     for (final ColumnDefinition col : cols) {
       final HColumnDescriptor cd = new HColumnDescriptor(Bytes.toBytes(col.getColumnName()), col.getMaxVersions(),

@@ -4,6 +4,8 @@ import org.apache.hadoop.hbase.HTableDescriptor;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 public class TableSchema {
   private String name = null;
@@ -12,8 +14,8 @@ public class TableSchema {
   private long maxFileSize = HTableDescriptor.DEFAULT_MAX_FILESIZE;
   private long memStoreFlushSize = HTableDescriptor.DEFAULT_MEMSTORE_FLUSH_SIZE;
   private boolean readOnly = false;
-
   private final HashMap<String, ColumnDefinition> columns = new HashMap<String, ColumnDefinition>();
+  private Map<String, String> keyValues = new LinkedHashMap<String,String>();
 
   public String getName() {
     return name;
@@ -75,9 +77,19 @@ public class TableSchema {
     return columns.get(name);
   }
 
+  public void addKeyValue(String key, String value) {
+    keyValues.put(key, value);
+  }
+
+  public Map<String, String> getKeyValues() {
+    return keyValues;
+  }
+
   @Override
   public String toString() {
-    return "name -> " + name + "\n  description -> " + description + "\n  columns -> " + columns;
+    return "name -> " + name + "\n  description -> " + description +
+      "\n  columns -> " + columns +
+      "\n  keyValues -> " + keyValues;
   }
 }
 
