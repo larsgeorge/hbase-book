@@ -105,13 +105,12 @@ public class HushMain {
     // configure security
     LOG.info("Configuring security.");
     HBaseLoginService loginService = new HBaseLoginService("HBaseRealm");
-    loginService.createAdminUser();
     server.addBean(loginService);
     wac.getSecurityHandler().setLoginService(loginService);
 
-    // test data
-    DomainManager dm = new DomainManager(manager);
-    dm.createTestData();
+    // seed data
+    manager.getUserManager().createAdminUser();
+    manager.getDomainManager().createDomains();
 
     // start the server
     server.start();

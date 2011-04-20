@@ -24,11 +24,17 @@ public class DomainManager {
   private final Log LOG = LogFactory.getLog(DomainManager.class);
   private final ResourceManager rm;
 
-  public DomainManager(ResourceManager rm) throws IOException {
+  /**
+   * Package private constructor so only ResourceManager can instantiate.
+   * 
+   * @param rm
+   * @throws IOException
+   */
+  DomainManager(ResourceManager rm) throws IOException {
     this.rm = rm;
   }
 
-  public void createTestData() throws IOException {
+  public void createDomains() throws IOException {
     addLongDomain("oreil.ly", "www.oreilly.com");
     addLongDomain("oreil.ly", "www2.oreilly.com");
     addLongDomain("oreil.ly", "www.orly.com");
@@ -39,6 +45,12 @@ public class DomainManager {
     addLongDomain("hba.se", "seeya.com");
   }
 
+  /**
+   * Gets a list of {@link ShortDomain}.
+   * 
+   * @return the list
+   * @throws IOException
+   */
   public List<ShortDomain> listShortDomains() throws IOException {
     HTable table = null;
 
@@ -63,13 +75,18 @@ public class DomainManager {
         domains.add(new ShortDomain(shortDomain, domainsList));
       }
     } finally {
-      if (table != null) {
-        rm.putTable(table);
-      }
+      rm.putTable(table);
     }
     return domains;
   }
 
+  /**
+   * Adds a short to long domain mapping.
+   * 
+   * @param shortDomain
+   * @param longDomain
+   * @throws IOException
+   */
   public void addLongDomain(String shortDomain, String longDomain)
       throws IOException {
     HTable shortTable = rm.getTable(ShortDomainTable.NAME);
@@ -89,16 +106,21 @@ public class DomainManager {
       Put longPut = new Put(longBytes);
       longPut.add(LongDomainTable.DATA_FAMILY, LongDomainTable.SHORT_DOMAIN,
           shortBytes);
+
+      longTable.flushCommits();
+      shortTable.flushCommits();
     } finally {
-      if (shortTable != null) {
-        rm.putTable(shortTable);
-      }
-      if (longTable != null) {
-        rm.putTable(longTable);
-      }
+      rm.putTable(shortTable);
+      rm.putTable(longTable);
     }
   }
 
+  /**
+   * Deletes a long domain mapping.
+   * 
+   * @param longDomain
+   * @throws IOException
+   */
   public void deleteLongDomain(String longDomain) throws IOException {
     HTable shortTable = rm.getTable(ShortDomainTable.NAME);
     HTable longTable = rm.getTable(LongDomainTable.NAME);
@@ -112,17 +134,22 @@ public class DomainManager {
 
         longTable.delete(new Delete(longBytes));
         shortTable.delete(new Delete(shortBytes));
+
+        longTable.flushCommits();
+        shortTable.flushCommits();
       }
     } finally {
-      if (shortTable != null) {
-        rm.putTable(shortTable);
-      }
-      if (longTable != null) {
-        rm.putTable(longTable);
-      }
+      rm.putTable(shortTable);
+      rm.putTable(longTable);
     }
   }
 
+  /**
+   * Deletes a short domain and all its mappings.
+   * 
+   * @param shortDomain
+   * @throws IOException
+   */
   public void deleteShortDomain(String shortDomain) throws IOException {
     HTable shortTable = rm.getTable(ShortDomainTable.NAME);
     HTable longTable = rm.getTable(LongDomainTable.NAME);
@@ -140,17 +167,25 @@ public class DomainManager {
         }
         longTable.delete(deletes);
         shortTable.delete(new Delete(shortBytes));
+
+        longTable.flushCommits();
+        shortTable.flushCommits();
       }
     } finally {
-      if (shortTable != null) {
-        rm.putTable(shortTable);
-      }
-      if (longTable != null) {
-        rm.putTable(longTable);
-      }
+      rm.putTable(shortTable);
+      rm.putTable(longTable);
     }
   }
 
+  /**
+   * Shortens a long domain.
+   * 
+   * @param longDomain
+   * @param defaultValue
+   * @return The short domain mapped to longDomain, or defaultValue if no
+   *         mapping exists.
+   * @throws IOException
+   */
   public String shorten(String longDomain, String defaultValue)
       throws IOException {
     HTable longTable = rm.getTable(LongDomainTable.NAME);
@@ -166,10 +201,7 @@ public class DomainManager {
       }
       return defaultValue;
     } finally {
-      if (longTable != null) {
-        rm.putTable(longTable);
-      }
+      rm.putTable(longTable);
     }
   }
-
 }

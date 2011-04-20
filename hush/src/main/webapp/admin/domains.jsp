@@ -5,7 +5,7 @@
 <%@ page import="com.hbasebook.hush.DomainManager" %>
 <%
   ResourceManager rm = ResourceManager.getInstance();
-  DomainManager dm = new DomainManager(rm);
+  DomainManager dm = rm.getDomainManager();
   
   List<ShortDomain> list = dm.listShortDomains();
 %>
