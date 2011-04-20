@@ -4,9 +4,7 @@
 <%@ page import="com.hbasebook.hush.ResourceManager" %>
 <%@ page import="com.hbasebook.hush.DomainManager" %>
 <%
-  ResourceManager rm = ResourceManager.getInstance();
-  DomainManager dm = rm.getDomainManager();
-  
+  DomainManager dm = ResourceManager.getInstance().getDomainManager();  
   List<ShortDomain> list = dm.listShortDomains();
 %>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
@@ -19,35 +17,43 @@
 <body>
 <jsp:include page="/include/header.jsp"/>
 <div class="main">
+  <div align="center">
+  <h2>Domains</h2>
   <jsp:include page="/include/error.jsp"/>
-  <table id="domains" cellpadding="0" cellspacing="0" border="0">
+  
+  <form action="/admin/domains.jsp">  
+  <table id="domains">
     <thead>
       <tr>
         <td>Short Domain</td>
         <td>Original Domain</td>
+        <td>&nbsp;</td>
       </tr>
     </thead>
     <tbody>
 <%
   for (ShortDomain sdom : list) {
+      List<String> ldoms = sdom.getDomains();      
 %>
       <tr>
-        <td class="shortDomainCell">
-        	<span class="shortDomain"><%= sdom.getShortDomain() %></span>
-        	<span class="shortDomainActions">
-		        <a href="/admin/domains.jsp?action=deleteShortDomain&value=<%= sdom.getShortDomain() %>">[ delete ]</a>
-        	</span>
-        </td>
-        <td class="longDomainCell">
+        <td class="shortDomain"><%= sdom.getShortDomain() %></td>
+        <td class="longDomain">
           <ul>
 <%
-      List<String> domains = sdom.getDomains();      
-	  for (String domain : domains) {
+	  for (String ldom : ldoms) {
 %>
-			<li>
-				<span class="longDomain"><%= domain %></span>
-	            <span class="longDomainActions"><a href="/admin/domains.jsp?action=deleteLongDomain&value=<%=domain %>">[ delete ]</a></span>
-            </li>          
+			<li><%= ldom %></li>          
+<%
+	  }
+%>
+          </ul>
+        </td>
+        <td class="action">
+          <ul>
+<%
+	  for (String ldom : ldoms) {
+%>
+            <li></li>[ <a href="/admin/domains.jsp?action=delete&ldom=<%= ldom %>">delete</a> ]</li>
 <%
 	  }
 %>
@@ -57,8 +63,16 @@
 <%
   }
 %>
+      <tr>
+        <td><input type="text" size="20" name="sdom"/></td>
+        <td><input type="text" size="40" name="ldom"/></td>
+        <td><input type="submit" value="Add"/></td>
+      </tr>
     </tbody>
   </table>
+  </form>
+  
+  </div> 
 </div>
 <jsp:include page="/include/footer.jsp"/>
 </body>

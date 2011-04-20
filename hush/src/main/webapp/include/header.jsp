@@ -4,12 +4,11 @@
 %>
 <div id="header">
   <span>
-  <a href="/">Home</a> -
+  <a href="/">Home</a>&nbsp;|&nbsp;
 <% if (principal != null) { %>
-    Welcome, <a href="/user"><%= principal %>
-  </a>!&nbsp;&nbsp;&nbsp;<a href="/logout.jsp">Sign off</a>
+Welcome, <a href="/user"><%= principal %></a>&nbsp;|&nbsp;<a href="/logout.jsp">Sign off</a>
 <% } else { %>
-    <a href="/signup.jsp">Sign in</a>
+<a href="/signup.jsp">Sign in</a>
 <% } %>
   </span>
 </div>
