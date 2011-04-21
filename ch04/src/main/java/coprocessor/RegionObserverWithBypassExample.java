@@ -30,7 +30,7 @@ public class RegionObserverWithBypassExample extends BaseRegionObserverCoprocess
       LOG.debug("Had a match, adding fake KV: " + kv);
       // vv RegionObserverWithBypassExample
       results.add(kv);
-      /*[*/e.bypass();/*]*/ // co RegionObserverWithBypassExample-1-Bypass Ones the special KeyValue is inserted all further processing is skipped.
+      /*[*/e.bypass();/*]*/ // co RegionObserverWithBypassExample-1-Bypass Once the special KeyValue is inserted all further processing is skipped.
     }
     // ^^ RegionObserverWithBypassExample
   }
