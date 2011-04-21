@@ -1,29 +1,37 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
 <%@ page import="com.hbasebook.hush.table.UserTable" %>
 <%@ page import="com.hbasebook.hush.ResourceManager" %>
+<%@ page import="com.hbasebook.hush.UserManager" %>
 <%@ page import="org.apache.hadoop.hbase.client.HTable" %>
 <%@ page import="org.apache.hadoop.hbase.client.Put" %>
 <%@ page import="org.apache.hadoop.hbase.util.Bytes" %>
 <%@ page import="java.util.BitSet" %>
 <%
-  String submit = request.getParameter("submit");
+  String action = request.getParameter("action");
   String userName = request.getParameter("username");
-  if (userName == null) userName = "";
+  if (userName == null)
+    userName = "";
   String firstName = request.getParameter("firstName");
-  if (firstName == null) firstName = "";
+  if (firstName == null)
+    firstName = "";
   String lastName = request.getParameter("lastName");
-  if (lastName == null) lastName = "";
+  if (lastName == null)
+    lastName = "";
   String email = request.getParameter("email");
-  if (email == null) email = "";
+  if (email == null)
+    email = "";
   String password = request.getParameter("password");
-  if (password == null) password = "";
+  if (password == null)
+    password = "";
   String confirmPassword = request.getParameter("confirmPassword");
-  if (confirmPassword == null) confirmPassword = "";
+  if (confirmPassword == null)
+    confirmPassword = "";
   BitSet errors = new BitSet(10);
-  boolean success = false;
-  if (submit != null) {
+  
+  if (action != null && action.equalsIgnoreCase("create")) {
     // check for form errors
-    errors.set(0, password.length() > 0 && !password.equals(confirmPassword));
+    errors.set(0, password.length() > 0
+        && !password.equals(confirmPassword));
     errors.set(1, userName.length() == 0);
     errors.set(2, firstName.length() == 0);
     errors.set(3, lastName.length() == 0);
@@ -31,23 +39,10 @@
     errors.set(5, password.length() == 0);
     errors.set(6, confirmPassword.length() == 0);
     if (errors.isEmpty()) {
-      ResourceManager manager = ResourceManager.getInstance();
-      HTable table = manager.getTable(UserTable.NAME);
-      Put put = new Put(Bytes.toBytes(userName));
-      put.add(UserTable.DATA_FAMILY, UserTable.FIRSTNAME,
-        Bytes.toBytes(firstName));
-      put.add(UserTable.DATA_FAMILY, UserTable.LASTNAME,
-        Bytes.toBytes(lastName));
-      put.add(UserTable.DATA_FAMILY, UserTable.EMAIL,
-        Bytes.toBytes(email));
-      put.add(UserTable.DATA_FAMILY, UserTable.CREDENTIALS,
-        Bytes.toBytes(password));
-      put.add(UserTable.DATA_FAMILY, UserTable.ROLES,
-        UserTable.USER_ROLE);
-      table.put(put);
-      table.flushCommits();
-      manager.putTable(table);
-      success = true;
+      UserManager um = ResourceManager.getInstance().getUserManager();
+      um.createUser(userName, firstName, lastName, email, password);
+      response.sendRedirect("/user");
+      return ;
     }
   }
 %>
@@ -61,7 +56,6 @@
 <body>
 <div class="main">
   <jsp:include page="/include/error.jsp"/>
-  <% if (!success) { %>
   <div id="stylized" class="myform">
     <form id="form" method="post" name="form" action="j_security_check">
       <h1>Existing users</h1>
@@ -83,73 +77,86 @@
 
       <label>Username
         <span class="small">Your login</span>
-        <% if (errors.get(1)) { %>
+        <%
+          if (errors.get(1)) {
+        %>
         <span class="error">*required</span>
-        <% } %>
+        <%
+          }
+        %>
       </label>
       <input type="text" name="username" id="username"
-             value="<%= userName%>"/>
+             value="<%=userName%>"/>
 
       <label>First Name
         <span class="small"></span>
-        <% if (errors.get(2)) { %>
+        <%
+          if (errors.get(2)) {
+        %>
         <span class="error">*required</span>
-        <% } %>
+        <%
+          }
+        %>
       </label>
       <input type="text" name="firstName" id="firstName"
-             value="<%= firstName%>"/>
+             value="<%=firstName%>"/>
 
       <label>Last Name
         <span class="small"></span>
-        <% if (errors.get(3)) { %>
+        <%
+          if (errors.get(3)) {
+        %>
         <span class="error">*required</span>
-        <% } %>
+        <%
+          }
+        %>
       </label>
       <input type="text" name="lastName" id="lastName"
-             value="<%= lastName%>"/>
+             value="<%=lastName%>"/>
 
       <label>Email
         <span class="small"></span>
-        <% if (errors.get(4)) { %>
+        <%
+          if (errors.get(4)) {
+        %>
         <span class="error">*required</span>
-        <% } %>
+        <%
+          }
+        %>
       </label>
       <input type="text" name="email" id="email"
-             value="<%= email%>"/>
+             value="<%=email%>"/>
 
       <label>Password
         <span class="small">Make it good!</span>
-        <% if (errors.get(5)) { %>
+        <%
+          if (errors.get(5)) {
+        %>
         <span class="error">Please enter a password.</span>
-        <% } %>
+        <%
+          }
+        %>
       </label>
       <input type="password" name="password" id="password"/>
 
       <label>Confirm Password
         <span class="small"></span>
-        <% if (errors.get(0)) { %>
+        <%
+          if (errors.get(0)) {
+        %>
         <span class="error">password mismatch</span>
-        <% } %>
+        <%
+          }
+        %>
       </label>
       <input type="password" name="confirmPassword" id="confirmPassword"/>
 
+
+      <input type="hidden" name="action" value="create"/>
       <button name="submit" type="submit">Sign Up</button>
       <div class="spacer"></div>
     </form>
   </div>
-  <% } else { %>
-  <h1>Welcome <%= firstName%>!</h1>
-
-  <p>Thank you for singing up! You will be redirected to your account page...</p>
-
-  <p>(Click <a href="/user">here</a> if this takes for more than 5 seconds)</p>
-  <script type="text/javascript">
-    function Redirect() {
-      location.href = "/user";
-    }
-    setTimeout('Redirect()', 4000);
-  </script>
-  <% } %>
 </div>
 </body>
 </html>

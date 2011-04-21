@@ -6,7 +6,9 @@ body {
 }
 
 .main {
-	margin: 10px;
+	margin-top: 10px;
+	margin-right: 10px;
+	margin-left: 150px;
 }
 
 a {
@@ -69,7 +71,6 @@ p,h1,form,button {
 
 /* ----------- Error ----------- */
 #error {
-	text-align: center;
 	color: red;
 }
 

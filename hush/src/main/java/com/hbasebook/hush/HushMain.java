@@ -109,7 +109,7 @@ public class HushMain {
     wac.getSecurityHandler().setLoginService(loginService);
 
     // seed data
-    manager.getUserManager().createAdminUser();
+    manager.getUserManager().createRootUser();
     manager.getDomainManager().createDomains();
 
     // start the server

@@ -36,34 +36,30 @@
 <body>
 <jsp:include page="/include/header.jsp"/>
 <div class="main">
+   <h2>Welcome to the HBase URL Shortener</h2>
 
-  <div align="center">
-    <h2>Welcome to the HBase URL Shortener</h2>
+   <div id="shorten">
+     <p>Shorten your URLs!</p>
 
-    <div id="shorten">
-      <p>Shorten your URLs!</p>
+     <form action="/index.jsp" method="post">
+       <input type="text" size="80" name="url"/>
+       <input type="submit" value="Shorten it"/>
+     </form>
+     <% if (newShortId != null) {
+       String newUrl = "http://" + request.getHeader("Host") + "/" + newShortId;
+       String qrNewUrl = newUrl + ".q";
+     %>
+     <p>Your new shortened URL is:</p>
 
-      <form action="/index.jsp" method="post">
-        <input type="text" size="80" name="url"/>
-        <input type="submit" value="Shorten it"/>
-      </form>
-      <% if (newShortId != null) {
-        String newUrl = "http://" + request.getHeader("Host") + "/" + newShortId;
-        String qrNewUrl = newUrl + ".q";
-      %>
-      <p>Your new shortened URL is:</p>
+     <p><input type="text" size="50" value="<%= newUrl %>" disabled="disabled"/></p>
 
-      <p><input type="text" size="50" value="<%= newUrl %>" disabled="disabled"/></p>
+     <p>Hand it out as a QRCode:</p>
 
-      <p>Hand it out as a QRCode:</p>
+     <p><input type="text" size="50" value="<%= qrNewUrl %>" disabled="disabled"/></p>
 
-      <p><input type="text" size="50" value="<%= qrNewUrl %>" disabled="disabled"/></p>
-
-      <p><img src="<%= qrNewUrl%>" width="100" height="100" alt=""/></p>
-      <% } %>
-    </div>
-  </div>
-
+     <p><img src="<%= qrNewUrl%>" width="100" height="100" alt=""/></p>
+     <% } %>
+   </div>
 </div>
 <!--  main -->
 <jsp:include page="/include/footer.jsp"/>

@@ -26,7 +26,7 @@ public class UserManager {
     this.rm = rm;
   }
 
-  public void createAdminUser() throws IOException {
+  public void createRootUser() throws IOException {
     HTable table = rm.getTable(UserTable.NAME);
     try {
       byte[] ADMIN_LOGIN = Bytes.toBytes("admin");
@@ -46,6 +46,32 @@ public class UserManager {
     } finally {
       rm.putTable(table);
     }
+  }
+
+  public void createAdmin(String username, String firstName, String lastName,
+      String email, String password) throws IOException {
+    createUser(username, firstName, lastName, email, password, "admin");
+  }
+
+  public void createUser(String username, String firstName, String lastName,
+      String email, String password) throws IOException {
+    createUser(username, firstName, lastName, email, password, "user");
+  }
+
+  public void createUser(String username, String firstName, String lastName,
+      String email, String password, String roles) throws IOException {
+    HTable table = rm.getTable(UserTable.NAME);
+    Put put = new Put(Bytes.toBytes(username));
+    put.add(UserTable.DATA_FAMILY, UserTable.FIRSTNAME, Bytes
+        .toBytes(firstName));
+    put.add(UserTable.DATA_FAMILY, UserTable.LASTNAME, Bytes.toBytes(lastName));
+    put.add(UserTable.DATA_FAMILY, UserTable.EMAIL, Bytes.toBytes(email));
+    put.add(UserTable.DATA_FAMILY, UserTable.CREDENTIALS, Bytes
+        .toBytes(password));
+    put.add(UserTable.DATA_FAMILY, UserTable.ROLES, Bytes.toBytes(roles));
+    table.put(put);
+    table.flushCommits();
+    rm.putTable(table);
   }
 
   public User getUser(String username) {

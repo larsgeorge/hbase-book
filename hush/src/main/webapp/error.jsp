@@ -7,8 +7,9 @@
   <link href="/style.css" rel="stylesheet" type="text/css"/>
 </head>
 <body>
-<h1>Shush!</h1>
-<p>There was a fail.</p>
+<div class="main">
+<h1>There was a fail.</h1>
 <jsp:include page="/include/error.jsp"/>
 <a href="/index.jsp">Go home</a>
+</div>
 </html>

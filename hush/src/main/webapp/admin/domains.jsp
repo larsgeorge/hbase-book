@@ -32,7 +32,6 @@
 <body>
 <jsp:include page="/include/header.jsp" />
 <div class="main">
-<div align="center">
 <h2>Domains</h2>
 <jsp:include page="/include/error.jsp" />
 
@@ -83,7 +82,6 @@
 	</tbody>
 </table>
 
-</div>
 </div>
 <jsp:include page="/include/footer.jsp" />
 </body>
