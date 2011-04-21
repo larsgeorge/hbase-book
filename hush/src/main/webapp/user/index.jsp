@@ -48,9 +48,9 @@
   <h2>My Links</h2>
 
   <p>
-  <table style="width: 80%">
+  <table>
     <thead>
-    <tr  style="text-align: left">
+    <tr>
       <th>No.</th>
       <th>Short Id</th>
       <th>Long URL</th>

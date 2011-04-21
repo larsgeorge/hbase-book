@@ -36,6 +36,16 @@
     <welcome-file>index.jsp</welcome-file>
   </welcome-file-list>
 
+  <error-page>
+    <error-code>403</error-code>
+    <location>/error.jsp?error=You are not authorized to view that page.</location>
+  </error-page>
+  
+  <error-page>
+    <exception-type>java.lang.Exception</exception-type>
+    <location>/error.jsp</location>
+  </error-page>
+
   <security-constraint>
     <web-resource-collection>
       <web-resource-name>User Page</web-resource-name>
@@ -56,11 +66,6 @@
     </auth-constraint>
   </security-constraint>
   
-  <error-page>
-    <error-code>403</error-code>
-    <location>/error.jsp?error=You are not authorized to view that page.</location>
-  </error-page>
-
   <login-config>
     <auth-method>FORM</auth-method>
     <realm-name>HBaseRealm</realm-name>

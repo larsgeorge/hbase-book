@@ -1,16 +1,15 @@
 package com.hbasebook.hush.table;
 
-
 public class User {
   private final String username;
   private final String firstName;
   private final String lastName;
   private final String email;
   private final String credentials;
-  private final String[] roles;
+  private final String roles;
 
   public User(String username, String firstName, String lastName, String email,
-      String credentials, String[] roles) {
+      String credentials, String roles) {
     super();
     this.username = username;
     this.firstName = firstName;
@@ -40,7 +39,7 @@ public class User {
     return credentials;
   }
 
-  public String[] getRoles() {
+  public String getRoles() {
     return roles;
   }
 }

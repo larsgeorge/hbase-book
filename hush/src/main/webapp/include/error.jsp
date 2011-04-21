@@ -1,4 +1,3 @@
-
 <%
   String error = request.getParameter("error");
   if (error == null) {

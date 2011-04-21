@@ -66,8 +66,10 @@ public class HBaseLoginService extends MappedLoginService {
     try {
       UserManager manager = ResourceManager.getInstance().getUserManager();
       User user = manager.getUser(username);
+      String roleString = user.getRoles();
+      String[] roles = roleString == null ? null : roleString.split(",");
       return putUser(username, Credential.getCredential(user.getCredentials()),
-          user.getRoles());
+          roles);
     } catch (Exception e) {
       LOG.error(String.format("Unable to get user '%s'", username), e);
       return null;
@@ -78,8 +80,10 @@ public class HBaseLoginService extends MappedLoginService {
   protected void loadUsers() throws IOException {
     UserManager manager = ResourceManager.getInstance().getUserManager();
     for (User user : manager.getUsers()) {
+      String roleString = user.getRoles();
+      String[] roles = roleString == null ? null : roleString.split(",");
       putUser(user.getCredentials(), Credential.getCredential(user
-          .getCredentials()), user.getRoles());
+          .getCredentials()), roles);
     }
   }
 }

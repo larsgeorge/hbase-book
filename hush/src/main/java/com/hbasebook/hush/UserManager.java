@@ -80,8 +80,6 @@ public class UserManager {
     try {
       table = rm.getTable(UserTable.NAME);
       Get get = new Get(Bytes.toBytes(username));
-      get.addColumn(UserTable.DATA_FAMILY, UserTable.CREDENTIALS);
-      get.addColumn(UserTable.DATA_FAMILY, UserTable.ROLES);
 
       Result result = table.get(get);
       if (result.isEmpty()) {
@@ -96,9 +94,8 @@ public class UserManager {
           UserTable.EMAIL));
       String credentials = Bytes.toString(result.getValue(
           UserTable.DATA_FAMILY, UserTable.CREDENTIALS));
-      String roleString = Bytes.toString(result.getValue(UserTable.DATA_FAMILY,
+      String roles = Bytes.toString(result.getValue(UserTable.DATA_FAMILY,
           UserTable.ROLES));
-      String[] roles = roleString == null ? null : roleString.split(",");
       user = new User(username, firstName, lastName, email, credentials, roles);
     } catch (Exception e) {
       LOG.error(String.format("Unable to get user '%s'", username), e);
@@ -114,8 +111,6 @@ public class UserManager {
     HTable table = rm.getTable(UserTable.NAME);
 
     Scan scan = new Scan();
-    scan.addColumn(UserTable.DATA_FAMILY, UserTable.CREDENTIALS);
-    scan.addColumn(UserTable.DATA_FAMILY, UserTable.ROLES);
     ResultScanner scanner = table.getScanner(scan);
 
     Iterator<Result> results = scanner.iterator();
@@ -133,9 +128,8 @@ public class UserManager {
               UserTable.EMAIL));
           String credentials = Bytes.toString(result.getValue(
               UserTable.DATA_FAMILY, UserTable.CREDENTIALS));
-          String roleString = Bytes.toString(result.getValue(
-              UserTable.DATA_FAMILY, UserTable.ROLES));
-          String[] roles = roleString == null ? null : roleString.split(",");
+          String roles = Bytes.toString(result.getValue(UserTable.DATA_FAMILY,
+              UserTable.ROLES));
           User user = new User(username, firstName, lastName, email,
               credentials, roles);
           users.add(user);

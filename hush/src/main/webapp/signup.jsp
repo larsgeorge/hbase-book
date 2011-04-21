@@ -1,4 +1,5 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
+<%@ page import="com.hbasebook.hush.HushUtil" %>
 <%@ page import="com.hbasebook.hush.table.UserTable" %>
 <%@ page import="com.hbasebook.hush.ResourceManager" %>
 <%@ page import="com.hbasebook.hush.UserManager" %>
@@ -7,28 +8,16 @@
 <%@ page import="org.apache.hadoop.hbase.util.Bytes" %>
 <%@ page import="java.util.BitSet" %>
 <%
-  String action = request.getParameter("action");
-  String userName = request.getParameter("username");
-  if (userName == null)
-    userName = "";
-  String firstName = request.getParameter("firstName");
-  if (firstName == null)
-    firstName = "";
-  String lastName = request.getParameter("lastName");
-  if (lastName == null)
-    lastName = "";
-  String email = request.getParameter("email");
-  if (email == null)
-    email = "";
-  String password = request.getParameter("password");
-  if (password == null)
-    password = "";
-  String confirmPassword = request.getParameter("confirmPassword");
-  if (confirmPassword == null)
-    confirmPassword = "";
+  String action = HushUtil.fixNulls (request.getParameter("action"));
+  String userName = HushUtil.fixNulls (request.getParameter("username"));
+  String firstName = HushUtil.fixNulls (request.getParameter("firstName"));
+  String lastName = HushUtil.fixNulls (request.getParameter("lastName"));
+  String email = HushUtil.fixNulls ( request.getParameter("email"));
+  String password = HushUtil.fixNulls (request.getParameter("password"));
+  String confirmPassword = HushUtil.fixNulls (request.getParameter("confirmPassword"));
   BitSet errors = new BitSet(10);
   
-  if (action != null && action.equalsIgnoreCase("create")) {
+  if (action.equalsIgnoreCase("create")) {
     // check for form errors
     errors.set(0, password.length() > 0
         && !password.equals(confirmPassword));
