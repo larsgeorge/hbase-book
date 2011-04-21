@@ -74,7 +74,7 @@ public class UserManager {
     rm.putTable(table);
   }
 
-  public User getUser(String username) {
+  public User getUser(String username) throws IOException {
     User user = null;
     HTable table = null;
     try {

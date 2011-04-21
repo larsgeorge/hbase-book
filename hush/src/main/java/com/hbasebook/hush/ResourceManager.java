@@ -28,10 +28,9 @@ public class ResourceManager {
 
   /**
    * Returns the shared instance of this singleton class.
-   * 
+   *
    * @return The singleton instance.
-   * @throws IOException
-   *           When creating the remote HBase connection fails.
+   * @throws IOException When creating the remote HBase connection fails.
    */
   public synchronized static ResourceManager getInstance() throws IOException {
     assert (INSTANCE != null);
@@ -41,15 +40,13 @@ public class ResourceManager {
   /**
    * Creates a new instance using the provided configuration upon first
    * invocation, otherwise it returns the already existing instance.
-   * 
-   * @param conf
-   *          The HBase configuration to use.
+   *
+   * @param conf The HBase configuration to use.
    * @return The new or existing singleton instance.
-   * @throws IOException
-   *           When creating the remote HBase connection fails.
+   * @throws IOException When creating the remote HBase connection fails.
    */
   public synchronized static ResourceManager getInstance(Configuration conf)
-      throws IOException {
+    throws IOException {
     if (INSTANCE == null) {
       INSTANCE = new ResourceManager(conf);
     }
@@ -67,11 +64,9 @@ public class ResourceManager {
 
   /**
    * Internal constructor, called by the <code>getInstance()</code> methods.
-   * 
-   * @param conf
-   *          The HBase configuration to use.
-   * @throws IOException
-   *           When creating the remote HBase connection fails.
+   *
+   * @param conf The HBase configuration to use.
+   * @throws IOException When creating the remote HBase connection fails.
    */
   private ResourceManager(Configuration conf) throws IOException {
     this.conf = conf;
@@ -84,9 +79,8 @@ public class ResourceManager {
   /**
    * Delayed initialization of the instance. Should be called once to set up the
    * counters etc.
-   * 
-   * @throws IOException
-   *           When setting up the resources in HBase fails.
+   *
+   * @throws IOException When setting up the resources in HBase fails.
    */
   void init() throws IOException {
     counters.init();
@@ -94,7 +88,7 @@ public class ResourceManager {
 
   /**
    * Returns the internal <code>HTable</code> pool.
-   * 
+   *
    * @return The shared table pool.
    */
   public HTablePool getTablePool() {
@@ -104,12 +98,10 @@ public class ResourceManager {
   /**
    * Returns a single table from the shared table pool. More convenient to use
    * compared to <code>getTablePool()</code>.
-   * 
-   * @param tableName
-   *          The name of the table to retrieve.
+   *
+   * @param tableName The name of the table to retrieve.
    * @return The table reference.
-   * @throws IOException
-   *           When talking to HBase fails.
+   * @throws IOException When talking to HBase fails.
    */
   public HTable getTable(byte[] tableName) throws IOException {
     return (HTable) pool.getTable(tableName);
@@ -119,11 +111,10 @@ public class ResourceManager {
    * Returns the previously retrieved tanle to the shared pool. The caller must
    * take care of calling <code>flushTable()</code> if there are any pending
    * mutatioons.
-   * 
-   * @param table
-   *          The table reference to return to the pool.
+   *
+   * @param table The table reference to return to the pool.
    */
-  public void putTable(HTable table) {
+  public void putTable(HTable table) throws IOException {
     if (table != null) {
       pool.putTable(table);
     }
@@ -131,7 +122,7 @@ public class ResourceManager {
 
   /**
    * Returns the currently used configuration.
-   * 
+   *
    * @return The current configuration.
    */
   public Configuration getConfiguration() {
@@ -142,10 +133,9 @@ public class ResourceManager {
    * Convenience method to retrieve a new short Id. The value is returned in the
    * proper format to be used as a row key in the HBase table. Each call
    * increments the counter by one.
-   * 
+   *
    * @return The newly created short Id.
-   * @throws Exception
-   *           When communicating with HBase fails.
+   * @throws Exception When communicating with HBase fails.
    */
   public byte[] getShortId() throws IOException {
     return getShortId(1L);
@@ -155,12 +145,10 @@ public class ResourceManager {
    * Convenience method to retrieve a new short Id. The value is returned in the
    * proper format to be used as a row key in the HBase table. Each call
    * increments the counter by the given <code>incrBy</code>.
-   * 
+   *
+   * @param incrBy The increment value.
    * @return The newly created short Id.
-   * @param incrBy
-   *          The increment value.
-   * @throws Exception
-   *           When communicating with HBase fails.
+   * @throws Exception When communicating with HBase fails.
    */
   public byte[] getShortId(long incrBy) throws IOException {
     return counters.getShortId(incrBy);
@@ -168,7 +156,7 @@ public class ResourceManager {
 
   /**
    * Returns a reference to the shared counters instance.
-   * 
+   *
    * @return The shared counters instance.
    */
   public Counters getCounters() {
