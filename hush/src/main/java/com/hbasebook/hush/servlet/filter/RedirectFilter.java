@@ -91,6 +91,11 @@ public class RedirectFilter implements Filter {
             String url = Bytes.toString(value);
             // either redirect to shortened URL or send QRCode
             if (!qr) {
+              // update counters
+              byte[] userName = result.getValue(ShortUrlTable.DATA_FAMILY,
+                ShortUrlTable.USER_ID);
+              manager.getCounters().incrementUsage(userName, shortId);
+              // redirect
               httpResponse.sendRedirect(url);
             } else {
               sendQRCode(httpResponse, url);
@@ -99,10 +104,6 @@ public class RedirectFilter implements Filter {
             // pathological case where there is a short Id but no URL
             httpResponse.sendError(501);
           }
-          // update counters
-          byte[] userName = result.getValue(ShortUrlTable.DATA_FAMILY,
-            ShortUrlTable.USER_ID);
-          manager.getCounters().incrementUsage(userName, shortId);
         } else {
           // if the short Id was bogus show a "shush" (our fail whale)
           httpResponse.sendError(404);
