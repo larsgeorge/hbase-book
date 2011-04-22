@@ -65,6 +65,20 @@
       <role-name>admin</role-name>
     </auth-constraint>
   </security-constraint>
+
+  <!-- 
+     Hack to prevent access to /include.
+     Should it be moved under WEB-INF instead?
+  -->
+  <security-constraint>
+    <web-resource-collection>
+      <web-resource-name>Includes</web-resource-name>
+      <url-pattern>/include/*</url-pattern>
+    </web-resource-collection>
+    <auth-constraint>
+      <role-name>nobody</role-name>
+    </auth-constraint>
+  </security-constraint>
   
   <login-config>
     <auth-method>FORM</auth-method>

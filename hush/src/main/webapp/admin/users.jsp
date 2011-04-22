@@ -32,22 +32,19 @@
 	<tbody>
 		<%
 		  for (User user : list) {
-		    String name = HushUtil.fixNull(user.getFirstName()) + ' '
+		    String fullName = HushUtil.fixNull(user.getFirstName()) + ' '
 		        + HushUtil.fixNull(user.getLastName());
 		%>
 		<tr>
-			<td class="username"><%=HushUtil.fixNull(user.getUsername())%></td>
-			<td class="name"><%= name %></td>
+			<td class="username"><a href="/user/editUser.jsp?username=<%= user.getUsername() %>">
+			  <%= user.getUsername() %></a></td>
+			<td class="name"><%= fullName %></td>
 			<td class="email"><%=HushUtil.fixNull(user.getEmail())%></td>
 			<td class="roles"><%=HushUtil.fixNull(user.getRoles())%></td>
 		</tr>
 		<%
 		  }
 		%>
-		<tr>		
-			<td colspan="4">
-			</td>
-		</tr>
 	</tbody>
 </table>
 

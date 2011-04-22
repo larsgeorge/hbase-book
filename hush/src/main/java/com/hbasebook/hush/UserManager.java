@@ -48,16 +48,6 @@ public class UserManager {
     }
   }
 
-  public void createAdmin(String username, String firstName, String lastName,
-      String email, String password) throws IOException {
-    createUser(username, firstName, lastName, email, password, "admin");
-  }
-
-  public void createUser(String username, String firstName, String lastName,
-      String email, String password) throws IOException {
-    createUser(username, firstName, lastName, email, password, "user");
-  }
-
   public void createUser(String username, String firstName, String lastName,
       String email, String password, String roles) throws IOException {
     HTable table = rm.getTable(UserTable.NAME);
@@ -69,6 +59,44 @@ public class UserManager {
     put.add(UserTable.DATA_FAMILY, UserTable.CREDENTIALS, Bytes
         .toBytes(password));
     put.add(UserTable.DATA_FAMILY, UserTable.ROLES, Bytes.toBytes(roles));
+    table.put(put);
+    table.flushCommits();
+    rm.putTable(table);
+  }
+
+  public void updateUser(String username, String firstName, String lastName,
+      String email) throws IOException {
+    HTable table = rm.getTable(UserTable.NAME);
+    Put put = new Put(Bytes.toBytes(username));
+    put.add(UserTable.DATA_FAMILY, UserTable.FIRSTNAME, Bytes
+        .toBytes(firstName));
+    put.add(UserTable.DATA_FAMILY, UserTable.LASTNAME, Bytes.toBytes(lastName));
+    put.add(UserTable.DATA_FAMILY, UserTable.EMAIL, Bytes.toBytes(email));
+    table.put(put);
+    table.flushCommits();
+    rm.putTable(table);
+  }
+
+  public boolean changePassword(String username, String oldPassword,
+      String newPassword) throws IOException {
+    HTable table = rm.getTable(UserTable.NAME);
+    Put put = new Put(Bytes.toBytes(username));
+    put.add(UserTable.DATA_FAMILY, UserTable.CREDENTIALS, Bytes
+        .toBytes(newPassword));
+    boolean check = table.checkAndPut(Bytes.toBytes(username),
+        UserTable.DATA_FAMILY, UserTable.CREDENTIALS, Bytes
+            .toBytes(oldPassword), put);
+    table.flushCommits();
+    rm.putTable(table);
+    return check;
+  }
+
+  public void adminChangePassword(String username, String newPassword)
+      throws IOException {
+    HTable table = rm.getTable(UserTable.NAME);
+    Put put = new Put(Bytes.toBytes(username));
+    put.add(UserTable.DATA_FAMILY, UserTable.CREDENTIALS, Bytes
+        .toBytes(newPassword));
     table.put(put);
     table.flushCommits();
     rm.putTable(table);

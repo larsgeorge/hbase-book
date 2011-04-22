@@ -1,27 +1,23 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
 <%@ page import="com.hbasebook.hush.HushUtil" %>
-<%@ page import="com.hbasebook.hush.table.UserTable" %>
 <%@ page import="com.hbasebook.hush.ResourceManager" %>
 <%@ page import="com.hbasebook.hush.UserManager" %>
-<%@ page import="org.apache.hadoop.hbase.client.HTable" %>
-<%@ page import="org.apache.hadoop.hbase.client.Put" %>
-<%@ page import="org.apache.hadoop.hbase.util.Bytes" %>
 <%@ page import="java.util.BitSet" %>
 <%
-  String action = HushUtil.fixNulls (request.getParameter("action"));
-  String userName = HushUtil.fixNulls (request.getParameter("username"));
-  String firstName = HushUtil.fixNulls (request.getParameter("firstName"));
-  String lastName = HushUtil.fixNulls (request.getParameter("lastName"));
-  String email = HushUtil.fixNulls ( request.getParameter("email"));
-  String password = HushUtil.fixNulls (request.getParameter("password"));
-  String confirmPassword = HushUtil.fixNulls (request.getParameter("confirmPassword"));
+  String action = HushUtil.fixNull (request.getParameter("action"));
+  String username = HushUtil.fixNull (request.getParameter("username"));
+  String firstName = HushUtil.fixNull (request.getParameter("firstName"));
+  String lastName = HushUtil.fixNull (request.getParameter("lastName"));
+  String email = HushUtil.fixNull ( request.getParameter("email"));
+  String password = HushUtil.fixNull (request.getParameter("password"));
+  String confirmPassword = HushUtil.fixNull (request.getParameter("confirmPassword"));
   BitSet errors = new BitSet(10);
   
   if (action.equalsIgnoreCase("create")) {
     // check for form errors
     errors.set(0, password.length() > 0
         && !password.equals(confirmPassword));
-    errors.set(1, userName.length() == 0);
+    errors.set(1, username.length() == 0);
     errors.set(2, firstName.length() == 0);
     errors.set(3, lastName.length() == 0);
     errors.set(4, email.length() == 0);
@@ -29,7 +25,7 @@
     errors.set(6, confirmPassword.length() == 0);
     if (errors.isEmpty()) {
       UserManager um = ResourceManager.getInstance().getUserManager();
-      um.createUser(userName, firstName, lastName, email, password);
+      um.createUser(username, firstName, lastName, email, password, "user");
       response.sendRedirect("/user");
       return ;
     }
@@ -75,7 +71,7 @@
         %>
       </label>
       <input type="text" name="username" id="username"
-             value="<%=userName%>"/>
+             value="<%= username %>"/>
 
       <label>First Name
         <span class="small"></span>

@@ -6,7 +6,7 @@
   <span>
   <a href="/">Home</a>&nbsp;|&nbsp;
 <% if (principal != null) { %>
-Welcome, <a href="/user"><%= principal %></a>&nbsp;|&nbsp;<a href="/logout.jsp">Sign off</a>
+Welcome, <a href="/user/editUser.jsp"><%= principal %></a>&nbsp;|&nbsp;<a href="/logout.jsp">Sign off</a>
 <% } else { %>
 <a href="/signup.jsp">Sign in</a>
 <% } %>
