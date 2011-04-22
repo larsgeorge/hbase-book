@@ -7,11 +7,12 @@ body {
 
 .main {
 	margin-top: 10px;
-	margin-right: 10px;
+	margin-right: 150px;
 	margin-left: 150px;
 }
 
-a {
+a, a:visited {
+	color: #117799;
 	text-decoration: none;
 }
 
@@ -149,19 +150,67 @@ p,h1,form,button {
 	font-weight: bold;
 }
 
+/* ----------- Admin Menu ----------- */
+div#adminMenu {
+	width: 100%;
+	border-bottom: solid 2px #aacfc2;
+	padding-bottom: 5px;
+	margin-bottom: 10px;
+	padding-top: 10px;
+}
+
+#adminMenu ul {
+	text-align: left;
+	list-style: none;
+	margin: 0;
+}
+
+#adminMenu li {
+	display: inline;
+}
+
+#adminMenu span {
+	border: solid 1px #aacfc2;
+	background-color: #aacfc2;
+	color: white;
+	text-decoration: none;
+	padding-left: 10px;
+	padding-right: 10px;
+	padding-bottom: 5px;
+	padding-top: 5px;
+	margin: 1px;
+}
+
+#adminMenu a {
+	text-decoration: none;
+	padding-left: 10px;
+	padding-right: 10px;
+	padding-bottom: 5px;
+	padding-top: 5px;
+	margin: 1px;
+}
+
+#adminMenu a:hover {
+	border: solid 1px #aacfc2;
+	margin: 0;
+}
+
+
 /* ----------- Tables ----------- */
 table {
 	border: solid 1px #aacfe4;
 	border-spacing: 0;
 }
 
-thead td {
+th {
 	background-color: #aacfe4;
+	text-align: left;
 	color: white;
 	padding: 5px;
+	color: white;
 }
 
-tbody td {
+td {
 	border-top: solid 1px #aacfe4;
 	padding: 5px;
 	margin: 0;
@@ -177,14 +226,34 @@ tbody td {
 	padding: 0;
 }
 
-td.shortDomain {
+#domains td.shortDomain {
 	width: 200px;
 }
 
-td.longDomain {
+#domains td.longDomain {
 	width: 400px;
 }
 
-td.action {
+#domains td.action {
+	width: 100px;
+}
+
+#users td.username {
+	width: 150px;
+}
+
+#users td.name {
+	width: 200px;
+}
+
+#users td.email {
+	width: 150px;
+}
+
+#users td.roles {
+	width: 100px;
+}
+
+#users td.action {
 	width: 100px;
 }

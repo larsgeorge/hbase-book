@@ -48,16 +48,6 @@ public class UserManager {
     }
   }
 
-  public void createAdmin(String username, String firstName, String lastName,
-      String email, String password) throws IOException {
-    createUser(username, firstName, lastName, email, password, "admin");
-  }
-
-  public void createUser(String username, String firstName, String lastName,
-      String email, String password) throws IOException {
-    createUser(username, firstName, lastName, email, password, "user");
-  }
-
   public void createUser(String username, String firstName, String lastName,
       String email, String password, String roles) throws IOException {
     HTable table = rm.getTable(UserTable.NAME);
@@ -74,14 +64,50 @@ public class UserManager {
     rm.putTable(table);
   }
 
+  public void updateUser(String username, String firstName, String lastName,
+      String email) throws IOException {
+    HTable table = rm.getTable(UserTable.NAME);
+    Put put = new Put(Bytes.toBytes(username));
+    put.add(UserTable.DATA_FAMILY, UserTable.FIRSTNAME, Bytes
+        .toBytes(firstName));
+    put.add(UserTable.DATA_FAMILY, UserTable.LASTNAME, Bytes.toBytes(lastName));
+    put.add(UserTable.DATA_FAMILY, UserTable.EMAIL, Bytes.toBytes(email));
+    table.put(put);
+    table.flushCommits();
+    rm.putTable(table);
+  }
+
+  public boolean changePassword(String username, String oldPassword,
+      String newPassword) throws IOException {
+    HTable table = rm.getTable(UserTable.NAME);
+    Put put = new Put(Bytes.toBytes(username));
+    put.add(UserTable.DATA_FAMILY, UserTable.CREDENTIALS, Bytes
+        .toBytes(newPassword));
+    boolean check = table.checkAndPut(Bytes.toBytes(username),
+        UserTable.DATA_FAMILY, UserTable.CREDENTIALS, Bytes
+            .toBytes(oldPassword), put);
+    table.flushCommits();
+    rm.putTable(table);
+    return check;
+  }
+
+  public void adminChangePassword(String username, String newPassword)
+      throws IOException {
+    HTable table = rm.getTable(UserTable.NAME);
+    Put put = new Put(Bytes.toBytes(username));
+    put.add(UserTable.DATA_FAMILY, UserTable.CREDENTIALS, Bytes
+        .toBytes(newPassword));
+    table.put(put);
+    table.flushCommits();
+    rm.putTable(table);
+  }
+
   public User getUser(String username) throws IOException {
     User user = null;
     HTable table = null;
     try {
       table = rm.getTable(UserTable.NAME);
       Get get = new Get(Bytes.toBytes(username));
-      get.addColumn(UserTable.DATA_FAMILY, UserTable.CREDENTIALS);
-      get.addColumn(UserTable.DATA_FAMILY, UserTable.ROLES);
 
       Result result = table.get(get);
       if (result.isEmpty()) {
@@ -96,9 +122,8 @@ public class UserManager {
           UserTable.EMAIL));
       String credentials = Bytes.toString(result.getValue(
           UserTable.DATA_FAMILY, UserTable.CREDENTIALS));
-      String roleString = Bytes.toString(result.getValue(UserTable.DATA_FAMILY,
+      String roles = Bytes.toString(result.getValue(UserTable.DATA_FAMILY,
           UserTable.ROLES));
-      String[] roles = roleString == null ? null : roleString.split(",");
       user = new User(username, firstName, lastName, email, credentials, roles);
     } catch (Exception e) {
       LOG.error(String.format("Unable to get user '%s'", username), e);
@@ -114,8 +139,6 @@ public class UserManager {
     HTable table = rm.getTable(UserTable.NAME);
 
     Scan scan = new Scan();
-    scan.addColumn(UserTable.DATA_FAMILY, UserTable.CREDENTIALS);
-    scan.addColumn(UserTable.DATA_FAMILY, UserTable.ROLES);
     ResultScanner scanner = table.getScanner(scan);
 
     Iterator<Result> results = scanner.iterator();
@@ -133,9 +156,8 @@ public class UserManager {
               UserTable.EMAIL));
           String credentials = Bytes.toString(result.getValue(
               UserTable.DATA_FAMILY, UserTable.CREDENTIALS));
-          String roleString = Bytes.toString(result.getValue(
-              UserTable.DATA_FAMILY, UserTable.ROLES));
-          String[] roles = roleString == null ? null : roleString.split(",");
+          String roles = Bytes.toString(result.getValue(UserTable.DATA_FAMILY,
+              UserTable.ROLES));
           User user = new User(username, firstName, lastName, email,
               credentials, roles);
           users.add(user);
