@@ -1,34 +1,30 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
-<%@ page import="org.apache.hadoop.hbase.client.HTable" %>
 <%@ page import="com.hbasebook.hush.ResourceManager" %>
-<%@ page import="com.hbasebook.hush.table.ShortUrlTable" %>
-<%@ page import="org.apache.hadoop.hbase.client.Put" %>
-<%@ page import="org.apache.hadoop.hbase.util.Bytes" %>
+<%@ page import="com.hbasebook.hush.UrlManager" %>
+<%@ page import="com.hbasebook.hush.table.ShortUrl" %>
+<%@ page import="java.net.URL" %>
 <%@ page import="java.security.Principal" %>
 <%
-  String url = request.getParameter("url");
-  String newShortId = null;
+  ShortUrl surl = null;
+  String urlParam = request.getParameter("url");
   Principal principal = request.getUserPrincipal();
-  if (url != null && url.length() > 0) {
-    ResourceManager manager = ResourceManager.getInstance();
-    HTable table = manager.getTable(ShortUrlTable.NAME);
-    byte[] newId = manager.getShortId();
-    newShortId = Bytes.toString(newId);
-    Put put = new Put(newId);
-    put.add(ShortUrlTable.DATA_FAMILY, ShortUrlTable.URL,
-      Bytes.toBytes(url));
-    if (principal != null) {
-      put.add(ShortUrlTable.DATA_FAMILY, ShortUrlTable.USER_ID,
-        Bytes.toBytes(principal.getName()));
+  
+  if (urlParam != null && urlParam.length() > 0) {
+    try {
+      URL url = new URL (urlParam);    
+      UrlManager urlm = ResourceManager.getInstance().getUrlManager();
+      String username = principal == null ? null : principal.getName();
+      surl = urlm.createShortUrl(url, username);      
     }
-    table.put(put);
-    table.flushCommits();
-    manager.putTable(table);
+    catch (MalformedURLException e) {
+      request.setAttribute("error", "Invalid URL.");
+    }
   }
 %>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
 "http://www.w3.org/TR/html4/strict.dtd">
-<html>
+
+<%@page import="java.net.MalformedURLException"%><html>
 <head>
   <title>Hush!</title>
   <link href="/style.css" rel="stylesheet" type="text/css"/>
@@ -37,27 +33,27 @@
 <jsp:include page="/include/header.jsp"/>
 <div class="main">
    <h2>Welcome to the HBase URL Shortener</h2>
-
+   <jsp:include page="/include/error.jsp"/>
+   
    <div id="shorten">
      <p>Shorten your URLs!</p>
 
      <form action="/index.jsp" method="post">
-       <input type="text" size="80" name="url"/>
+       <textarea name="url" rows="2" cols="60"></textarea>
        <input type="submit" value="Shorten it"/>
      </form>
-     <% if (newShortId != null) {
-       String newUrl = "http://" + request.getHeader("Host") + "/" + newShortId;
-       String qrNewUrl = newUrl + ".q";
+     <% if (surl != null) {
+       String qrUrl = surl.toString() + ".q";
      %>
      <p>Your new shortened URL is:</p>
 
-     <p><input type="text" size="50" value="<%= newUrl %>" disabled="disabled"/></p>
+     <p><input type="text" size="50" value="<%= surl.toString() %>" disabled="disabled"/></p>
 
      <p>Hand it out as a QRCode:</p>
 
-     <p><input type="text" size="50" value="<%= qrNewUrl %>" disabled="disabled"/></p>
+     <p><input type="text" size="50" value="<%= qrUrl %>" disabled="disabled"/></p>
 
-     <p><img src="<%= qrNewUrl%>" width="100" height="100" alt=""/></p>
+     <p><img src="<%= qrUrl %>" width="100" height="100" alt=""/></p>
      <% } %>
    </div>
 </div>

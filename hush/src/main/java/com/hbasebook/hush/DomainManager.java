@@ -23,6 +23,7 @@ import com.hbasebook.hush.table.ShortDomainTable;
 public class DomainManager {
   private final Log LOG = LogFactory.getLog(DomainManager.class);
   private final ResourceManager rm;
+  private String defaultDomain = "localhost:8080";
 
   /**
    * Package private constructor so only ResourceManager can instantiate.
@@ -181,6 +182,14 @@ public class DomainManager {
     }
   }
 
+  public void setDefaultDomain(String defaultDomain) {
+    this.defaultDomain = defaultDomain;
+  }
+
+  public String getDefaultDomain() {
+    return defaultDomain;
+  }
+
   /**
    * Shortens a long domain.
    * 
@@ -190,8 +199,7 @@ public class DomainManager {
    *         mapping exists.
    * @throws IOException
    */
-  public String shorten(String longDomain, String defaultValue)
-      throws IOException {
+  public String shorten(String longDomain) throws IOException {
     HTable longTable = rm.getTable(LongDomainTable.NAME);
 
     try {
@@ -203,7 +211,7 @@ public class DomainManager {
           return Bytes.toString(shortBytes);
         }
       }
-      return defaultValue;
+      return getDefaultDomain();
     } finally {
       rm.putTable(longTable);
     }

@@ -41,11 +41,6 @@
     <location>/error.jsp?error=You are not authorized to view that page.</location>
   </error-page>
   
-  <error-page>
-    <exception-type>java.lang.Exception</exception-type>
-    <location>/error.jsp</location>
-  </error-page>
-
   <security-constraint>
     <web-resource-collection>
       <web-resource-name>User Page</web-resource-name>

@@ -8,7 +8,7 @@
 </head>
 <body>
 <div class="main">
-<h1>There was a fail.</h1>
+<h1>Shush! There was a fail.</h1>
 <jsp:include page="/include/error.jsp"/>
 <a href="/index.jsp">Go home</a>
 </div>
