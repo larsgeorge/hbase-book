@@ -4,19 +4,19 @@
 <%@ page import="com.hbasebook.hush.UserManager" %>
 <%@ page import="java.util.BitSet" %>
 <%
-  String action = HushUtil.fixNull (request.getParameter("action"));
-  String username = HushUtil.fixNull (request.getParameter("username"));
-  String firstName = HushUtil.fixNull (request.getParameter("firstName"));
-  String lastName = HushUtil.fixNull (request.getParameter("lastName"));
-  String email = HushUtil.fixNull ( request.getParameter("email"));
-  String password = HushUtil.fixNull (request.getParameter("password"));
-  String confirmPassword = HushUtil.fixNull (request.getParameter("confirmPassword"));
+  String action = HushUtil.fixNull(request.getParameter("action"));
+  String username = HushUtil.fixNull(request.getParameter("username"));
+  String firstName = HushUtil.fixNull(request.getParameter("firstName"));
+  String lastName = HushUtil.fixNull(request.getParameter("lastName"));
+  String email = HushUtil.fixNull(request.getParameter("email"));
+  String password = HushUtil.fixNull(request.getParameter("password"));
+  String confirmPassword = HushUtil.fixNull(request.getParameter("confirmPassword"));
   BitSet errors = new BitSet(10);
-  
+
   if (action.equalsIgnoreCase("create")) {
     // check for form errors
     errors.set(0, password.length() > 0
-        && !password.equals(confirmPassword));
+      && !password.equals(confirmPassword));
     errors.set(1, username.length() == 0);
     errors.set(2, firstName.length() == 0);
     errors.set(3, lastName.length() == 0);
@@ -27,7 +27,7 @@
       UserManager um = ResourceManager.getInstance().getUserManager();
       um.createUser(username, firstName, lastName, email, password, "user");
       response.sendRedirect("/user");
-      return ;
+      return;
     }
   }
 %>

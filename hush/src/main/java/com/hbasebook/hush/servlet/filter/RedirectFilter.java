@@ -27,11 +27,9 @@ public class RedirectFilter implements Filter {
 
   /**
    * Initialized the filter instance.
-   * 
-   * @param filterConfig
-   *          The filter configuration.
-   * @throws ServletException
-   *           When initializing the filter fails.
+   *
+   * @param filterConfig The filter configuration.
+   * @throws ServletException When initializing the filter fails.
    */
   @Override
   public void init(FilterConfig filterConfig) throws ServletException {
@@ -48,34 +46,29 @@ public class RedirectFilter implements Filter {
 
   /**
    * Filter the requests. Used to detect actual pages versus shortened URL Ids.
-   * 
-   * @param request
-   *          The current request.
-   * @param response
-   *          The response to write to.
-   * @param chain
-   *          The filter chain instance.
-   * @throws IOException
-   *           When handling the in- or output fails.
-   * @throws ServletException
-   *           Might be thrown when there is an internal issue.
+   *
+   * @param request The current request.
+   * @param response The response to write to.
+   * @param chain The filter chain instance.
+   * @throws IOException When handling the in- or output fails.
+   * @throws ServletException Might be thrown when there is an internal issue.
    */
   @Override
   public void doFilter(ServletRequest request, ServletResponse response,
-      FilterChain chain) throws IOException, ServletException {
+                       FilterChain chain) throws IOException, ServletException {
     final HttpServletRequest httpRequest = (HttpServletRequest) request;
     final HttpServletResponse httpResponse = (HttpServletResponse) response;
 
     String uri = httpRequest.getRequestURI();
     // check if the request shall pass
     if (uri.equals("/") || uri.startsWith("/user") || uri.startsWith("/admin")
-        || uri.endsWith(".jsp") || uri.endsWith(".css")) {
+      || uri.endsWith(".jsp") || uri.endsWith(".css")) {
       chain.doFilter(request, response);
     } else if (uri.endsWith(DETAILS_EXTENSION)) {
       // redirect http://hostname/shortId+ to
       // http://hostname/user/details.jsp?sid=shortId
       String shortId = uri.substring(1, uri.length()
-          - DETAILS_EXTENSION.length());
+        - DETAILS_EXTENSION.length());
       httpResponse.sendRedirect("/user/details.jsp?sid=" + shortId);
     } else if (uri.endsWith(QR_EXTENSION)) {
       ResourceManager rm = ResourceManager.getInstance();
@@ -99,7 +92,7 @@ public class RedirectFilter implements Filter {
         // increment counters and redirect to the long url!
         String user = surl.getUser();
         if (user != null) {
-          rm.getCounters().incrementUsage(user, shortId);
+          rm.getCounters().incrementUsage(user, shortId, httpRequest);
         }
         httpResponse.sendRedirect(surl.getLongUrl());
       }
@@ -108,18 +101,15 @@ public class RedirectFilter implements Filter {
 
   /**
    * Copies a Google Chart API QRCode image to the output stream.
-   * 
-   * @param response
-   *          The response instance to use.
-   * @param url
-   *          The URL to encode.
-   * @throws IOException
-   *           When reading or writing the image fails.
+   *
+   * @param response The response instance to use.
+   * @param url The URL to encode.
+   * @throws IOException When reading or writing the image fails.
    */
   private void sendQRCode(HttpServletResponse response, String url)
-      throws IOException {
+    throws IOException {
     URL qrUrl = new URL("http://chart.apis.google.com/chart?"
-        + "chs=100x100&cht=qr&chl=" + response.encodeURL(url));
+      + "chs=100x100&cht=qr&chl=" + response.encodeURL(url));
     InputStream in = new BufferedInputStream(qrUrl.openStream());
     OutputStream out = response.getOutputStream();
     byte[] buf = new byte[1024];

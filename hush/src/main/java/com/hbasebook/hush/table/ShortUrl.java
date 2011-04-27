@@ -4,13 +4,15 @@ public class ShortUrl {
   private final String id;
   private final String domain;
   private final String longUrl;
+  private final String refShortId;
   private final String user;
 
-  public ShortUrl(String id, String domain, String longUrl, String user) {
-    super();
+  public ShortUrl(String id, String domain, String longUrl,
+                  String refShortId, String user) {
     this.id = id;
     this.domain = domain;
     this.longUrl = longUrl;
+    this.refShortId = refShortId;
     this.user = user;
   }
 
@@ -24,6 +26,10 @@ public class ShortUrl {
 
   public String getLongUrl() {
     return longUrl;
+  }
+
+  public String getRefShortId() {
+    return refShortId;
   }
 
   public String getUser() {

@@ -32,6 +32,90 @@
       </column_family>
     </table>
     <table>
+      <name>url</name>
+      <description>Stores the URLs, keyed by the MD5 of the URL.</description>
+      <column_family>
+        <name>data</name>
+        <description>Contains the "url", i.e. the long URL</description>
+        <!-- Default: 3 -->
+        <max_versions>1</max_versions>
+        <!-- Default: None -->
+        <compression/>
+        <!-- Default: false -->
+        <in_memory/>
+        <!-- Default: true -->
+        <block_cache_enabled/>
+        <!-- Default: 64k -->
+        <block_size/>
+        <!-- Default: Integer.MAX_VALUE (forever), set to 12 months -->
+        <time_to_live>31449600</time_to_live>
+        <!-- Default: false -->
+        <bloom_filter/>
+        <!-- Default: 0 -->
+        <scope/>
+      </column_family>
+      <column_family>
+        <name>std</name>
+        <description>Daily usage statistics</description>
+        <!-- Default: 3 -->
+        <max_versions>1</max_versions>
+        <!-- Default: None -->
+        <compression/>
+        <!-- Default: false -->
+        <in_memory/>
+        <!-- Default: true -->
+        <block_cache_enabled/>
+        <!-- Default: 64k -->
+        <block_size/>
+        <!-- Default: Integer.MAX_VALUE (forever), set to 7 days -->
+        <time_to_live>604800</time_to_live>
+        <!-- Default: false -->
+        <bloom_filter/>
+        <!-- Default: 0 -->
+        <scope/>
+      </column_family>
+      <column_family>
+        <name>stw</name>
+        <description>Weekly usage statistics</description>
+        <!-- Default: 3 -->
+        <max_versions>1</max_versions>
+        <!-- Default: None -->
+        <compression/>
+        <!-- Default: false -->
+        <in_memory/>
+        <!-- Default: true -->
+        <block_cache_enabled/>
+        <!-- Default: 64k -->
+        <block_size/>
+        <!-- Default: Integer.MAX_VALUE (forever), set to 4 weeks -->
+        <time_to_live>2419200</time_to_live>
+        <!-- Default: false -->
+        <bloom_filter/>
+        <!-- Default: 0 -->
+        <scope/>
+      </column_family>
+      <column_family>
+        <name>stm</name>
+        <description>Monthly usage statistics</description>
+        <!-- Default: 3 -->
+        <max_versions>1</max_versions>
+        <!-- Default: None -->
+        <compression/>
+        <!-- Default: false -->
+        <in_memory/>
+        <!-- Default: true -->
+        <block_cache_enabled/>
+        <!-- Default: 64k -->
+        <block_size/>
+        <!-- Default: Integer.MAX_VALUE (forever), set to 12 months -->
+        <time_to_live>31449600</time_to_live>
+        <!-- Default: false -->
+        <bloom_filter/>
+        <!-- Default: 0 -->
+        <scope/>
+      </column_family>
+    </table>
+    <table>
       <name>user</name>
       <description>The user table, keyed by username.</description>
       <column_family>
@@ -174,7 +258,8 @@
     <table>
       <name>hush</name>
       <description>The system table, holding central configuration
-        details.</description>
+        details.
+      </description>
       <column_family>
         <name>cnt</name>
         <description>Keeps the global counters.</description>
