@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+  <name>Hush</name>
+  <description>Configuration for the HBase URL Shortener.</description>
+  <zookeeper_quorum>localhost</zookeeper_quorum>
+  <zookeeper_client_port>2181</zookeeper_client_port>
+  <schema>
+    <table>
+      <name>surl</name>
+      <description>The Short ID to URLs mapping table, keyed by
+        shortId.
+      </description>
+      <column_family>
+        <name>data</name>
+        <description>Contains the "url", i.e. the long URL</description>
+        <!-- Default: 3 -->
+        <max_versions>1</max_versions>
+        <!-- Default: None -->
+        <compression/>
+        <!-- Default: false -->
+        <in_memory/>
+        <!-- Default: true -->
+        <block_cache_enabled/>
+        <!-- Default: 64k -->
+        <block_size/>
+        <!-- Default: Integer.MAX_VALUE (forever), set to 12 months -->
+        <time_to_live>31449600</time_to_live>
+        <!-- Default: false -->
+        <bloom_filter/>
+        <!-- Default: 0 -->
+        <scope/>
+      </column_family>
+    </table>
+    <table>
+      <name>user</name>
+      <description>The user table, keyed by username.</description>
+      <column_family>
+        <name>data</name>
+        <description>Stores the user data</description>
+        <!-- Default: 3 -->
+        <max_versions>3</max_versions>
+        <!-- Default: None -->
+        <compression/>
+        <!-- Default: false -->
+        <in_memory/>
+        <!-- Default: true -->
+        <block_cache_enabled/>
+        <!-- Default: 64k -->
+        <block_size/>
+        <!-- Default: Integer.MAX_VALUE (forever) -->
+        <time_to_live/>
+        <!-- Default: false -->
+        <bloom_filter/>
+        <!-- Default: 0 -->
+        <scope/>
+      </column_family>
+    </table>
+    <table>
+      <name>sdom</name>
+      <description>The short (vanity) domain table, keyed by shortDomain.
+      </description>
+      <column_family>
+        <name>domains</name>
+        <description>One qualifier per long domain. Value is timestamp.</description>
+        <!-- Default: 3 -->
+        <max_versions>1</max_versions>
+        <!-- Default: None -->
+        <compression/>
+        <!-- Default: false -->
+        <in_memory/>
+        <!-- Default: true -->
+        <block_cache_enabled/>
+        <!-- Default: 64k -->
+        <block_size/>
+        <!-- Default: Integer.MAX_VALUE (forever) -->
+        <time_to_live/>
+        <!-- Default: false -->
+        <bloom_filter/>
+        <!-- Default: 0 -->
+        <scope/>
+      </column_family>
+    </table>
+    <table>
+      <name>ldom</name>
+      <description>The domain table, keyed by long domain. (Reverse index of sdom table.)
+      </description>
+      <column_family>
+        <name>data</name>
+        <description>Link to key of vdom table</description>
+        <!-- Default: 3 -->
+        <max_versions>1</max_versions>
+        <!-- Default: None -->
+        <compression/>
+        <!-- Default: false -->
+        <in_memory/>
+        <!-- Default: true -->
+        <block_cache_enabled/>
+        <!-- Default: 64k -->
+        <block_size/>
+        <!-- Default: Integer.MAX_VALUE (forever) -->
+        <time_to_live/>
+        <!-- Default: false -->
+        <bloom_filter/>
+        <!-- Default: 0 -->
+        <scope/>
+      </column_family>
+    </table>
+    <table>
+      <name>user-surl</name>
+      <description>The mapping of user.userId to surl.shortId, keeps the
+        usage statistics.
+      </description>
+      <column_family>
+        <name>std</name>
+        <description>Daily usage statistics</description>
+        <!-- Default: 3 -->
+        <max_versions>1</max_versions>
+        <!-- Default: None -->
+        <compression/>
+        <!-- Default: false -->
+        <in_memory/>
+        <!-- Default: true -->
+        <block_cache_enabled/>
+        <!-- Default: 64k -->
+        <block_size/>
+        <!-- Default: Integer.MAX_VALUE (forever), set to 7 days -->
+        <time_to_live>604800</time_to_live>
+        <!-- Default: false -->
+        <bloom_filter/>
+        <!-- Default: 0 -->
+        <scope/>
+      </column_family>
+      <column_family>
+        <name>stw</name>
+        <description>Weekly usage statistics</description>
+        <!-- Default: 3 -->
+        <max_versions>1</max_versions>
+        <!-- Default: None -->
+        <compression/>
+        <!-- Default: false -->
+        <in_memory/>
+        <!-- Default: true -->
+        <block_cache_enabled/>
+        <!-- Default: 64k -->
+        <block_size/>
+        <!-- Default: Integer.MAX_VALUE (forever), set to 4 weeks -->
+        <time_to_live>2419200</time_to_live>
+        <!-- Default: false -->
+        <bloom_filter/>
+        <!-- Default: 0 -->
+        <scope/>
+      </column_family>
+      <column_family>
+        <name>stm</name>
+        <description>Monthly usage statistics</description>
+        <!-- Default: 3 -->
+        <max_versions>1</max_versions>
+        <!-- Default: None -->
+        <compression/>
+        <!-- Default: false -->
+        <in_memory/>
+        <!-- Default: true -->
+        <block_cache_enabled/>
+        <!-- Default: 64k -->
+        <block_size/>
+        <!-- Default: Integer.MAX_VALUE (forever), set to 12 months -->
+        <time_to_live>31449600</time_to_live>
+        <!-- Default: false -->
+        <bloom_filter/>
+        <!-- Default: 0 -->
+        <scope/>
+      </column_family>
+    </table>
+    <table>
+      <name>hush</name>
+      <description>The system table, holding central configuration
+        details.</description>
+      <column_family>
+        <name>cnt</name>
+        <description>Keeps the global counters.</description>
+        <!-- Default: 3 -->
+        <max_versions>1</max_versions>
+        <!-- Default: None -->
+        <compression/>
+        <!-- Default: false -->
+        <in_memory/>
+        <!-- Default: true -->
+        <block_cache_enabled/>
+        <!-- Default: 64k -->
+        <block_size/>
+        <!-- Default: Integer.MAX_VALUE (forever) -->
+        <time_to_live/>
+        <!-- Default: false -->
+        <bloom_filter/>
+        <!-- Default: 0 -->
+        <scope/>
+      </column_family>
+    </table>
+  </schema>
+</configuration>

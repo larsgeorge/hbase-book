@@ -1,0 +1,88 @@
+<!DOCTYPE web-app PUBLIC
+  "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
+  "http://java.sun.com/dtd/web-app_2_3.dtd" >
+
+<web-app>
+  <display-name>HBase URL Shortener</display-name>
+
+  <filter>
+    <filter-name>RedirectFilter</filter-name>
+    <filter-class>com.hbasebook.hush.servlet.filter.RedirectFilter</filter-class>
+  </filter>
+  <filter-mapping>
+    <filter-name>RedirectFilter</filter-name>
+    <url-pattern>/*</url-pattern>
+  </filter-mapping>
+
+  <servlet>
+    <servlet-name>jsp</servlet-name>
+    <servlet-class>org.apache.jasper.servlet.JspServlet</servlet-class>
+    <load-on-startup>0</load-on-startup>
+  </servlet>
+
+  <servlet-mapping>
+    <servlet-name>jsp</servlet-name>
+    <url-pattern>*.jspx</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>jsp</servlet-name>
+    <url-pattern>*.jsp</url-pattern>
+  </servlet-mapping>
+
+  <welcome-file-list>
+    <welcome-file>index.html</welcome-file>
+    <welcome-file>index.htm</welcome-file>
+    <welcome-file>index.jsp</welcome-file>
+  </welcome-file-list>
+
+  <error-page>
+    <error-code>403</error-code>
+    <location>/error.jsp?error=You are not authorized to view that page.</location>
+  </error-page>
+  
+  <security-constraint>
+    <web-resource-collection>
+      <web-resource-name>User Page</web-resource-name>
+      <url-pattern>/user/*</url-pattern>
+    </web-resource-collection>
+    <auth-constraint>
+      <role-name>user</role-name>
+    </auth-constraint>
+  </security-constraint>
+
+  <security-constraint>
+    <web-resource-collection>
+      <web-resource-name>Admin Page</web-resource-name>
+      <url-pattern>/admin/*</url-pattern>
+    </web-resource-collection>
+    <auth-constraint>
+      <role-name>admin</role-name>
+    </auth-constraint>
+  </security-constraint>
+
+  <!-- 
+     Hack to prevent access to /include.
+     Should it be moved under WEB-INF instead?
+  -->
+  <security-constraint>
+    <web-resource-collection>
+      <web-resource-name>Includes</web-resource-name>
+      <url-pattern>/include/*</url-pattern>
+    </web-resource-collection>
+    <auth-constraint>
+      <role-name>nobody</role-name>
+    </auth-constraint>
+  </security-constraint>
+  
+  <login-config>
+    <auth-method>FORM</auth-method>
+    <realm-name>HBaseRealm</realm-name>
+    <form-login-config>
+      <form-login-page>/login.jsp</form-login-page>
+      <form-error-page>/error.jsp?error=Login failure.</form-error-page>
+    </form-login-config>
+
+  </login-config>
+
+</web-app>

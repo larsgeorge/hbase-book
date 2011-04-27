@@ -1,0 +1,259 @@
+body {
+	font-family: "Lucida Grande", "Lucida Sans Unicode", Verdana, Arial,
+		Helvetica, sans-serif;
+	font-size: 12px;
+	margin: 0;
+}
+
+.main {
+	margin-top: 10px;
+	margin-right: 150px;
+	margin-left: 150px;
+}
+
+a, a:visited {
+	color: #117799;
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+p,h1,form,button {
+	border: 0;
+	margin-bottom: 15px;
+	padding: 0;
+}
+
+.spacer {
+	clear: both;
+	height: 1px;
+}
+
+#shorten div {
+	width: 400px;
+	border: solid 1px #ddddf2;
+	align: center;
+}
+
+#shorten button {
+	width: 100px;
+	height: 20px;
+	background: #666666 url(img/button.png) no-repeat;
+	text-align: center;
+	color: #FFFFFF;
+	font-size: 11px;
+	font-weight: bold;
+}
+
+/* ----------- Header/Footer ----------- */
+#header {
+	width: 100%;
+	height: 20px;
+	text-align: right;
+	background-color: #add8e6;
+	font-size: 11px;
+}
+
+#header span {
+	padding-right: 10px;
+	vertical-align: middle;
+}
+
+#footer {
+	width: 100%;
+	position: absolute;
+	bottom: 0;
+	text-align: center;
+	background-color: #add8e6;
+	font-size: 11px;
+}
+
+/* ----------- Error ----------- */
+#error {
+	color: red;
+}
+
+/* ----------- My Form ----------- */
+.myform {
+	margin: 0 auto;
+	width: 400px;
+	padding: 14px;
+}
+
+/* ----------- stylized ----------- */
+#stylized {
+	border: solid 2px #b7ddf2;
+	background: #ebf4fb;
+}
+
+#stylized h1 {
+	font-size: 14px;
+	font-weight: bold;
+	margin-bottom: 8px;
+}
+
+#stylized p {
+	font-size: 11px;
+	color: #666666;
+	margin-bottom: 20px;
+	border-bottom: solid 1px #b7ddf2;
+	padding-bottom: 10px;
+}
+
+#stylized label {
+	display: block;
+	font-weight: bold;
+	text-align: right;
+	width: 140px;
+	float: left;
+}
+
+#stylized .small {
+	color: #666666;
+	display: block;
+	font-size: 11px;
+	font-weight: normal;
+	text-align: right;
+	width: 140px;
+}
+
+#stylized .error {
+	color: #ff0000;
+	display: block;
+	font-size: 11px;
+	font-weight: normal;
+	text-align: right;
+	width: 140px;
+}
+
+#stylized input {
+	float: left;
+	font-size: 12px;
+	padding: 4px 2px;
+	border: solid 1px #aacfe4;
+	width: 200px;
+	margin: 2px 0 20px 10px;
+}
+
+#stylized button {
+	clear: both;
+	margin-left: 150px;
+	width: 125px;
+	height: 31px;
+	background: #666666 url(img/button.png) no-repeat;
+	text-align: center;
+	line-height: 31px;
+	color: #FFFFFF;
+	font-size: 11px;
+	font-weight: bold;
+}
+
+/* ----------- Admin Menu ----------- */
+div#adminMenu {
+	width: 100%;
+	border-bottom: solid 2px #aacfc2;
+	padding-bottom: 5px;
+	margin-bottom: 10px;
+	padding-top: 10px;
+}
+
+#adminMenu ul {
+	text-align: left;
+	list-style: none;
+	margin: 0;
+}
+
+#adminMenu li {
+	display: inline;
+}
+
+#adminMenu span {
+	border: solid 1px #aacfc2;
+	background-color: #aacfc2;
+	color: white;
+	text-decoration: none;
+	padding-left: 10px;
+	padding-right: 10px;
+	padding-bottom: 5px;
+	padding-top: 5px;
+	margin: 1px;
+}
+
+#adminMenu a {
+	text-decoration: none;
+	padding-left: 10px;
+	padding-right: 10px;
+	padding-bottom: 5px;
+	padding-top: 5px;
+	margin: 1px;
+}
+
+#adminMenu a:hover {
+	border: solid 1px #aacfc2;
+	margin: 0;
+}
+
+
+/* ----------- Tables ----------- */
+table {
+	border: solid 1px #aacfe4;
+	border-spacing: 0;
+}
+
+th {
+	background-color: #aacfe4;
+	text-align: left;
+	color: white;
+	padding: 5px;
+	color: white;
+}
+
+td {
+	border-top: solid 1px #aacfe4;
+	padding: 5px;
+	margin: 0;
+}
+
+#domains td {
+	vertical-align: top;
+}
+
+#domains ul {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+#domains td.shortDomain {
+	width: 200px;
+}
+
+#domains td.longDomain {
+	width: 400px;
+}
+
+#domains td.action {
+	width: 100px;
+}
+
+#users td.username {
+	width: 150px;
+}
+
+#users td.name {
+	width: 200px;
+}
+
+#users td.email {
+	width: 150px;
+}
+
+#users td.roles {
+	width: 100px;
+}
+
+#users td.action {
+	width: 100px;
+}
