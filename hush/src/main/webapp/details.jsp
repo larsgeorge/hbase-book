@@ -1,7 +1,5 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
 <%@ page import="com.hbasebook.hush.ResourceManager" %>
-<%@ page import="org.apache.hadoop.hbase.util.Bytes" %>
-<%@ page import="java.security.Principal" %>
 <%@ page import="com.hbasebook.hush.Counters" %>
 <%@ page import="java.util.Map" %>
 <%@ page import="java.util.Date" %>
@@ -16,17 +14,17 @@
     shortId = (String) request.getAttribute("sid");
   }
   if (shortId == null) {
-    request.getRequestDispatcher("/error.jsp?error=No+short+ID+provided!").forward(request, response);
+    request.getRequestDispatcher("/error.jsp?error=No+short+ID+provided!").
+      forward(request, response);
   }
   // get statistics
-  Principal principal = request.getUserPrincipal();
-  String userName = principal.getName();
   ResourceManager manager = ResourceManager.getInstance();
-  ShortUrl shortUrl = new ShortUrl(shortId, null, null, null, userName);
+  ShortUrl shortUrl = manager.getUrlManager().getShortUrl(shortId);
   Counters.ShortUrlStatistics stats = manager.getCounters().getDailyStatistics(
     shortUrl);
   if (stats == null) {
-    request.getRequestDispatcher("/error.jsp?error=Nothing+found!").forward(request, response);
+    request.getRequestDispatcher("/error.jsp?error=Nothing+found!").
+      forward(request, response);
   }
   SimpleDateFormat formatter = new SimpleDateFormat("yyyy, MM, dd");
 %>
@@ -43,10 +41,11 @@
   <h2>Details on <%= shortId%>
   </h2>
 
-  <p>URL: <%= stats.getUrl()%>
+  <p>URL: <%= stats.getUrl()%> created by <%= shortUrl.getUser()%>
   </p>
 
   <div id="timeline_chart">
+    <h3>Clicks by Date</h3>
     <script type="text/javascript" src="http://www.google.com/jsapi"></script>
     <script type="text/javascript">
       google.load("visualization", "1", {packages:["annotatedtimeline"]});
@@ -86,6 +85,28 @@
       }
     </script>
     <div id="div_for_timeline" style="width: 620px; height: 280px;"></div>
+  </div>
+  <div id="country_chart">
+    <h3>Clicks by Country</h3>
+    <%
+      // get details for countries
+//      for (Counters.ShortUrlStatistics stat : stats) {
+//        String shortId = stat.getShortId();
+//        String detailsUrl = "/" + shortId + "+";
+//        StringBuffer data = new StringBuffer();
+//        for (Double clicks : stat.getClicks().descendingMap().values()) {
+//          if (data.length() > 0) {
+//            data.append(",");
+//          }
+//          data.append(clicks);
+//        }
+//      }
+      // or use http://code.google.com/apis/visualization/documentation/gallery/piechart.html
+      String data = "25.893,19.507,8.527,6.372,0.938,14.66,38.983,48.208,54.748,63.069";
+    %>
+
+    <img src="http://chart.apis.google.com/chart?chs=300x265&cht=p&chco=3399CC&chd=t:<%= data%>"
+         width="300" height="265" alt="" />
   </div>
 </div>
 <jsp:include page="/include/footer.jsp"/>
