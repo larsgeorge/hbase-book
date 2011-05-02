@@ -18,6 +18,10 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * This class provides support for XML based schemas. It handles creation and
+ * alteration of tables based on external definition files.
+ */
 public class SchemaManager {
   private static final Log LOG = LogFactory.getLog(SchemaManager.class);
 
@@ -125,47 +129,53 @@ public class SchemaManager {
     }
   }
 
-  private void createOrChangeTable(final TableSchema schema) throws IOException {
+  // cc SchemaManager Creating or modifying table schemas using the HBase administrative API
+  // vv SchemaManager
+  private void createOrChangeTable(final TableSchema schema)
+    throws IOException {
     HTableDescriptor desc = null;
     if (tableExists(schema.getName(), false)) {
       desc = getTable(schema.getName(), false);
       LOG.info("Checking table " + desc.getNameAsString() + "...");
       final HTableDescriptor d = convertSchemaToDescriptor(schema);
-      // compute differences
-      final List<HColumnDescriptor> modCols = new ArrayList<HColumnDescriptor>();
+
+      final List<HColumnDescriptor> modCols =
+        new ArrayList<HColumnDescriptor>();
       for (final HColumnDescriptor cd : desc.getFamilies()) {
         final HColumnDescriptor cd2 = d.getFamily(cd.getName());
-        if (cd2 != null && !cd.equals(cd2)) {
+        if (cd2 != null && !cd.equals(cd2)) { // co SchemaManager-1-Diff Compute the differences between the XML based schema and what is currently in HBase.
           modCols.add(cd2);
         }
       }
-      final List<HColumnDescriptor> delCols = new ArrayList<HColumnDescriptor>(desc.getFamilies());
+      final List<HColumnDescriptor> delCols =
+        new ArrayList<HColumnDescriptor>(desc.getFamilies());
       delCols.removeAll(d.getFamilies());
-      final List<HColumnDescriptor> addCols = new ArrayList<HColumnDescriptor>(d.getFamilies());
+      final List<HColumnDescriptor> addCols =
+        new ArrayList<HColumnDescriptor>(d.getFamilies());
       addCols.removeAll(desc.getFamilies());
-      // check if we had a column that was changed, added or deleted, or table properties have changed
-      if (modCols.size() > 0 || addCols.size() > 0 || delCols.size() > 0 || !hasSameProperties(desc, d)) {
-        // yes, then disable table and iterate over changes
+
+      if (modCols.size() > 0 || addCols.size() > 0 || delCols.size() > 0 || // co SchemaManager-2-Check See if there are any differences in the column and table definitions.
+          !hasSameProperties(desc, d)) {
         LOG.info("Disabling table...");
         hbaseAdmin.disableTable(schema.getName());
         if (modCols.size() > 0 || addCols.size() > 0 || delCols.size() > 0) {
           for (final HColumnDescriptor col : modCols) {
             LOG.info("Found different column -> " + col);
-            hbaseAdmin.modifyColumn(schema.getName(), col.getNameAsString(), col);
+            hbaseAdmin.modifyColumn(schema.getName(), col.getNameAsString(), // co SchemaManager-3-AlterCol Alter the columns that have changed. The table was properly disabled first.
+              col);
           }
           for (final HColumnDescriptor col : addCols) {
             LOG.info("Found new column -> " + col);
-            hbaseAdmin.addColumn(schema.getName(), col);
+            hbaseAdmin.addColumn(schema.getName(), col); // co SchemaManager-4-AddCol Add newly defined columns.
           }
           for (final HColumnDescriptor col : delCols) {
             LOG.info("Found removed column -> " + col);
-            hbaseAdmin.deleteColumn(schema.getName(), col.getNameAsString());
+            hbaseAdmin.deleteColumn(schema.getName(), col.getNameAsString()); // co SchemaManager-5-DelCol Delete removed columns.
           }
         } else if (!hasSameProperties(desc, d)) {
           LOG.info("Found different table properties...");
-          hbaseAdmin.modifyTable(Bytes.toBytes(schema.getName()), d);
+          hbaseAdmin.modifyTable(Bytes.toBytes(schema.getName()), d); // co SchemaManager-6-AlterTable Alter the table itself, if there are any differences found.
         }
-        // enable again and reload details
         LOG.info("Enabling table...");
         hbaseAdmin.enableTable(schema.getName());
         LOG.info("Table enabled");
@@ -177,12 +187,14 @@ public class SchemaManager {
     } else {
       desc = convertSchemaToDescriptor(schema);
       LOG.info("Creating table " + desc.getNameAsString() + "...");
-      hbaseAdmin.createTable(desc);
+      hbaseAdmin.createTable(desc); // co SchemaManager-7-CreateTable In case the table did not exist yet create it now.
       LOG.info("Table created");
     }
   }
+  // ^^ SchemaManager
 
-  private boolean hasSameProperties(HTableDescriptor desc1, HTableDescriptor desc2) {
+  private boolean hasSameProperties(HTableDescriptor desc1,
+    HTableDescriptor desc2) {
     return desc1.isDeferredLogFlush() == desc2.isDeferredLogFlush() &&
       desc1.getMaxFileSize() == desc2.getMaxFileSize() &&
       desc1.getMemStoreFlushSize() == desc2.getMemStoreFlushSize() &&
@@ -201,15 +213,18 @@ public class SchemaManager {
     }
     final Collection<ColumnDefinition> cols = schema.getColumns();
     for (final ColumnDefinition col : cols) {
-      final HColumnDescriptor cd = new HColumnDescriptor(Bytes.toBytes(col.getColumnName()), col.getMaxVersions(),
-        col.getCompression(), col.isInMemory(), col.isBlockCacheEnabled(), col.getBlockSize(), col.getTimeToLive(),
-        col.getBloomFilter(), col.getReplicationScope());
+      final HColumnDescriptor cd =
+        new HColumnDescriptor(Bytes.toBytes(col.getColumnName()),
+          col.getMaxVersions(), col.getCompression(), col.isInMemory(),
+          col.isBlockCacheEnabled(), col.getBlockSize(), col.getTimeToLive(),
+          col.getBloomFilter(), col.getReplicationScope());
       desc.addFamily(cd);
     }
     return desc;
   }
 
-  private synchronized HTableDescriptor getTable(final String name, final boolean force) throws IOException {
+  private synchronized HTableDescriptor getTable(final String name,
+    final boolean force) throws IOException {
     if (remoteTables == null || force) {
       remoteTables = hbaseAdmin.listTables();
     }
@@ -221,7 +236,8 @@ public class SchemaManager {
     return null;
   }
 
-  private boolean tableExists(final String name, final boolean force) throws IOException {
+  private boolean tableExists(final String name, final boolean force)
+    throws IOException {
     getTables(force);
     for (final HTableDescriptor d : remoteTables) {
       if (d.getNameAsString().equals(name)) {

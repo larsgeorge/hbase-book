@@ -35,8 +35,9 @@ public class UserManager {
       Put put = new Put(ADMIN_LOGIN);
       put.add(UserTable.DATA_FAMILY, UserTable.CREDENTIALS, ADMIN_PASSWORD);
       put.add(UserTable.DATA_FAMILY, UserTable.ROLES, UserTable.ADMIN_ROLES);
-      boolean hasPut = table.checkAndPut(ADMIN_LOGIN, UserTable.DATA_FAMILY,
-          UserTable.ROLES, null, put);
+      boolean hasPut = table
+        .checkAndPut(ADMIN_LOGIN, UserTable.DATA_FAMILY, UserTable.ROLES,
+          null, put);
       if (hasPut) {
         LOG.info("Admin user initialized.");
       }
@@ -48,29 +49,34 @@ public class UserManager {
     }
   }
 
+  // cc HTablePoolUsage Using the pool in application code
+  // vv HTablePoolUsage
   public void createUser(String username, String firstName, String lastName,
-      String email, String password, String roles) throws IOException {
-    HTable table = rm.getTable(UserTable.NAME);
+    String email, String password, String roles) throws IOException {
+    /*[*/HTable table = rm.getTable(UserTable.NAME);/*]*/
     Put put = new Put(Bytes.toBytes(username));
-    put.add(UserTable.DATA_FAMILY, UserTable.FIRSTNAME, Bytes
-        .toBytes(firstName));
-    put.add(UserTable.DATA_FAMILY, UserTable.LASTNAME, Bytes.toBytes(lastName));
+    put.add(UserTable.DATA_FAMILY, UserTable.FIRSTNAME,
+      Bytes.toBytes(firstName));
+    put.add(UserTable.DATA_FAMILY, UserTable.LASTNAME,
+      Bytes.toBytes(lastName));
     put.add(UserTable.DATA_FAMILY, UserTable.EMAIL, Bytes.toBytes(email));
-    put.add(UserTable.DATA_FAMILY, UserTable.CREDENTIALS, Bytes
-        .toBytes(password));
+    put.add(UserTable.DATA_FAMILY, UserTable.CREDENTIALS,
+      Bytes.toBytes(password));
     put.add(UserTable.DATA_FAMILY, UserTable.ROLES, Bytes.toBytes(roles));
     table.put(put);
     table.flushCommits();
-    rm.putTable(table);
+    /*[*/rm.putTable(table);/*]*/
   }
+  // ^^ HTablePoolUsage
 
   public void updateUser(String username, String firstName, String lastName,
-      String email) throws IOException {
+    String email) throws IOException {
     HTable table = rm.getTable(UserTable.NAME);
     Put put = new Put(Bytes.toBytes(username));
-    put.add(UserTable.DATA_FAMILY, UserTable.FIRSTNAME, Bytes
-        .toBytes(firstName));
-    put.add(UserTable.DATA_FAMILY, UserTable.LASTNAME, Bytes.toBytes(lastName));
+    put.add(UserTable.DATA_FAMILY, UserTable.FIRSTNAME,
+      Bytes.toBytes(firstName));
+    put.add(UserTable.DATA_FAMILY, UserTable.LASTNAME,
+      Bytes.toBytes(lastName));
     put.add(UserTable.DATA_FAMILY, UserTable.EMAIL, Bytes.toBytes(email));
     table.put(put);
     table.flushCommits();
@@ -78,25 +84,25 @@ public class UserManager {
   }
 
   public boolean changePassword(String username, String oldPassword,
-      String newPassword) throws IOException {
+    String newPassword) throws IOException {
     HTable table = rm.getTable(UserTable.NAME);
     Put put = new Put(Bytes.toBytes(username));
-    put.add(UserTable.DATA_FAMILY, UserTable.CREDENTIALS, Bytes
-        .toBytes(newPassword));
-    boolean check = table.checkAndPut(Bytes.toBytes(username),
-        UserTable.DATA_FAMILY, UserTable.CREDENTIALS, Bytes
-            .toBytes(oldPassword), put);
+    put.add(UserTable.DATA_FAMILY, UserTable.CREDENTIALS,
+      Bytes.toBytes(newPassword));
+    boolean check = table
+      .checkAndPut(Bytes.toBytes(username), UserTable.DATA_FAMILY,
+        UserTable.CREDENTIALS, Bytes.toBytes(oldPassword), put);
     table.flushCommits();
     rm.putTable(table);
     return check;
   }
 
   public void adminChangePassword(String username, String newPassword)
-      throws IOException {
+    throws IOException {
     HTable table = rm.getTable(UserTable.NAME);
     Put put = new Put(Bytes.toBytes(username));
-    put.add(UserTable.DATA_FAMILY, UserTable.CREDENTIALS, Bytes
-        .toBytes(newPassword));
+    put.add(UserTable.DATA_FAMILY, UserTable.CREDENTIALS,
+      Bytes.toBytes(newPassword));
     table.put(put);
     table.flushCommits();
     rm.putTable(table);
@@ -114,17 +120,18 @@ public class UserManager {
         return null;
       }
 
-      String firstName = Bytes.toString(result.getValue(UserTable.DATA_FAMILY,
-          UserTable.FIRSTNAME));
-      String lastName = Bytes.toString(result.getValue(UserTable.DATA_FAMILY,
-          UserTable.LASTNAME));
-      String email = Bytes.toString(result.getValue(UserTable.DATA_FAMILY,
-          UserTable.EMAIL));
-      String credentials = Bytes.toString(result.getValue(
-          UserTable.DATA_FAMILY, UserTable.CREDENTIALS));
-      String roles = Bytes.toString(result.getValue(UserTable.DATA_FAMILY,
-          UserTable.ROLES));
-      user = new User(username, firstName, lastName, email, credentials, roles);
+      String firstName = Bytes.toString(
+        result.getValue(UserTable.DATA_FAMILY, UserTable.FIRSTNAME));
+      String lastName = Bytes
+        .toString(result.getValue(UserTable.DATA_FAMILY, UserTable.LASTNAME));
+      String email = Bytes
+        .toString(result.getValue(UserTable.DATA_FAMILY, UserTable.EMAIL));
+      String credentials = Bytes.toString(
+        result.getValue(UserTable.DATA_FAMILY, UserTable.CREDENTIALS));
+      String roles = Bytes
+        .toString(result.getValue(UserTable.DATA_FAMILY, UserTable.ROLES));
+      user =
+        new User(username, firstName, lastName, email, credentials, roles);
     } catch (Exception e) {
       LOG.error(String.format("Unable to get user '%s'", username), e);
     } finally {
@@ -148,18 +155,19 @@ public class UserManager {
       if (!result.isEmpty()) {
         try {
           String username = Bytes.toString(result.getRow());
-          String firstName = Bytes.toString(result.getValue(
-              UserTable.DATA_FAMILY, UserTable.FIRSTNAME));
-          String lastName = Bytes.toString(result.getValue(
-              UserTable.DATA_FAMILY, UserTable.LASTNAME));
-          String email = Bytes.toString(result.getValue(UserTable.DATA_FAMILY,
-              UserTable.EMAIL));
-          String credentials = Bytes.toString(result.getValue(
-              UserTable.DATA_FAMILY, UserTable.CREDENTIALS));
-          String roles = Bytes.toString(result.getValue(UserTable.DATA_FAMILY,
-              UserTable.ROLES));
-          User user = new User(username, firstName, lastName, email,
-              credentials, roles);
+          String firstName = Bytes.toString(
+            result.getValue(UserTable.DATA_FAMILY, UserTable.FIRSTNAME));
+          String lastName = Bytes.toString(
+            result.getValue(UserTable.DATA_FAMILY, UserTable.LASTNAME));
+          String email = Bytes.toString(
+            result.getValue(UserTable.DATA_FAMILY, UserTable.EMAIL));
+          String credentials = Bytes.toString(
+            result.getValue(UserTable.DATA_FAMILY, UserTable.CREDENTIALS));
+          String roles = Bytes.toString(
+            result.getValue(UserTable.DATA_FAMILY, UserTable.ROLES));
+          User user =
+            new User(username, firstName, lastName, email, credentials,
+              roles);
           users.add(user);
         } catch (Exception e) {
           errors++;

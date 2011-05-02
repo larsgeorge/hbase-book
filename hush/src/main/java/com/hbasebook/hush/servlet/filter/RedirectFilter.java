@@ -16,6 +16,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.hbasebook.hush.ResourceManager;
+import com.hbasebook.hush.servlet.RequestInfo;
 import com.hbasebook.hush.table.ShortUrl;
 
 /**
@@ -66,34 +67,29 @@ public class RedirectFilter implements Filter {
       chain.doFilter(request, response);
     } else if (uri.endsWith(DETAILS_EXTENSION)) {
       // redirect http://hostname/shortId+ to
-      // http://hostname/user/details.jsp?sid=shortId
-      String shortId = uri.substring(1, uri.length()
-        - DETAILS_EXTENSION.length());
-      httpResponse.sendRedirect("/user/details.jsp?sid=" + shortId);
-    } else if (uri.endsWith(QR_EXTENSION)) {
-      ResourceManager rm = ResourceManager.getInstance();
-      String shortId = uri.substring(1, uri.length() - QR_EXTENSION.length());
-      ShortUrl surl = rm.getUrlManager().getShortUrl(shortId);
-      if (surl == null) {
-        // if the short Id was bogus show a "shush" (our fail whale)
-        httpResponse.sendError(404);
-      } else {
-        sendQRCode(httpResponse, surl.getLongUrl());
-      }
+      // http://hostname/details.jsp?sid=shortId
+      String shortId = uri.substring(1, uri.length() -
+        DETAILS_EXTENSION.length());
+      httpRequest.setAttribute("sid", shortId);
+      httpRequest.getRequestDispatcher("/details.jsp").
+        forward(request, response);
     } else {
       // otherwise assume it is a short Id
       ResourceManager rm = ResourceManager.getInstance();
-      String shortId = uri.substring(1);
+      boolean isQrCode = uri.endsWith(QR_EXTENSION);
+      String shortId = isQrCode ?
+        uri.substring(1, uri.length() - QR_EXTENSION.length()) :
+        uri.substring(1);
       ShortUrl surl = rm.getUrlManager().getShortUrl(shortId);
       if (surl == null) {
         // if the short Id was bogus show a "shush" (our fail whale)
         httpResponse.sendError(404);
+      } else if (isQrCode) {
+        // show QRCode if requested
+        sendQRCode(httpResponse, surl.getLongUrl());
       } else {
         // increment counters and redirect to the long url!
-        String user = surl.getUser();
-        if (user != null) {
-          rm.getCounters().incrementUsage(user, shortId, httpRequest);
-        }
+        rm.getCounters().incrementUsage(surl, new RequestInfo(httpRequest));
         httpResponse.sendRedirect(surl.getLongUrl());
       }
     }

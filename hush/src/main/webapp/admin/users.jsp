@@ -36,7 +36,7 @@
 		        + HushUtil.fixNull(user.getLastName());
 		%>
 		<tr>
-			<td class="username"><a href="/user/editUser.jsp?username=<%= user.getUsername() %>">
+			<td class="username"><a href="/user/index.jsp?username=<%= user.getUsername() %>">
 			  <%= user.getUsername() %></a></td>
 			<td class="name"><%= fullName %></td>
 			<td class="email"><%=HushUtil.fixNull(user.getEmail())%></td>

@@ -8,9 +8,13 @@
 <%@ page import="java.text.SimpleDateFormat" %>
 <%@ page import="java.util.NavigableMap" %>
 <%@ page import="java.util.Calendar" %>
+<%@ page import="com.hbasebook.hush.table.ShortUrl" %>
 <%
   // check if the parameter was given
   String shortId = request.getParameter("sid");
+  if (shortId == null) {
+    shortId = (String) request.getAttribute("sid");
+  }
   if (shortId == null) {
     request.getRequestDispatcher("/error.jsp?error=No+short+ID+provided!").forward(request, response);
   }
@@ -18,8 +22,9 @@
   Principal principal = request.getUserPrincipal();
   String userName = principal.getName();
   ResourceManager manager = ResourceManager.getInstance();
+  ShortUrl shortUrl = new ShortUrl(shortId, null, null, null, userName);
   Counters.ShortUrlStatistics stats = manager.getCounters().getDailyStatistics(
-    Bytes.toBytes(userName), Bytes.toBytes(shortId));
+    shortUrl);
   if (stats == null) {
     request.getRequestDispatcher("/error.jsp?error=Nothing+found!").forward(request, response);
   }

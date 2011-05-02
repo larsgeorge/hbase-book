@@ -5,6 +5,7 @@
 <%@ page import="java.net.URL" %>
 <%@ page import="java.security.Principal" %>
 <%@ page import="java.net.MalformedURLException" %>
+<%@ page import="com.hbasebook.hush.servlet.RequestInfo" %>
 <%
   ShortUrl surl = null;
   String urlParam = request.getParameter("url");
@@ -15,7 +16,7 @@
       URL url = new URL(urlParam);
       UrlManager urlm = ResourceManager.getInstance().getUrlManager();
       String username = principal == null ? null : principal.getName();
-      surl = urlm.createShortUrl(url, username);
+      surl = urlm.createShortUrl(url, username, new RequestInfo(request));
     } catch (MalformedURLException e) {
       request.setAttribute("error", "Invalid URL.");
     }
@@ -55,6 +56,9 @@
     <p><img src="<%= qrUrl %>" width="100" height="100" alt=""/></p>
     <% } %>
   </div>
+  <% if (principal != null) { %>
+  <jsp:include page="/include/userstats.jsp"/>
+  <% } %>
 </div>
 <!--  main -->
 <jsp:include page="/include/footer.jsp"/>
