@@ -22,7 +22,6 @@ public class ScanCacheBatchExample {
 
   // vv ScanCacheBatchExample
   private static void scan(int caching, int batch) throws IOException {
-    // ^^ ScanCacheBatchExample
     Logger log = Logger.getLogger("org.apache.hadoop");
     final int[] counters = {0, 0};
     Appender appender = new AppenderSkeleton() {
@@ -45,7 +44,7 @@ public class ScanCacheBatchExample {
     log.addAppender(appender);
     log.setLevel(Level.DEBUG);
 
-    // vv ScanCacheBatchExample
+
     Scan scan = new Scan();
     scan.setCaching(caching);  // co ScanCacheBatchExample-1-Set Set caching and batch parameters.
     scan.setBatch(batch);
@@ -56,7 +55,6 @@ public class ScanCacheBatchExample {
     scanner.close();
     System.out.println("Caching: " + caching + ", Batch: " + batch +
       ", Results: " + counters[1] + ", RPCs: " + counters[0]);
-
   }
 
   public static void main(String[] args) throws IOException {
