@@ -129,8 +129,8 @@ public class SchemaManager {
     }
   }
 
-  // cc SchemaManager Creating or modifying table schemas using the HBase administrative API
-  // vv SchemaManager
+  // cc HushSchemaManager Creating or modifying table schemas using the HBase administrative API
+  // vv HushSchemaManager
   private void createOrChangeTable(final TableSchema schema)
     throws IOException {
     HTableDescriptor desc = null;
@@ -143,7 +143,7 @@ public class SchemaManager {
         new ArrayList<HColumnDescriptor>();
       for (final HColumnDescriptor cd : desc.getFamilies()) {
         final HColumnDescriptor cd2 = d.getFamily(cd.getName());
-        if (cd2 != null && !cd.equals(cd2)) { // co SchemaManager-1-Diff Compute the differences between the XML based schema and what is currently in HBase.
+        if (cd2 != null && !cd.equals(cd2)) { // co HushSchemaManager-1-Diff Compute the differences between the XML based schema and what is currently in HBase.
           modCols.add(cd2);
         }
       }
@@ -154,27 +154,27 @@ public class SchemaManager {
         new ArrayList<HColumnDescriptor>(d.getFamilies());
       addCols.removeAll(desc.getFamilies());
 
-      if (modCols.size() > 0 || addCols.size() > 0 || delCols.size() > 0 || // co SchemaManager-2-Check See if there are any differences in the column and table definitions.
+      if (modCols.size() > 0 || addCols.size() > 0 || delCols.size() > 0 || // co HushSchemaManager-2-Check See if there are any differences in the column and table definitions.
           !hasSameProperties(desc, d)) {
         LOG.info("Disabling table...");
         hbaseAdmin.disableTable(schema.getName());
         if (modCols.size() > 0 || addCols.size() > 0 || delCols.size() > 0) {
           for (final HColumnDescriptor col : modCols) {
             LOG.info("Found different column -> " + col);
-            hbaseAdmin.modifyColumn(schema.getName(), col.getNameAsString(), // co SchemaManager-3-AlterCol Alter the columns that have changed. The table was properly disabled first.
+            hbaseAdmin.modifyColumn(schema.getName(), col.getNameAsString(), // co HushSchemaManager-3-AlterCol Alter the columns that have changed. The table was properly disabled first.
               col);
           }
           for (final HColumnDescriptor col : addCols) {
             LOG.info("Found new column -> " + col);
-            hbaseAdmin.addColumn(schema.getName(), col); // co SchemaManager-4-AddCol Add newly defined columns.
+            hbaseAdmin.addColumn(schema.getName(), col); // co HushSchemaManager-4-AddCol Add newly defined columns.
           }
           for (final HColumnDescriptor col : delCols) {
             LOG.info("Found removed column -> " + col);
-            hbaseAdmin.deleteColumn(schema.getName(), col.getNameAsString()); // co SchemaManager-5-DelCol Delete removed columns.
+            hbaseAdmin.deleteColumn(schema.getName(), col.getNameAsString()); // co HushSchemaManager-5-DelCol Delete removed columns.
           }
         } else if (!hasSameProperties(desc, d)) {
           LOG.info("Found different table properties...");
-          hbaseAdmin.modifyTable(Bytes.toBytes(schema.getName()), d); // co SchemaManager-6-AlterTable Alter the table itself, if there are any differences found.
+          hbaseAdmin.modifyTable(Bytes.toBytes(schema.getName()), d); // co HushSchemaManager-6-AlterTable Alter the table itself, if there are any differences found.
         }
         LOG.info("Enabling table...");
         hbaseAdmin.enableTable(schema.getName());
@@ -187,11 +187,11 @@ public class SchemaManager {
     } else {
       desc = convertSchemaToDescriptor(schema);
       LOG.info("Creating table " + desc.getNameAsString() + "...");
-      hbaseAdmin.createTable(desc); // co SchemaManager-7-CreateTable In case the table did not exist yet create it now.
+      hbaseAdmin.createTable(desc); // co HushSchemaManager-7-CreateTable In case the table did not exist yet create it now.
       LOG.info("Table created");
     }
   }
-  // ^^ SchemaManager
+  // ^^ HushSchemaManager
 
   private boolean hasSameProperties(HTableDescriptor desc1,
     HTableDescriptor desc2) {

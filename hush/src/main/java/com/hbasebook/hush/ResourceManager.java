@@ -75,13 +75,13 @@ public class ResourceManager {
    * @param conf The HBase configuration to use.
    * @throws IOException When creating the remote HBase connection fails.
    */
-  // cc HTablePoolProvider Use a pool of tables that is shared across threads
-  // vv HTablePoolProvider
+  // cc HushHTablePoolProvider Use a pool of tables that is shared across threads
+  // vv HushHTablePoolProvider
   private ResourceManager(Configuration conf) throws IOException {
     this.conf = conf;
     this.pool = new HTablePool(conf, 10);
     /*...*/
-    // ^^ HTablePoolProvider
+    // ^^ HushHTablePoolProvider
     this.counters = new Counters();
     this.domainManager = new DomainManager(this);
     this.userManager = new UserManager(this);
@@ -94,16 +94,15 @@ public class ResourceManager {
       e.printStackTrace();
     }
     this.lookupService = file != null ? new LookupService(file) : null;
-    // vv HTablePoolProvider
+    // vv HushHTablePoolProvider
   }
-  // ^^ HTablePoolProvider
+  // ^^ HushHTablePoolProvider
 
   /**
    * Delayed initialization of the instance. Should be called once to set up the
    * counters etc.
    *
-   * @throws IOException
-   *           When setting up the resources in HBase fails.
+   * @throws IOException When setting up the resources in HBase fails.
    */
   void init() throws IOException {
     counters.init();
@@ -122,17 +121,15 @@ public class ResourceManager {
    * Returns a single table from the shared table pool. More convenient to use
    * compared to <code>getTablePool()</code>.
    *
-   * @param tableName
-   *          The name of the table to retrieve.
+   * @param tableName The name of the table to retrieve.
    * @return The table reference.
-   * @throws IOException
-   *           When talking to HBase fails.
+   * @throws IOException When talking to HBase fails.
    */
-  // vv HTablePoolProvider
+  // vv HushHTablePoolProvider
   public HTable getTable(byte[] tableName) throws IOException {
     return (HTable) pool.getTable(tableName);
   }
-  // ^^ HTablePoolProvider
+  // ^^ HushHTablePoolProvider
 
   /**
    * Returns the previously retrieved table to the shared pool. The caller must
@@ -141,13 +138,13 @@ public class ResourceManager {
    *
    * @param table  The table reference to return to the pool.
    */
-  // vv HTablePoolProvider
+  // vv HushHTablePoolProvider
   public void putTable(HTable table) throws IOException {
     if (table != null) {
       pool.putTable(table);
     }
   }
-  // ^^ HTablePoolProvider
+  // ^^ HushHTablePoolProvider
 
   /**
    * Returns the currently used configuration.

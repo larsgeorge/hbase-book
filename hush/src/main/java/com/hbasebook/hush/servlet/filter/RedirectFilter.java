@@ -6,12 +6,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
 
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
+import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -71,8 +66,11 @@ public class RedirectFilter implements Filter {
       String shortId = uri.substring(1, uri.length() -
         DETAILS_EXTENSION.length());
       httpRequest.setAttribute("sid", shortId);
-      httpRequest.getRequestDispatcher("/details.jsp").
-        forward(request, response);
+      RequestDispatcher dispatcher =
+        httpRequest.getRequestDispatcher("/details.jsp");
+      if (dispatcher != null) {
+        dispatcher.forward(request, response);
+      }
     } else {
       // otherwise assume it is a short Id
       ResourceManager rm = ResourceManager.getInstance();

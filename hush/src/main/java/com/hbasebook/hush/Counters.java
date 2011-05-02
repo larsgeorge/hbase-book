@@ -10,8 +10,9 @@ import java.util.NavigableMap;
 import java.util.TreeMap;
 
 import com.hbasebook.hush.servlet.RequestInfo;
-import com.hbasebook.hush.table.ShortUrl;
+import com.hbasebook.hush.table.*;
 import com.maxmind.geoip.Country;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.hbase.client.Get;
@@ -20,10 +21,6 @@ import org.apache.hadoop.hbase.client.Increment;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.util.Bytes;
-
-import com.hbasebook.hush.table.HushTable;
-import com.hbasebook.hush.table.ShortUrlTable;
-import com.hbasebook.hush.table.UserShortUrlTable;
 
 public class Counters {
   private final Log LOG = LogFactory.getLog(Counters.class);
@@ -279,21 +276,34 @@ public class Counters {
    */
   public void incrementUsage(ShortUrl shortUrl, RequestInfo info,
     long incrBy) throws IOException {
-    ResourceManager manager = ResourceManager.getInstance();
-    HTable table = manager.getTable(UserShortUrlTable.NAME);
     Date date = new Date();
+    ResourceManager manager = ResourceManager.getInstance();
+    Country country = null;
+    if (info != null) {
+      country = manager.getCountry(info.get(RequestInfo.Name.RemoteAddr));
+    }
+    // increment user statistics
+    HTable table = manager.getTable(UserShortUrlTable.NAME);
     byte[] rowKey = getRowKey(shortUrl);
     Increment increment = new Increment(rowKey);
     addIncrement(increment, Category.Click, date, null, incrBy);
-    if (info != null) {
-      Country country = manager.getCountry(info.get(
-        RequestInfo.Name.RemoteAddr));
+    if (country != null) {
       addIncrement(increment, Category.Country, date, country.getCode(),
         incrBy);
     }
     table.increment(increment);
+    manager.putTable(table);
 
-    manager.getUrlManager().
+    // increment URL statistics
+    table = manager.getTable(LongUrlTable.NAME);
+    rowKey = DigestUtils.md5(shortUrl.getLongUrl());
+    increment = new Increment(rowKey);
+    addIncrement(increment, Category.Click, date, null, incrBy);
+    if (country != null) {
+      addIncrement(increment, Category.Country, date, country.getCode(),
+        incrBy);
+    }
+    table.increment(increment);
     manager.putTable(table);
   }
 
@@ -393,8 +403,11 @@ public class Counters {
     String url = Bytes.toString(shortUrlData.getValue(ShortUrlTable.DATA_FAMILY,
       ShortUrlTable.URL));
     // get short Id usage data
-    byte[] rowKey = Bytes.add(Bytes.toBytes(shortUrl.getUser()), ZERO,
-      shortId);
+    String user = shortUrl.getUser();
+    if (user == null) {
+      user = getUser(shortUrl.getId());
+    }
+    byte[] rowKey = Bytes.add(Bytes.toBytes(user), ZERO, shortId);
     get = new Get(rowKey);
     get.addFamily(UserShortUrlTable.DAILY_FAMILY);
     Result userShortUrlResult = userShortUrltable.get(get);
@@ -433,6 +446,19 @@ public class Counters {
 
     return new ShortUrlStatistics(shortUrl.getId(), url, clicks,
       TimeFrame.Day);
+  }
+
+  /**
+   * Loads a user based on a short Id.
+   *
+   * @param shortId  The short Id to get the user for.
+   * @return The user name or <code>null</code> if not found.
+   * @throws IOException When loading the user fails.
+   */
+  private String getUser(String shortId) throws IOException {
+    ResourceManager manager = ResourceManager.getInstance();
+    ShortUrl shortUrl = manager.getUrlManager().getShortUrl(shortId);
+    return shortUrl != null ? shortUrl.getUser() : null;
   }
 
   /**
