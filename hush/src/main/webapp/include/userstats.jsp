@@ -7,16 +7,16 @@
 <%@ page import="org.apache.hadoop.hbase.client.ResultScanner" %>
 <%@ page import="org.apache.hadoop.hbase.client.Result" %>
 <%@ page import="com.hbasebook.hush.Counters" %>
+<%@ page import="com.hbasebook.hush.HushUtil" %>
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.ArrayList" %>
 <%@ page import="com.hbasebook.hush.table.ShortUrl" %>
 <%
-  Principal principal = request.getUserPrincipal();
-  String userName = principal.getName();
+  String username = HushUtil.getOrSetUsername (request, response);
   ResourceManager manager = ResourceManager.getInstance();
   HTable userShortUrltable = manager.getTable(UserShortUrlTable.NAME);
 
-  byte[] startRow = Bytes.toBytes(userName);
+  byte[] startRow = Bytes.toBytes(username);
   byte[] one = new byte[]{1};
   byte[] stopRow = Bytes.add(startRow, one);
 
@@ -29,7 +29,7 @@
   for (Result result : scanner) {
     String rowKey = Bytes.toString(result.getRow());
     String shortId = rowKey.substring(rowKey.indexOf(0) + 1);
-    ShortUrl shortUrl = new ShortUrl(shortId, null, null, null, userName);
+    ShortUrl shortUrl = new ShortUrl(shortId, null, null, null, username);
     Counters.ShortUrlStatistics stat = manager.getCounters().getDailyStatistics(
       shortUrl, 30, 110.0);
     stats.add(stat);
@@ -38,13 +38,13 @@
 %>
 <div id="userstats">
   <p>
-  <table>
+  <table id="userstats">
     <thead>
     <tr>
       <th>No.</th>
       <th>Short Id</th>
       <th>Long URL</th>
-      <th>Trend (Last 30 Days)</th>
+      <th>Trend (last 30d)</th>
     </tr>
     </thead>
     <tbody>
@@ -63,13 +63,10 @@
         }
     %>
     <tr>
-      <td><%= rowNum%>
-      </td>
-      <td><a href="<%= detailsUrl %>"><%= shortId %>
-      </a></td>
-      <td><a href="<%= stat.getUrl()%>" target=""><%= stat.getUrl()%>
-      </a></td>
-      <td><a href="<%= detailsUrl %>">
+      <td class="rowNum"><%= rowNum%></td>
+      <td class="shortUrl"><a href="<%= detailsUrl %>"><%= shortId %></a></td>
+      <td class="longUrl"><a href="<%= stat.getUrl()%>" target=""><%= stat.getUrl() %></a></td>
+      <td class="trend"><a href="<%= detailsUrl %>">
         <img alt="Recent Trend for <%= shortId%>"
              src="http://chart.apis.google.com/chart?cht=ls&chs=120x15&chd=t:<%= sparkData%>&chco=999999&chm=B,999999,0,0,0&chds=0,120"/></a>
       </td>

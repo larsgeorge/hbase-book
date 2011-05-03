@@ -257,3 +257,19 @@ td {
 #users td.action {
 	width: 100px;
 }
+
+#userstats td.rowNum {
+	width: 20px;
+}
+
+#userstats td.shortUrl {
+	width: 100px;
+}
+
+#userstats td.longUrl {
+	width: 300px;
+}
+
+#userstats td.trend {
+	width: 200px;
+}

@@ -9,9 +9,6 @@ import java.util.Map;
 import java.util.NavigableMap;
 import java.util.TreeMap;
 
-import com.hbasebook.hush.servlet.RequestInfo;
-import com.hbasebook.hush.table.*;
-import com.maxmind.geoip.Country;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -22,10 +19,18 @@ import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.util.Bytes;
 
+import com.hbasebook.hush.servlet.RequestInfo;
+import com.hbasebook.hush.table.HushTable;
+import com.hbasebook.hush.table.LongUrlTable;
+import com.hbasebook.hush.table.ShortUrl;
+import com.hbasebook.hush.table.ShortUrlTable;
+import com.hbasebook.hush.table.UserShortUrlTable;
+import com.maxmind.geoip.Country;
+
 public class Counters {
   private final Log LOG = LogFactory.getLog(Counters.class);
 
-  private static final byte[] ZERO = new byte[] {0};
+  private static final byte[] ZERO = new byte[]{0};
   private static final byte[] DEFAULT_USER = Bytes.toBytes("@@@DEF");
 
   /**
@@ -36,6 +41,7 @@ public class Counters {
     Country("co");
 
     private final String postfix;
+
     Category(String postfix) {
       this.postfix = postfix;
     }
@@ -140,13 +146,12 @@ public class Counters {
   /**
    * Encodes a number in BASE N.
    *
-   * @param number  The number to encode.
-   * @param base  The base to use for the encoding.
-   * @param reverse  Flag to indicate if the result should be reversed.
+   * @param number The number to encode.
+   * @param base The base to use for the encoding.
+   * @param reverse Flag to indicate if the result should be reversed.
    * @return The encoded - and optionally reversed - encoded string.
    */
-  public static String longToString(long number, int base,
-    boolean reverse) {
+  public static String longToString(long number, int base, boolean reverse) {
     String result = number == 0 ? "0" : "";
     while (number != 0) {
       int mod = (int) number % base;
@@ -163,13 +168,12 @@ public class Counters {
   /**
    * Decodes the given BASE N encoded value.
    *
-   * @param number  The encoded value to decode.
-   * @param base  The base to decode with.
-   * @param reverse  Flag to indicate how the encoding was done.
+   * @param number The encoded value to decode.
+   * @param base The base to decode with.
+   * @param reverse Flag to indicate how the encoding was done.
    * @return The decoded number.
    */
-  public static long parseLong(String number, int base,
-    boolean reverse) {
+  public static long parseLong(String number, int base, boolean reverse) {
     int length = number.length();
     int index = length;
     int result = 0;
@@ -200,8 +204,18 @@ public class Counters {
       if (hasPut) {
         LOG.info("Short Id counter initialized.");
       }
+
+      put = new Put(HushTable.GLOBAL_ROW_KEY);
+      put.add(HushTable.COUNTERS_FAMILY, HushTable.ANONYMOUS_USER_ID,
+        Bytes.toBytes(parseLong("0", 62, false)));
+      hasPut = table.checkAndPut(HushTable.GLOBAL_ROW_KEY,
+        HushTable.COUNTERS_FAMILY, HushTable.SHORT_ID, null, put);
+      if (hasPut) {
+        LOG.info("Anonymous User Id counter initialized.");
+      }
+      table.flushCommits();
     } catch (Exception e) {
-      LOG.error("Unable to initialize Short Id.", e);
+      LOG.error("Unable to initialize counters.", e);
       throw new IOException(e);
     } finally {
       try {
@@ -226,7 +240,7 @@ public class Counters {
   /**
    * Creates a new short Id.
    *
-   * @param incrBy  The increment value.
+   * @param incrBy The increment value.
    * @return The newly created short id, encoded as String.
    * @throws IOException When the counter fails to increment.
    */
@@ -242,7 +256,48 @@ public class Counters {
         HushTable.SHORT_ID));
       return longToString(id, 62, true);
     } catch (Exception e) {
-      LOG.error("Unable to a new short Id.", e);
+      LOG.error("Unable to create a new short Id.", e);
+      throw new IOException(e);
+    } finally {
+      try {
+        manager.putTable(table);
+      } catch (Exception e) {
+        // ignore
+      }
+    }
+  }
+
+  /**
+   * Convenience method to retrieve a new anonymous User Id. Each call
+   * increments the counter by one.
+   *
+   * @return The newly created user Id.
+   * @throws Exception When communicating with HBase fails.
+   */
+  public String getAnonymousUserId() throws IOException {
+    return getAnonymousUserId(1L);
+  }
+
+  /**
+   * Creates a new short Id.
+   *
+   * @param incrBy The increment value.
+   * @return The newly created short id, encoded as String.
+   * @throws IOException When the counter fails to increment.
+   */
+  public String getAnonymousUserId(long incrBy) throws IOException {
+    ResourceManager manager = ResourceManager.getInstance();
+    HTable table = manager.getTable(HushTable.NAME);
+    try {
+      Increment increment = new Increment(HushTable.GLOBAL_ROW_KEY);
+      increment.addColumn(HushTable.COUNTERS_FAMILY,
+        HushTable.ANONYMOUS_USER_ID, incrBy);
+      Result result = table.increment(increment);
+      long id = Bytes.toLong(result.getValue(HushTable.COUNTERS_FAMILY,
+        HushTable.ANONYMOUS_USER_ID));
+      return longToString(id, 62, true);
+    } catch (Exception e) {
+      LOG.error("Unable to create a new anonymous user Id.", e);
       throw new IOException(e);
     } finally {
       try {
@@ -256,13 +311,12 @@ public class Counters {
   /**
    * Increments the usage statistics of a shortened URL.
    *
-   *
    * @param shortUrl The short URL details.
    * @param info The request information, may be <code>null</code>.
    * @throws IOException When updating the counter fails.
    */
   public void incrementUsage(ShortUrl shortUrl, RequestInfo info)
-    throws IOException {
+  throws IOException {
     incrementUsage(shortUrl, info, 1L);
   }
 
@@ -274,8 +328,8 @@ public class Counters {
    * @param incrBy The increment value.
    * @throws IOException When updating the counter fails.
    */
-  public void incrementUsage(ShortUrl shortUrl, RequestInfo info,
-    long incrBy) throws IOException {
+  public void incrementUsage(ShortUrl shortUrl, RequestInfo info, long incrBy)
+  throws IOException {
     Date date = new Date();
     ResourceManager manager = ResourceManager.getInstance();
     Country country = null;
@@ -310,11 +364,11 @@ public class Counters {
   /**
    * Adds all increments needed for a specific category, for all time ranges.
    *
-   * @param increment  The increment instance to add to.
-   * @param category  The category of the statistics.
-   * @param date  The date component.
-   * @param extra  An extra info element added to the counter (optionally).
-   * @param incrBy  The increment value.
+   * @param increment The increment instance to add to.
+   * @param category The category of the statistics.
+   * @param date The date component.
+   * @param extra An extra info element added to the counter (optionally).
+   * @param incrBy The increment value.
    */
   private void addIncrement(Increment increment, Category category, Date date,
     String extra, long incrBy) {
@@ -329,10 +383,10 @@ public class Counters {
   /**
    * Creates the qualifier needed for the statistics columns.
    *
-   * @param qualifier  The qualifier kind.
-   * @param category  The statistics category.
-   * @param date  The date for the statistics.
-   * @param extra  The optional extra category element.
+   * @param qualifier The qualifier kind.
+   * @param category The statistics category.
+   * @param date The date for the statistics.
+   * @param extra The optional extra category element.
    * @return The qualifier.
    */
   private byte[] getQualifier(ColumnQualifier qualifier, Category category,
@@ -377,7 +431,7 @@ public class Counters {
    * @throws IOException When loading the statistics fails.
    */
   public ShortUrlStatistics getDailyStatistics(ShortUrl shortUrl, int maxValues)
-  throws IOException {
+    throws IOException {
     return getDailyStatistics(shortUrl, maxValues, -1);
   }
 
@@ -400,8 +454,8 @@ public class Counters {
     byte[] shortId = Bytes.toBytes(shortUrl.getId());
     Get get = new Get(shortId);
     Result shortUrlData = shortUrltable.get(get);
-    String url = Bytes.toString(shortUrlData.getValue(ShortUrlTable.DATA_FAMILY,
-      ShortUrlTable.URL));
+    String url = Bytes.toString(
+      shortUrlData.getValue(ShortUrlTable.DATA_FAMILY, ShortUrlTable.URL));
     // get short Id usage data
     String user = shortUrl.getUser();
     if (user == null) {
@@ -416,11 +470,12 @@ public class Counters {
     }
 
     // TODO - Fix this once the reversed sorting is working
-    NavigableMap<Date, Double> clicks = new TreeMap<Date, Double>(
-      new ReverseDateComparator());
+    NavigableMap<Date, Double> clicks =
+      new TreeMap<Date, Double>(new ReverseDateComparator());
     double maxValue = 0L;
-    Map<byte[], byte[]> familyMap = userShortUrlResult.getFamilyMap(
-      UserShortUrlTable.DAILY_FAMILY).descendingMap();
+    Map<byte[], byte[]> familyMap =
+      userShortUrlResult.getFamilyMap(UserShortUrlTable.DAILY_FAMILY)
+        .descendingMap();
     int count = 0;
     // iterate over usage data
     for (Map.Entry<byte[], byte[]> entry : familyMap.entrySet()) {
@@ -430,8 +485,9 @@ public class Counters {
       double clickCount = Bytes.toLong(entry.getValue());
       maxValue = Math.max(maxValue, clickCount);
       try {
-        clicks.put(ColumnQualifier.Day.parseDate(Bytes.toString(
-          entry.getKey())), new Double(clickCount));
+        clicks
+          .put(ColumnQualifier.Day.parseDate(Bytes.toString(entry.getKey())),
+            new Double(clickCount));
       } catch (ParseException e) {
         throw new IOException(e);
       }
@@ -444,14 +500,13 @@ public class Counters {
     manager.putTable(userShortUrltable);
     manager.putTable(shortUrltable);
 
-    return new ShortUrlStatistics(shortUrl.getId(), url, clicks,
-      TimeFrame.Day);
+    return new ShortUrlStatistics(shortUrl.getId(), url, clicks, TimeFrame.Day);
   }
 
   /**
    * Loads a user based on a short Id.
    *
-   * @param shortId  The short Id to get the user for.
+   * @param shortId The short Id to get the user for.
    * @return The user name or <code>null</code> if not found.
    * @throws IOException When loading the user fails.
    */
@@ -462,18 +517,18 @@ public class Counters {
   }
 
   /**
-   * Normalizes the given values, based on a normalization factor and
-   * the maximum value seen.
+   * Normalizes the given values, based on a normalization factor and the
+   * maximum value seen.
    *
    * @param data The data to normalize.
    * @param normalize The factor to normalize to.
    * @param maxValue The maximum value in the data.
    * @return A copy of the list with all values normalized.
    */
-  private NavigableMap<Date, Double> normalizeData(Map<Date,
-    Double> data, double normalize, double maxValue) {
-    NavigableMap<Date, Double> norms = new TreeMap<Date, Double>(
-      new ReverseDateComparator());
+  private NavigableMap<Date, Double> normalizeData(Map<Date, Double> data,
+    double normalize, double maxValue) {
+    NavigableMap<Date, Double> norms =
+      new TreeMap<Date, Double>(new ReverseDateComparator());
     for (Map.Entry<Date, Double> entry : data.entrySet()) {
       norms.put(entry.getKey(),
         new Double(entry.getValue() * normalize / maxValue));
