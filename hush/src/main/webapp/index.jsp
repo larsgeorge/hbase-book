@@ -1,6 +1,7 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
 <%@ page import="com.hbasebook.hush.ResourceManager" %>
 <%@ page import="com.hbasebook.hush.UrlManager" %>
+<%@ page import="com.hbasebook.hush.HushUtil" %>
 <%@ page import="com.hbasebook.hush.table.ShortUrl" %>
 <%@ page import="java.net.URL" %>
 <%@ page import="java.security.Principal" %>
@@ -9,13 +10,12 @@
 <%
   ShortUrl surl = null;
   String urlParam = request.getParameter("url");
-  Principal principal = request.getUserPrincipal();
-
   if (urlParam != null && urlParam.length() > 0) {
     try {
       URL url = new URL(urlParam);
       UrlManager urlm = ResourceManager.getInstance().getUrlManager();
-      String username = principal == null ? null : principal.getName();
+      String username = HushUtil.getOrSetUsername(request, response);
+
       surl = urlm.createShortUrl(url, username, new RequestInfo(request));
     } catch (MalformedURLException e) {
       request.setAttribute("error", "Invalid URL.");
@@ -39,26 +39,20 @@
     <p>Shorten your URLs!</p>
 
     <form action="/index.jsp" method="post">
-      <textarea name="url" rows="2" cols="60"></textarea>
+      <textarea name="url" rows="3" cols="60"></textarea>
       <input type="submit" value="Shorten it"/>
     </form>
-    <% if (surl != null) {
-      String qrUrl = surl.toString() + ".q";
-    %>
-    <p>Your new shortened URL is:</p>
-
-    <p><input type="text" size="50" value="<%= surl.toString() %>" disabled="disabled"/></p>
-
-    <p>Hand it out as a QRCode:</p>
-
-    <p><input type="text" size="50" value="<%= qrUrl %>" disabled="disabled"/></p>
-
-    <p><img src="<%= qrUrl %>" width="100" height="100" alt=""/></p>
-    <% } %>
   </div>
-  <% if (principal != null) { %>
+<% if (surl != null) {
+  String qrUrl = surl.toString() + ".q";
+%>
+  <div id="short_url">
+    <p>Your new shortened URL is:</p>
+    <input type="text" size="50" value="<%= surl.toString() %>" disabled="disabled"/>
+    <p>Hand it out as QR Code: <a href="<%= qrUrl %>"><%= qrUrl %></a></p>
+  </div>
+<% } %>
   <jsp:include page="/include/userstats.jsp"/>
-  <% } %>
 </div>
 <!--  main -->
 <jsp:include page="/include/footer.jsp"/>

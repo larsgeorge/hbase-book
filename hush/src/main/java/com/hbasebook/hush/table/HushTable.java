@@ -6,5 +6,6 @@ public class HushTable {
   public static final byte[] NAME = Bytes.toBytes("hush");
   public static final byte[] COUNTERS_FAMILY = Bytes.toBytes("cnt");
   public static final byte[] SHORT_ID = Bytes.toBytes("sid");
+  public static final byte[] ANONYMOUS_USER_ID = Bytes.toBytes("auid");
   public static final byte[] GLOBAL_ROW_KEY = Bytes.toBytes("global");
 }
