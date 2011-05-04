@@ -10,7 +10,7 @@ import org.eclipse.jetty.server.UserIdentity;
 
 import com.hbasebook.hush.ResourceManager;
 import com.hbasebook.hush.UserManager;
-import com.hbasebook.hush.table.User;
+import com.hbasebook.hush.model.User;
 
 /**
  * Implements the Jetty <code>LoginService</code> instance required for server

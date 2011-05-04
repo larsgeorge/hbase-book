@@ -11,8 +11,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.hbasebook.hush.ResourceManager;
+import com.hbasebook.hush.model.ShortUrl;
 import com.hbasebook.hush.servlet.RequestInfo;
-import com.hbasebook.hush.table.ShortUrl;
 
 /**
  * The filter handles the short Id to URL redirects.

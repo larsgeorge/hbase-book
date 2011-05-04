@@ -1,6 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8"%>
 <%@ page import="java.util.List"%>
-<%@ page import="com.hbasebook.hush.table.User"%>
+<%@ page import="com.hbasebook.hush.model.User"%>
 <%@ page import="com.hbasebook.hush.HushUtil"%>
 <%@ page import="com.hbasebook.hush.ResourceManager"%>
 <%@ page import="com.hbasebook.hush.UserManager"%>

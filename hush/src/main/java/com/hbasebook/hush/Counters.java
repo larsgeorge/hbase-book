@@ -2,9 +2,10 @@ package com.hbasebook.hush;
 
 import java.io.IOException;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.NavigableMap;
 import java.util.TreeMap;
@@ -17,78 +18,30 @@ import org.apache.hadoop.hbase.client.HTable;
 import org.apache.hadoop.hbase.client.Increment;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Result;
+import org.apache.hadoop.hbase.client.ResultScanner;
+import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.util.Bytes;
 
+import com.hbasebook.hush.model.Category;
+import com.hbasebook.hush.model.ColumnQualifier;
+import com.hbasebook.hush.model.ShortUrl;
+import com.hbasebook.hush.model.ShortUrlStatistics;
+import com.hbasebook.hush.model.TimeFrame;
 import com.hbasebook.hush.servlet.RequestInfo;
 import com.hbasebook.hush.table.HushTable;
 import com.hbasebook.hush.table.LongUrlTable;
-import com.hbasebook.hush.table.ShortUrl;
-import com.hbasebook.hush.table.ShortUrlTable;
 import com.hbasebook.hush.table.UserShortUrlTable;
 import com.maxmind.geoip.Country;
 
 public class Counters {
   private final Log LOG = LogFactory.getLog(Counters.class);
+  private final ResourceManager rm;
 
-  private static final byte[] ZERO = new byte[] { 0 };
+  // TODO: really never used anymore... yank it?
   private static final byte[] DEFAULT_USER = Bytes.toBytes("@@@DEF");
 
-  /**
-   * All possible statistics saved in columns in the table.
-   */
-  public enum Category {
-    Click("cl"), Country("co");
-
-    private final String postfix;
-
-    Category(String postfix) {
-      this.postfix = postfix;
-    }
-
-    public String getPostfix() {
-      return postfix;
-    }
-
-    @Override
-    public String toString() {
-      return postfix;
-    }
-  }
-
-  /**
-   * Time frame for statistics.
-   */
-  public enum TimeFrame {
-    Day, Week, Month
-  }
-
-  /**
-   * The column qualifiers for the statistics table.
-   */
-  public enum ColumnQualifier {
-    Day("yyyyMMdd", TimeFrame.Day), Week("yyyyww", TimeFrame.Week), Month(
-        "yyyyMM", TimeFrame.Month);
-
-    private final SimpleDateFormat formatter;
-    private final TimeFrame timeFrame;
-
-    ColumnQualifier(String format, TimeFrame timeFrame) {
-      this.formatter = new SimpleDateFormat(format);
-      this.timeFrame = timeFrame;
-    }
-
-    public byte[] getColumnName(Date date, Category type) {
-      return Bytes.add(Bytes.toBytes(formatter.format(date)), ZERO,
-          Bytes.toBytes(type.getPostfix()));
-    }
-
-    public TimeFrame getTimeFrame() {
-      return timeFrame;
-    }
-
-    public Date parseDate(String date) throws ParseException {
-      return formatter.parse(date);
-    }
+  Counters(ResourceManager rm) throws IOException {
+    this.rm = rm;
   }
 
   /**
@@ -98,40 +51,6 @@ public class Counters {
     @Override
     public int compare(Date date1, Date date2) {
       return date2.compareTo(date1);
-    }
-  }
-
-  /**
-   * Container class to hold the details for the presentation layer.
-   */
-  public class ShortUrlStatistics {
-    private final String shortId;
-    private final String url;
-    private final NavigableMap<Date, Double> clicks;
-    private final TimeFrame timeFrame;
-
-    private ShortUrlStatistics(String shortId, String url,
-        NavigableMap<Date, Double> clicks, TimeFrame timeFrame) {
-      this.shortId = shortId;
-      this.url = url;
-      this.clicks = clicks;
-      this.timeFrame = timeFrame;
-    }
-
-    public String getShortId() {
-      return shortId;
-    }
-
-    public String getUrl() {
-      return url;
-    }
-
-    public NavigableMap<Date, Double> getClicks() {
-      return clicks;
-    }
-
-    public TimeFrame getTimeFrame() {
-      return timeFrame;
     }
   }
 
@@ -329,13 +248,12 @@ public class Counters {
   public void incrementUsage(ShortUrl shortUrl, RequestInfo info,
       long incrBy) throws IOException {
     Date date = new Date();
-    ResourceManager manager = ResourceManager.getInstance();
     Country country = null;
     if (info != null) {
-      country = manager.getCountry(info.get(RequestInfo.Name.RemoteAddr));
+      country = rm.getCountry(info.get(RequestInfo.Name.RemoteAddr));
     }
     // increment user statistics
-    HTable table = manager.getTable(UserShortUrlTable.NAME);
+    HTable table = rm.getTable(UserShortUrlTable.NAME);
     byte[] rowKey = getRowKey(shortUrl);
     Increment increment = new Increment(rowKey);
     addIncrement(increment, Category.Click, date, null, incrBy);
@@ -344,10 +262,10 @@ public class Counters {
           country.getCode(), incrBy);
     }
     table.increment(increment);
-    manager.putTable(table);
+    rm.putTable(table);
 
     // increment URL statistics
-    table = manager.getTable(LongUrlTable.NAME);
+    table = rm.getTable(LongUrlTable.NAME);
     rowKey = DigestUtils.md5(shortUrl.getLongUrl());
     increment = new Increment(rowKey);
     addIncrement(increment, Category.Click, date, null, incrBy);
@@ -356,7 +274,7 @@ public class Counters {
           country.getCode(), incrBy);
     }
     table.increment(increment);
-    manager.putTable(table);
+    rm.putTable(table);
   }
 
   /**
@@ -397,7 +315,8 @@ public class Counters {
       Category category, Date date, String extra) {
     byte[] result = qualifier.getColumnName(date, category);
     if (extra != null) {
-      result = Bytes.add(result, ZERO, Bytes.toBytes(extra));
+      result = Bytes.add(result, ResourceManager.ZERO,
+          Bytes.toBytes(extra));
     }
     return result;
   }
@@ -411,19 +330,31 @@ public class Counters {
   public static byte[] getRowKey(ShortUrl shortUrl) {
     return Bytes.add(
         shortUrl.getUser() != null ? Bytes.toBytes(shortUrl.getUser())
-            : DEFAULT_USER, ZERO, Bytes.toBytes(shortUrl.getId()));
+            : DEFAULT_USER, ResourceManager.ZERO,
+        Bytes.toBytes(shortUrl.getId()));
   }
 
-  /**
-   * Returns daily statistics for the given shortened URL.
-   * 
-   * @param shortUrl The shortened URL.
-   * @return The statistics.
-   * @throws IOException When loading the statistics fails.
-   */
-  public ShortUrlStatistics getDailyStatistics(ShortUrl shortUrl)
-      throws IOException {
-    return getDailyStatistics(shortUrl, -1);
+  public List<ShortUrlStatistics> getUserShortUrlStatistics(
+      String username) throws IOException {
+    HTable userShortUrlTable = rm.getTable(UserShortUrlTable.NAME);
+
+    byte[] startRow = Bytes.toBytes(username);
+    byte[] stopRow = Bytes.add(startRow, ResourceManager.ONE);
+
+    Scan scan = new Scan(startRow, stopRow);
+    scan.addFamily(UserShortUrlTable.DAILY_FAMILY);
+
+    ResultScanner scanner = userShortUrlTable.getScanner(scan);
+    List<ShortUrlStatistics> stats = new ArrayList<ShortUrlStatistics>();
+    for (Result result : scanner) {
+      String rowKey = Bytes.toString(result.getRow());
+      String shortId = rowKey.substring(rowKey.indexOf(0) + 1);
+      ShortUrl shortUrl = rm.getUrlManager().getShortUrl(shortId);
+      ShortUrlStatistics stat = getDailyStatistics(shortUrl, 30, 110.0);
+      stats.add(stat);
+    }
+    rm.putTable(userShortUrlTable);
+    return stats;
   }
 
   /**
@@ -452,21 +383,11 @@ public class Counters {
       int maxValues, double normalize) throws IOException {
     ResourceManager manager = ResourceManager.getInstance();
     HTable userShortUrltable = manager.getTable(UserShortUrlTable.NAME);
-    HTable shortUrltable = manager.getTable(ShortUrlTable.NAME);
 
-    // get short Id to URL mapping
-    byte[] shortId = Bytes.toBytes(shortUrl.getId());
-    Get get = new Get(shortId);
-    Result shortUrlData = shortUrltable.get(get);
-    String url = Bytes.toString(shortUrlData.getValue(
-        ShortUrlTable.DATA_FAMILY, ShortUrlTable.URL));
     // get short Id usage data
-    String user = shortUrl.getUser();
-    if (user == null) {
-      user = getUser(shortUrl.getId());
-    }
-    byte[] rowKey = Bytes.add(Bytes.toBytes(user), ZERO, shortId);
-    get = new Get(rowKey);
+    byte[] rowKey = Bytes.add(Bytes.toBytes(shortUrl.getUser()),
+        ResourceManager.ZERO, Bytes.toBytes(shortUrl.getId()));
+    Get get = new Get(rowKey);
     get.addFamily(UserShortUrlTable.DAILY_FAMILY);
     Result userShortUrlResult = userShortUrltable.get(get);
     if (userShortUrlResult.isEmpty()) {
@@ -501,23 +422,20 @@ public class Counters {
     }
 
     manager.putTable(userShortUrltable);
-    manager.putTable(shortUrltable);
 
-    return new ShortUrlStatistics(shortUrl.getId(), url, clicks,
-        TimeFrame.Day);
+    return new ShortUrlStatistics(shortUrl, clicks, TimeFrame.Day);
   }
 
   /**
-   * Loads a user based on a short Id.
+   * Returns daily statistics for the given shortened URL.
    * 
-   * @param shortId The short Id to get the user for.
-   * @return The user name or <code>null</code> if not found.
-   * @throws IOException When loading the user fails.
+   * @param shortUrl The shortened URL.
+   * @return The statistics.
+   * @throws IOException When loading the statistics fails.
    */
-  private String getUser(String shortId) throws IOException {
-    ResourceManager manager = ResourceManager.getInstance();
-    ShortUrl shortUrl = manager.getUrlManager().getShortUrl(shortId);
-    return shortUrl != null ? shortUrl.getUser() : null;
+  public ShortUrlStatistics getDailyStatistics(ShortUrl shortUrl)
+      throws IOException {
+    return getDailyStatistics(shortUrl, -1);
   }
 
   /**

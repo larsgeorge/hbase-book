@@ -6,7 +6,7 @@
 <%@ page import="java.text.SimpleDateFormat" %>
 <%@ page import="java.util.NavigableMap" %>
 <%@ page import="java.util.Calendar" %>
-<%@ page import="com.hbasebook.hush.table.ShortUrl" %>
+<%@ page import="com.hbasebook.hush.model.ShortUrl" %>
 <%
   // check if the parameter was given
   String shortId = request.getParameter("sid");

@@ -16,8 +16,8 @@ import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.util.Bytes;
 
+import com.hbasebook.hush.model.ShortDomain;
 import com.hbasebook.hush.table.LongDomainTable;
-import com.hbasebook.hush.table.ShortDomain;
 import com.hbasebook.hush.table.ShortDomainTable;
 
 public class DomainManager {

@@ -15,7 +15,7 @@ import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.util.Bytes;
 
-import com.hbasebook.hush.table.User;
+import com.hbasebook.hush.model.User;
 import com.hbasebook.hush.table.UserTable;
 
 public class UserManager {

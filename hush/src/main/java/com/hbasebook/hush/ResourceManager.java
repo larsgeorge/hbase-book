@@ -5,13 +5,14 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
 
-import com.maxmind.geoip.Country;
-import com.maxmind.geoip.LookupService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.client.HTable;
 import org.apache.hadoop.hbase.client.HTablePool;
+
+import com.maxmind.geoip.Country;
+import com.maxmind.geoip.LookupService;
 
 /**
  * This class is implemented as a Singleton, i.e., it is shared across the
@@ -33,13 +34,18 @@ public class ResourceManager {
   private final UrlManager urlManager;
   private final LookupService lookupService;
 
+  public static final byte[] ONE = new byte[] { 1 };
+
+  public static final byte[] ZERO = new byte[] { 0 };
+
   /**
    * Returns the shared instance of this singleton class.
-   *
+   * 
    * @return The singleton instance.
    * @throws IOException When creating the remote HBase connection fails.
    */
-  public synchronized static ResourceManager getInstance() throws IOException {
+  public synchronized static ResourceManager getInstance()
+      throws IOException {
     assert (INSTANCE != null);
     return INSTANCE;
   }
@@ -47,13 +53,13 @@ public class ResourceManager {
   /**
    * Creates a new instance using the provided configuration upon first
    * invocation, otherwise it returns the already existing instance.
-   *
+   * 
    * @param conf The HBase configuration to use.
    * @return The new or existing singleton instance.
    * @throws IOException When creating the remote HBase connection fails.
    */
-  public synchronized static ResourceManager getInstance(Configuration conf)
-  throws IOException {
+  public synchronized static ResourceManager getInstance(
+      Configuration conf) throws IOException {
     if (INSTANCE == null) {
       INSTANCE = new ResourceManager(conf);
     }
@@ -71,18 +77,19 @@ public class ResourceManager {
 
   /**
    * Internal constructor, called by the <code>getInstance()</code> methods.
-   *
+   * 
    * @param conf The HBase configuration to use.
    * @throws IOException When creating the remote HBase connection fails.
    */
-  // cc HushHTablePoolProvider Use a pool of tables that is shared across threads
+  // cc HushHTablePoolProvider Use a pool of tables that is shared across
+  // threads
   // vv HushHTablePoolProvider
   private ResourceManager(Configuration conf) throws IOException {
     this.conf = conf;
     this.pool = new HTablePool(conf, 10);
-    /*...*/
+    /* ... */
     // ^^ HushHTablePoolProvider
-    this.counters = new Counters();
+    this.counters = new Counters(this);
     this.domainManager = new DomainManager(this);
     this.userManager = new UserManager(this);
     this.urlManager = new UrlManager(this);
@@ -96,12 +103,13 @@ public class ResourceManager {
     this.lookupService = file != null ? new LookupService(file) : null;
     // vv HushHTablePoolProvider
   }
+
   // ^^ HushHTablePoolProvider
 
   /**
    * Delayed initialization of the instance. Should be called once to set up the
    * counters etc.
-   *
+   * 
    * @throws IOException When setting up the resources in HBase fails.
    */
   void init() throws IOException {
@@ -110,7 +118,7 @@ public class ResourceManager {
 
   /**
    * Returns the internal <code>HTable</code> pool.
-   *
+   * 
    * @return The shared table pool.
    */
   public HTablePool getTablePool() {
@@ -120,7 +128,7 @@ public class ResourceManager {
   /**
    * Returns a single table from the shared table pool. More convenient to use
    * compared to <code>getTablePool()</code>.
-   *
+   * 
    * @param tableName The name of the table to retrieve.
    * @return The table reference.
    * @throws IOException When talking to HBase fails.
@@ -129,14 +137,15 @@ public class ResourceManager {
   public HTable getTable(byte[] tableName) throws IOException {
     return (HTable) pool.getTable(tableName);
   }
+
   // ^^ HushHTablePoolProvider
 
   /**
    * Returns the previously retrieved table to the shared pool. The caller must
    * take care of calling <code>flushTable()</code> if there are any pending
    * mutations.
-   *
-   * @param table  The table reference to return to the pool.
+   * 
+   * @param table The table reference to return to the pool.
    */
   // vv HushHTablePoolProvider
   public void putTable(HTable table) throws IOException {
@@ -144,11 +153,12 @@ public class ResourceManager {
       pool.putTable(table);
     }
   }
+
   // ^^ HushHTablePoolProvider
 
   /**
    * Returns the currently used configuration.
-   *
+   * 
    * @return The current configuration.
    */
   public Configuration getConfiguration() {
@@ -157,7 +167,7 @@ public class ResourceManager {
 
   /**
    * Returns a reference to the shared counters instance.
-   *
+   * 
    * @return The shared counters instance.
    */
   public Counters getCounters() {
@@ -166,7 +176,7 @@ public class ResourceManager {
 
   /**
    * Returns a reference to the shared domain manager instance.
-   *
+   * 
    * @return The shared domain manager instance.
    */
   public DomainManager getDomainManager() {
@@ -175,7 +185,7 @@ public class ResourceManager {
 
   /**
    * Returns a reference to the shared user manager instance.
-   *
+   * 
    * @return The shared user manager instance.
    */
   public UserManager getUserManager() {
@@ -184,7 +194,7 @@ public class ResourceManager {
 
   /**
    * Returns a reference to the shared domain manager instance.
-   *
+   * 
    * @return The shared domain manager instance.
    */
   public UrlManager getUrlManager() {
@@ -193,8 +203,8 @@ public class ResourceManager {
 
   /**
    * Returns the country details as looked up in the GeoIP database.
-   *
-   * @param address  The IP address as given.
+   * 
+   * @param address The IP address as given.
    * @return The country details.
    */
   public Country getCountry(String address) {
