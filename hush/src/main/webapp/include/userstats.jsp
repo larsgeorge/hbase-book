@@ -11,8 +11,10 @@
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.ArrayList" %>
 <%@ page import="com.hbasebook.hush.table.ShortUrl" %>
+<%@ page import="com.hbasebook.hush.Counter" %>
+<%@ page import="java.util.Date" %>
 <%
-  String username = HushUtil.getOrSetUsername (request, response);
+  String username = HushUtil.getOrSetUsername(request, response);
   ResourceManager manager = ResourceManager.getInstance();
   HTable userShortUrltable = manager.getTable(UserShortUrlTable.NAME);
 
@@ -35,10 +37,11 @@
     stats.add(stat);
   }
   manager.putTable(userShortUrltable);
+  if (stats.size() > 0) {
 %>
 <div id="userstats">
   <p>
-  <table id="userstats">
+  <table id="tbluserstats">
     <thead>
     <tr>
       <th>No.</th>
@@ -52,20 +55,22 @@
       int rowNum = 0;
       for (Counters.ShortUrlStatistics stat : stats) {
         rowNum++;
-        String shortId = stat.getShortId();
+        ShortUrl shortUrl = stat.getShortUrl();
+        String shortId = shortUrl.getId();
         String detailsUrl = "/" + shortId + "+";
         StringBuffer sparkData = new StringBuffer();
-        for (Double clicks : stat.getClicks().descendingMap().values()) {
+        for (Object obj : stat.getCounters("clicks").descendingSet()) {
+          Counter<Date, Double> counter = (Counter<Date, Double>) obj;
           if (sparkData.length() > 0) {
             sparkData.append(",");
           }
-          sparkData.append(clicks);
+          sparkData.append(counter.getValue());
         }
     %>
     <tr>
       <td class="rowNum"><%= rowNum%></td>
       <td class="shortUrl"><a href="<%= detailsUrl %>"><%= shortId %></a></td>
-      <td class="longUrl"><a href="<%= stat.getUrl()%>" target=""><%= stat.getUrl() %></a></td>
+      <td class="longUrl"><a href="<%= shortUrl.getLongUrl()%>" target=""><%= shortUrl.getLongUrl() %></a></td>
       <td class="trend"><a href="<%= detailsUrl %>">
         <img alt="Recent Trend for <%= shortId%>"
              src="http://chart.apis.google.com/chart?cht=ls&chs=120x15&chd=t:<%= sparkData%>&chco=999999&chm=B,999999,0,0,0&chds=0,120"/></a>
@@ -78,3 +83,4 @@
   </table>
   </p>
 </div>
+<% } %>

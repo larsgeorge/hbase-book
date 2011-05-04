@@ -3,11 +3,7 @@ package com.hbasebook.hush;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.Map;
-import java.util.NavigableMap;
-import java.util.TreeMap;
+import java.util.*;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.logging.Log;
@@ -37,39 +33,23 @@ public class Counters {
    * All possible statistics saved in columns in the table.
    */
   public enum Category {
-    Click("cl"),
-    Country("co");
-
-    private final String postfix;
-
-    Category(String postfix) {
-      this.postfix = postfix;
-    }
-
-    public String getPostfix() {
-      return postfix;
-    }
-
-    @Override
-    public String toString() {
-      return postfix;
-    }
+    CLICK, COUNTRY;
   }
 
   /**
    * Time frame for statistics.
    */
   public enum TimeFrame {
-    Day, Week, Month
+    DAY, WEEK, MONTH
   }
 
   /**
    * The column qualifiers for the statistics table.
    */
   public enum ColumnQualifier {
-    Day("yyyyMMdd", TimeFrame.Day),
-    Week("yyyyww", TimeFrame.Week),
-    Month("yyyyMM", TimeFrame.Month);
+    DAY("yyyyMMdd", TimeFrame.DAY),
+    WEEK("yyyyww", TimeFrame.WEEK),
+    MONTH("yyyyMM", TimeFrame.MONTH);
 
     private final SimpleDateFormat formatter;
     private final TimeFrame timeFrame;
@@ -81,7 +61,7 @@ public class Counters {
 
     public byte[] getColumnName(Date date, Category type) {
       return Bytes.add(Bytes.toBytes(formatter.format(date)), ZERO,
-        Bytes.toBytes(type.getPostfix()));
+        new byte[] { (byte)(type.ordinal() + 1) });
     }
 
     public TimeFrame getTimeFrame() {
@@ -107,33 +87,30 @@ public class Counters {
    * Container class to hold the details for the presentation layer.
    */
   public class ShortUrlStatistics {
-    private final String shortId;
-    private final String url;
-    private final NavigableMap<Date, Double> clicks;
+    private final ShortUrl shortUrl;
     private final TimeFrame timeFrame;
+    private Map<String, NavigableSet<?>>
+      counters = new HashMap<String, NavigableSet<?>>();
 
-    private ShortUrlStatistics(String shortId, String url,
-      NavigableMap<Date, Double> clicks, TimeFrame timeFrame) {
-      this.shortId = shortId;
-      this.url = url;
-      this.clicks = clicks;
+    private ShortUrlStatistics(ShortUrl shortUrl, TimeFrame timeFrame) {
+      this.shortUrl = shortUrl;
       this.timeFrame = timeFrame;
     }
 
-    public String getShortId() {
-      return shortId;
-    }
-
-    public String getUrl() {
-      return url;
-    }
-
-    public NavigableMap<Date, Double> getClicks() {
-      return clicks;
+    public ShortUrl getShortUrl() {
+      return shortUrl;
     }
 
     public TimeFrame getTimeFrame() {
       return timeFrame;
+    }
+
+    public NavigableSet<?> getCounters(String name) {
+      return counters.get(name);
+    }
+
+    public void addCounters(String name, NavigableSet<?> counters) {
+      this.counters.put(name, counters);
     }
   }
 
@@ -174,8 +151,7 @@ public class Counters {
    * @return The decoded number.
    */
   public static long parseLong(String number, int base, boolean reverse) {
-    int length = number.length();
-    int index = length;
+    int index = number.length();
     int result = 0;
     int multiplier = 1;
     while (index-- > 0) {
@@ -231,7 +207,7 @@ public class Counters {
    * counter by one.
    *
    * @return The newly created short Id.
-   * @throws Exception When communicating with HBase fails.
+   * @throws IOException When communicating with HBase fails.
    */
   public String getShortId() throws IOException {
     return getShortId(1L);
@@ -249,11 +225,10 @@ public class Counters {
     HTable table = manager.getTable(HushTable.NAME);
     try {
       Increment increment = new Increment(HushTable.GLOBAL_ROW_KEY);
-      increment.addColumn(HushTable.COUNTERS_FAMILY, HushTable.SHORT_ID,
-        incrBy);
+      increment.addColumn(HushTable.COUNTERS_FAMILY, HushTable.SHORT_ID, incrBy);
       Result result = table.increment(increment);
-      long id = Bytes.toLong(result.getValue(HushTable.COUNTERS_FAMILY,
-        HushTable.SHORT_ID));
+      long id = Bytes.toLong(
+        result.getValue(HushTable.COUNTERS_FAMILY, HushTable.SHORT_ID));
       return longToString(id, 62, true);
     } catch (Exception e) {
       LOG.error("Unable to create a new short Id.", e);
@@ -272,7 +247,7 @@ public class Counters {
    * increments the counter by one.
    *
    * @return The newly created user Id.
-   * @throws Exception When communicating with HBase fails.
+   * @throws IOException When communicating with HBase fails.
    */
   public String getAnonymousUserId() throws IOException {
     return getAnonymousUserId(1L);
@@ -340,9 +315,9 @@ public class Counters {
     HTable table = manager.getTable(UserShortUrlTable.NAME);
     byte[] rowKey = getRowKey(shortUrl);
     Increment increment = new Increment(rowKey);
-    addIncrement(increment, Category.Click, date, null, incrBy);
+    addIncrement(increment, Category.CLICK, date, null, incrBy);
     if (country != null) {
-      addIncrement(increment, Category.Country, date, country.getCode(),
+      addIncrement(increment, Category.COUNTRY, date, country.getCode(),
         incrBy);
     }
     table.increment(increment);
@@ -352,9 +327,9 @@ public class Counters {
     table = manager.getTable(LongUrlTable.NAME);
     rowKey = DigestUtils.md5(shortUrl.getLongUrl());
     increment = new Increment(rowKey);
-    addIncrement(increment, Category.Click, date, null, incrBy);
+    addIncrement(increment, Category.CLICK, date, null, incrBy);
     if (country != null) {
-      addIncrement(increment, Category.Country, date, country.getCode(),
+      addIncrement(increment, Category.COUNTRY, date, country.getCode(),
         incrBy);
     }
     table.increment(increment);
@@ -372,11 +347,11 @@ public class Counters {
    */
   private void addIncrement(Increment increment, Category category, Date date,
     String extra, long incrBy) {
-    byte[] qualifier = getQualifier(ColumnQualifier.Day, category, date, extra);
+    byte[] qualifier = getQualifier(ColumnQualifier.DAY, category, date, extra);
     increment.addColumn(UserShortUrlTable.DAILY_FAMILY, qualifier, incrBy);
-    qualifier = getQualifier(ColumnQualifier.Week, category, date, extra);
+    qualifier = getQualifier(ColumnQualifier.WEEK, category, date, extra);
     increment.addColumn(UserShortUrlTable.WEEKLY_FAMILY, qualifier, incrBy);
-    qualifier = getQualifier(ColumnQualifier.Month, category, date, extra);
+    qualifier = getQualifier(ColumnQualifier.MONTH, category, date, extra);
     increment.addColumn(UserShortUrlTable.MONTHLY_FAMILY, qualifier, incrBy);
   }
 
@@ -448,72 +423,75 @@ public class Counters {
     double normalize) throws IOException {
     ResourceManager manager = ResourceManager.getInstance();
     HTable userShortUrltable = manager.getTable(UserShortUrlTable.NAME);
-    HTable shortUrltable = manager.getTable(ShortUrlTable.NAME);
 
     // get short Id to URL mapping
-    byte[] shortId = Bytes.toBytes(shortUrl.getId());
-    Get get = new Get(shortId);
-    Result shortUrlData = shortUrltable.get(get);
-    String url = Bytes.toString(
-      shortUrlData.getValue(ShortUrlTable.DATA_FAMILY, ShortUrlTable.URL));
-    // get short Id usage data
-    String user = shortUrl.getUser();
-    if (user == null) {
-      user = getUser(shortUrl.getId());
-    }
-    byte[] rowKey = Bytes.add(Bytes.toBytes(user), ZERO, shortId);
-    get = new Get(rowKey);
+    ShortUrl newShortUrl = manager.getUrlManager().getShortUrl(
+      shortUrl.getId());
+    // load that user statistics
+    byte[] rowKey = Bytes.add(Bytes.toBytes(newShortUrl.getUser()), ZERO,
+      Bytes.toBytes(newShortUrl.getId()));
+    Get get = new Get(rowKey);
     get.addFamily(UserShortUrlTable.DAILY_FAMILY);
     Result userShortUrlResult = userShortUrltable.get(get);
     if (userShortUrlResult.isEmpty()) {
       return null;
     }
 
-    // TODO - Fix this once the reversed sorting is working
-    NavigableMap<Date, Double> clicks =
-      new TreeMap<Date, Double>(new ReverseDateComparator());
+    // create container to hold the computed values
+    NavigableSet<Counter<Date, Double>> clicks =
+      new TreeSet<Counter<Date, Double>>();
+    Map<String, Counter<String, Long>> clicksByCountry =
+      new TreeMap<String, Counter<String, Long>>();
     double maxValue = 0L;
-    Map<byte[], byte[]> familyMap =
-      userShortUrlResult.getFamilyMap(UserShortUrlTable.DAILY_FAMILY)
-        .descendingMap();
     int count = 0;
-    // iterate over usage data
+    // iterate over usage data, sort descending (newest to oldest)
+    Map<byte[], byte[]> familyMap = userShortUrlResult.getFamilyMap(
+      UserShortUrlTable.DAILY_FAMILY).descendingMap();
     for (Map.Entry<byte[], byte[]> entry : familyMap.entrySet()) {
+      // stop if we have enough values
       if (maxValues > 0 && count++ >= maxValues) {
         break;
       }
+      // parse the qualifier back into its details
+      String[] kp = Bytes.toString(entry.getKey()).split("\u0000");
+      Category category = Category.values()[kp[1].charAt(0) - 1];
       double clickCount = Bytes.toLong(entry.getValue());
-      maxValue = Math.max(maxValue, clickCount);
-      try {
-        clicks
-          .put(ColumnQualifier.Day.parseDate(Bytes.toString(entry.getKey())),
-            new Double(clickCount));
-      } catch (ParseException e) {
-        throw new IOException(e);
+      switch (category) {
+        case CLICK:
+          maxValue = Math.max(maxValue, clickCount);
+          try {
+            clicks.add(
+              new Counter<Date, Double>(ColumnQualifier.DAY.parseDate(kp[0]),
+                new Double(clickCount), Counter.Sort.KeyDesc));
+          } catch (ParseException e) {
+            throw new IOException(e);
+          }
+          break;
+        case COUNTRY:
+          Counter<String, Long> countryCount = clicksByCountry.get(kp[2]);
+          if (countryCount == null) {
+            countryCount = new Counter<String, Long>(kp[2],
+              Math.round(clickCount), Counter.Sort.ValueDesc);
+          } else {
+            countryCount.setValue(new Long(
+              Math.round(clickCount) + countryCount.getValue().longValue()));
+          }
+          clicksByCountry.put(kp[2], countryCount);
       }
     }
     // optionally normalize the data
     if (normalize > 0) {
-      clicks = normalizeData(clicks, normalize, maxValue);
+      normalizeData(clicks, normalize, maxValue);
     }
 
     manager.putTable(userShortUrltable);
-    manager.putTable(shortUrltable);
 
-    return new ShortUrlStatistics(shortUrl.getId(), url, clicks, TimeFrame.Day);
-  }
-
-  /**
-   * Loads a user based on a short Id.
-   *
-   * @param shortId The short Id to get the user for.
-   * @return The user name or <code>null</code> if not found.
-   * @throws IOException When loading the user fails.
-   */
-  private String getUser(String shortId) throws IOException {
-    ResourceManager manager = ResourceManager.getInstance();
-    ShortUrl shortUrl = manager.getUrlManager().getShortUrl(shortId);
-    return shortUrl != null ? shortUrl.getUser() : null;
+    ShortUrlStatistics statistics = new ShortUrlStatistics(newShortUrl,
+      TimeFrame.DAY);
+    statistics.addCounters("clicks", clicks);
+    statistics.addCounters("clicksbycountry",
+      new TreeSet<Counter<String, Long>>(clicksByCountry.values()));
+    return statistics;
   }
 
   /**
@@ -523,16 +501,12 @@ public class Counters {
    * @param data The data to normalize.
    * @param normalize The factor to normalize to.
    * @param maxValue The maximum value in the data.
-   * @return A copy of the list with all values normalized.
    */
-  private NavigableMap<Date, Double> normalizeData(Map<Date, Double> data,
-    double normalize, double maxValue) {
-    NavigableMap<Date, Double> norms =
-      new TreeMap<Date, Double>(new ReverseDateComparator());
-    for (Map.Entry<Date, Double> entry : data.entrySet()) {
-      norms.put(entry.getKey(),
-        new Double(entry.getValue() * normalize / maxValue));
+  private void normalizeData(Set<Counter<Date, Double>> data, double normalize,
+    double maxValue) {
+    for (Counter<Date, Double> counter : data) {
+      counter.setValue(
+        new Double(counter.getValue().doubleValue() * normalize / maxValue));
     }
-    return norms;
   }
 }
