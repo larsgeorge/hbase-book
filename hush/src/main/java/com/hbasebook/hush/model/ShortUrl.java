@@ -8,7 +8,7 @@ public class ShortUrl {
   private final String user;
 
   public ShortUrl(String id, String domain, String longUrl,
-                  String refShortId, String user) {
+      String refShortId, String user) {
     this.id = id;
     this.domain = domain;
     this.longUrl = longUrl;
@@ -33,6 +33,16 @@ public class ShortUrl {
   }
 
   public String getUser() {
+    return user;
+  }
+
+  public String getDisplayUser() {
+    if (user == null) {
+      return "";
+    }
+    if (user.endsWith(":anon")) {
+      return "anonymous";
+    }
     return user;
   }
 

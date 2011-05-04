@@ -7,6 +7,7 @@
 <%@ page import="java.util.NavigableMap" %>
 <%@ page import="java.util.Calendar" %>
 <%@ page import="com.hbasebook.hush.model.ShortUrl" %>
+<%@ page import="com.hbasebook.hush.model.ShortUrlStatistics" %>
 <%
   // check if the parameter was given
   String shortId = request.getParameter("sid");
@@ -20,16 +21,20 @@
   // get statistics
   ResourceManager manager = ResourceManager.getInstance();
   ShortUrl shortUrl = manager.getUrlManager().getShortUrl(shortId);
-  Counters.ShortUrlStatistics stats = manager.getCounters().getDailyStatistics(
+  ShortUrlStatistics stats = manager.getCounters().getDailyStatistics(
     shortUrl);
   if (stats == null) {
     request.getRequestDispatcher("/error.jsp?error=Nothing+found!").
       forward(request, response);
   }
   SimpleDateFormat formatter = new SimpleDateFormat("yyyy, MM, dd");
+  String longUrl = shortUrl.getLongUrl();
+  String user = shortUrl.getDisplayUser();
+  String qrUrl = shortUrl.toString() + ".q";
+  
 %>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
-"http://www.w3.org/TR/html4/strict.dtd">
+  "http://www.w3.org/TR/html4/strict.dtd">
 <html>
 <head>
   <title>Short URL Details</title>
@@ -38,11 +43,14 @@
 <body>
 <jsp:include page="/include/header.jsp"/>
 <div class="main">
-  <h2>Details on <%= shortId%>
-  </h2>
+  <h2>Details on <%= shortId %></h2>
 
-  <p>URL: <%= stats.getUrl()%> created by <%= shortUrl.getUser()%>
-  </p>
+  <div id="summary">
+    <p>URL: <%= longUrl %> created by <%= user %></p>
+    <h3>QR Code</h3>
+    <img src="<%= qrUrl %>"
+     width="100" height="100" alt="<%= qrUrl %>" />    
+  </div>
 
   <div id="timeline_chart">
     <h3>Clicks by Date</h3>
