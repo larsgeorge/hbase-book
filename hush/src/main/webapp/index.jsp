@@ -39,7 +39,7 @@
     <p>Shorten your URLs!</p>
 
     <form action="/index.jsp" method="post">
-      <textarea name="url" rows="3" cols="60"></textarea>
+      <input type="text" name="url" size="60" />
       <input type="submit" value="Shorten it"/>
     </form>
   </div>

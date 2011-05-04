@@ -78,8 +78,8 @@ public class Counters {
     }
 
     public byte[] getColumnName(Date date, Category type) {
-      return Bytes.add(Bytes.toBytes(formatter.format(date)), ZERO, Bytes
-          .toBytes(type.getPostfix()));
+      return Bytes.add(Bytes.toBytes(formatter.format(date)), ZERO,
+          Bytes.toBytes(type.getPostfix()));
     }
 
     public TimeFrame getTimeFrame() {
@@ -148,7 +148,8 @@ public class Counters {
    * @param reverse Flag to indicate if the result should be reversed.
    * @return The encoded - and optionally reversed - encoded string.
    */
-  public static String longToString(long number, int base, boolean reverse) {
+  public static String longToString(long number, int base,
+      boolean reverse) {
     String result = number == 0 ? "0" : "";
     while (number != 0) {
       int mod = (int) number % base;
@@ -203,14 +204,13 @@ public class Counters {
       }
 
       put = new Put(HushTable.GLOBAL_ROW_KEY);
-      put.add(HushTable.COUNTERS_FAMILY, HushTable.ANONYMOUS_USER_ID, Bytes
-          .toBytes(parseLong("0", 62, false)));
+      put.add(HushTable.COUNTERS_FAMILY, HushTable.ANONYMOUS_USER_ID,
+          Bytes.toBytes(parseLong("0", 62, false)));
       hasPut = table.checkAndPut(HushTable.GLOBAL_ROW_KEY,
           HushTable.COUNTERS_FAMILY, HushTable.SHORT_ID, null, put);
       if (hasPut) {
         LOG.info("Anonymous User Id counter initialized.");
       }
-      table.flushCommits();
     } catch (Exception e) {
       LOG.error("Unable to initialize counters.", e);
       throw new IOException(e);
@@ -246,12 +246,11 @@ public class Counters {
     HTable table = manager.getTable(HushTable.NAME);
     try {
       Increment increment = new Increment(HushTable.GLOBAL_ROW_KEY);
-      increment
-          .addColumn(HushTable.COUNTERS_FAMILY, HushTable.SHORT_ID, incrBy);
+      increment.addColumn(HushTable.COUNTERS_FAMILY,
+          HushTable.SHORT_ID, incrBy);
       Result result = table.increment(increment);
       long id = Bytes.toLong(result.getValue(HushTable.COUNTERS_FAMILY,
           HushTable.SHORT_ID));
-      table.flushCommits();
       return longToString(id, 62, true);
     } catch (Exception e) {
       LOG.error("Unable to create a new short Id.", e);
@@ -293,7 +292,6 @@ public class Counters {
       Result result = table.increment(increment);
       long id = Bytes.toLong(result.getValue(HushTable.COUNTERS_FAMILY,
           HushTable.ANONYMOUS_USER_ID));
-      table.flushCommits();
       return longToString(id, 62, true);
     } catch (Exception e) {
       LOG.error("Unable to create a new anonymous user Id.", e);
@@ -328,8 +326,8 @@ public class Counters {
    * @param incrBy The increment value.
    * @throws IOException When updating the counter fails.
    */
-  public void incrementUsage(ShortUrl shortUrl, RequestInfo info, long incrBy)
-      throws IOException {
+  public void incrementUsage(ShortUrl shortUrl, RequestInfo info,
+      long incrBy) throws IOException {
     Date date = new Date();
     ResourceManager manager = ResourceManager.getInstance();
     Country country = null;
@@ -342,10 +340,10 @@ public class Counters {
     Increment increment = new Increment(rowKey);
     addIncrement(increment, Category.Click, date, null, incrBy);
     if (country != null) {
-      addIncrement(increment, Category.Country, date, country.getCode(), incrBy);
+      addIncrement(increment, Category.Country, date,
+          country.getCode(), incrBy);
     }
     table.increment(increment);
-    table.flushCommits();
     manager.putTable(table);
 
     // increment URL statistics
@@ -354,10 +352,10 @@ public class Counters {
     increment = new Increment(rowKey);
     addIncrement(increment, Category.Click, date, null, incrBy);
     if (country != null) {
-      addIncrement(increment, Category.Country, date, country.getCode(), incrBy);
+      addIncrement(increment, Category.Country, date,
+          country.getCode(), incrBy);
     }
     table.increment(increment);
-    table.flushCommits();
     manager.putTable(table);
   }
 
@@ -370,14 +368,20 @@ public class Counters {
    * @param extra An extra info element added to the counter (optionally).
    * @param incrBy The increment value.
    */
-  private void addIncrement(Increment increment, Category category, Date date,
-      String extra, long incrBy) {
-    byte[] qualifier = getQualifier(ColumnQualifier.Day, category, date, extra);
-    increment.addColumn(UserShortUrlTable.DAILY_FAMILY, qualifier, incrBy);
-    qualifier = getQualifier(ColumnQualifier.Week, category, date, extra);
-    increment.addColumn(UserShortUrlTable.WEEKLY_FAMILY, qualifier, incrBy);
-    qualifier = getQualifier(ColumnQualifier.Month, category, date, extra);
-    increment.addColumn(UserShortUrlTable.MONTHLY_FAMILY, qualifier, incrBy);
+  private void addIncrement(Increment increment, Category category,
+      Date date, String extra, long incrBy) {
+    byte[] qualifier = getQualifier(ColumnQualifier.Day, category,
+        date, extra);
+    increment.addColumn(UserShortUrlTable.DAILY_FAMILY, qualifier,
+        incrBy);
+    qualifier = getQualifier(ColumnQualifier.Week, category, date,
+        extra);
+    increment.addColumn(UserShortUrlTable.WEEKLY_FAMILY, qualifier,
+        incrBy);
+    qualifier = getQualifier(ColumnQualifier.Month, category, date,
+        extra);
+    increment.addColumn(UserShortUrlTable.MONTHLY_FAMILY, qualifier,
+        incrBy);
   }
 
   /**
@@ -389,8 +393,8 @@ public class Counters {
    * @param extra The optional extra category element.
    * @return The qualifier.
    */
-  private byte[] getQualifier(ColumnQualifier qualifier, Category category,
-      Date date, String extra) {
+  private byte[] getQualifier(ColumnQualifier qualifier,
+      Category category, Date date, String extra) {
     byte[] result = qualifier.getColumnName(date, category);
     if (extra != null) {
       result = Bytes.add(result, ZERO, Bytes.toBytes(extra));
@@ -405,8 +409,9 @@ public class Counters {
    * @return The row key in byte[] format.
    */
   public static byte[] getRowKey(ShortUrl shortUrl) {
-    return Bytes.add(shortUrl.getUser() != null ? Bytes.toBytes(shortUrl
-        .getUser()) : DEFAULT_USER, ZERO, Bytes.toBytes(shortUrl.getId()));
+    return Bytes.add(
+        shortUrl.getUser() != null ? Bytes.toBytes(shortUrl.getUser())
+            : DEFAULT_USER, ZERO, Bytes.toBytes(shortUrl.getId()));
   }
 
   /**
@@ -429,8 +434,8 @@ public class Counters {
    * @return The statistics.
    * @throws IOException When loading the statistics fails.
    */
-  public ShortUrlStatistics getDailyStatistics(ShortUrl shortUrl, int maxValues)
-      throws IOException {
+  public ShortUrlStatistics getDailyStatistics(ShortUrl shortUrl,
+      int maxValues) throws IOException {
     return getDailyStatistics(shortUrl, maxValues, -1);
   }
 
@@ -483,8 +488,9 @@ public class Counters {
       double clickCount = Bytes.toLong(entry.getValue());
       maxValue = Math.max(maxValue, clickCount);
       try {
-        clicks.put(ColumnQualifier.Day
-            .parseDate(Bytes.toString(entry.getKey())), new Double(clickCount));
+        clicks.put(
+            ColumnQualifier.Day.parseDate(Bytes.toString(entry.getKey())),
+            new Double(clickCount));
       } catch (ParseException e) {
         throw new IOException(e);
       }
@@ -497,7 +503,8 @@ public class Counters {
     manager.putTable(userShortUrltable);
     manager.putTable(shortUrltable);
 
-    return new ShortUrlStatistics(shortUrl.getId(), url, clicks, TimeFrame.Day);
+    return new ShortUrlStatistics(shortUrl.getId(), url, clicks,
+        TimeFrame.Day);
   }
 
   /**
@@ -522,8 +529,8 @@ public class Counters {
    * @param maxValue The maximum value in the data.
    * @return A copy of the list with all values normalized.
    */
-  private NavigableMap<Date, Double> normalizeData(Map<Date, Double> data,
-      double normalize, double maxValue) {
+  private NavigableMap<Date, Double> normalizeData(
+      Map<Date, Double> data, double normalize, double maxValue) {
     NavigableMap<Date, Double> norms = new TreeMap<Date, Double>(
         new ReverseDateComparator());
     for (Map.Entry<Date, Double> entry : data.entrySet()) {

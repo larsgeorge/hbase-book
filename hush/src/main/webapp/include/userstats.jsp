@@ -35,6 +35,8 @@
     stats.add(stat);
   }
   manager.putTable(userShortUrltable);
+  
+  if (stats != null && stats.size() > 0) {
 %>
 <div id="userstats">
   <p>
@@ -78,3 +80,6 @@
   </table>
   </p>
 </div>
+<%
+  }
+%>

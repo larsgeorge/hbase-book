@@ -36,6 +36,7 @@ public class DomainManager {
   }
 
   public void createDomains() throws IOException {
+    LOG.info("Creating test domains.");
     addLongDomain("oreil.ly", "www.oreilly.com");
     addLongDomain("oreil.ly", "www2.oreilly.com");
     addLongDomain("oreil.ly", "www.orly.com");
