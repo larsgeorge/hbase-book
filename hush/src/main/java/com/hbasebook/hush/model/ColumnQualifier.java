@@ -8,13 +8,12 @@ import org.apache.hadoop.hbase.util.Bytes;
 
 import com.hbasebook.hush.ResourceManager;
 
-
 /**
  * The column qualifiers for the statistics table.
  */
 public enum ColumnQualifier {
-  Day("yyyyMMdd", TimeFrame.Day), Week("yyyyww", TimeFrame.Week), Month(
-      "yyyyMM", TimeFrame.Month);
+  DAY("yyyyMMdd", TimeFrame.DAY), WEEK("yyyyww", TimeFrame.WEEK), MONTH(
+      "yyyyMM", TimeFrame.MONTH);
 
   private final SimpleDateFormat formatter;
   private final TimeFrame timeFrame;
@@ -25,8 +24,8 @@ public enum ColumnQualifier {
   }
 
   public byte[] getColumnName(Date date, Category type) {
-    return Bytes.add(Bytes.toBytes(formatter.format(date)), ResourceManager.ZERO,
-        Bytes.toBytes(type.getPostfix()));
+    return Bytes.add(Bytes.toBytes(formatter.format(date)),
+        ResourceManager.ZERO, Bytes.toBytes(type.getPostfix()));
   }
 
   public TimeFrame getTimeFrame() {

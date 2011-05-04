@@ -4,7 +4,7 @@ package com.hbasebook.hush.model;
  * All possible statistics saved in columns in the table.
  */
 public enum Category {
-  Click("cl"), Country("co");
+  CLICK("cl"), COUNTRY("co");
 
   private final String postfix;
 
@@ -19,5 +19,14 @@ public enum Category {
   @Override
   public String toString() {
     return postfix;
+  }
+
+  public static Category forPostfix(String postfix) {
+    for (Category c : Category.values()) {
+      if (c.postfix.equals(postfix)) {
+        return c;
+      }
+    }
+    return null;
   }
 }

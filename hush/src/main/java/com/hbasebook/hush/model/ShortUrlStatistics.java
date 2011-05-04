@@ -1,20 +1,19 @@
 package com.hbasebook.hush.model;
 
-import java.util.Date;
-import java.util.NavigableMap;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.NavigableSet;
 
 /**
  * Container class to hold the details for the presentation layer.
  */
 public class ShortUrlStatistics {
   private final ShortUrl shortUrl;
-  private final NavigableMap<Date, Double> clicks;
   private final TimeFrame timeFrame;
+  private final Map<String, NavigableSet<?>> counters = new HashMap<String, NavigableSet<?>>();
 
-  public ShortUrlStatistics(ShortUrl shortUrl,
-      NavigableMap<Date, Double> clicks, TimeFrame timeFrame) {
+  public ShortUrlStatistics(ShortUrl shortUrl, TimeFrame timeFrame) {
     this.shortUrl = shortUrl;
-    this.clicks = clicks;
     this.timeFrame = timeFrame;
   }
 
@@ -22,11 +21,15 @@ public class ShortUrlStatistics {
     return shortUrl;
   }
 
-  public NavigableMap<Date, Double> getClicks() {
-    return clicks;
-  }
-
   public TimeFrame getTimeFrame() {
     return timeFrame;
+  }
+
+  public NavigableSet<?> getCounters(String name) {
+    return counters.get(name);
+  }
+
+  public void addCounters(String name, NavigableSet<?> counters) {
+    this.counters.put(name, counters);
   }
 }

@@ -6,10 +6,11 @@
 <%@ page import="org.apache.hadoop.hbase.client.ResultScanner" %>
 <%@ page import="org.apache.hadoop.hbase.client.Result" %>
 <%@ page import="com.hbasebook.hush.Counters" %>
+<%@ page import="com.hbasebook.hush.Counter" %>
 <%@ page import="com.hbasebook.hush.HushUtil" %>
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.ArrayList" %>
-<%@ page import="java.security.Principal" %>
+<%@ page import="java.util.Date" %>
 <%@ page import="com.hbasebook.hush.model.ShortUrl" %>
 <%@ page import="com.hbasebook.hush.model.ShortUrlStatistics" %>
 <%
@@ -22,7 +23,7 @@
 %>
 <div id="userstats">
   <p>
-  <table id="userstats">
+  <table id="tbluserstats">
     <thead>
     <tr>
       <th>No.</th>
@@ -41,11 +42,12 @@
           String detailsUrl = url + "+";
           String longUrl = shortUrl.getLongUrl();
           StringBuffer sparkData = new StringBuffer();
-          for (Double clicks : stat.getClicks().descendingMap().values()) {
+          for (Object obj : stat.getCounters("clicks").descendingSet()) {
+            Counter<Date, Double> counter = (Counter<Date, Double>) obj;
             if (sparkData.length() > 0) {
               sparkData.append(",");
             }
-            sparkData.append(clicks);
+            sparkData.append(counter.getValue());
           }
     %>
     <tr>
@@ -64,6 +66,4 @@
   </table>
   </p>
 </div>
-<%
-  }
-%>
+<% } %>

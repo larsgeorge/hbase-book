@@ -49,7 +49,6 @@
   <div id="short_url">
     <p>Your new shortened URL is:</p>
     <input type="text" size="50" value="<%= surl.toString() %>" disabled="disabled"/>
-    <p>Hand it out as QR Code: <a href="<%= qrUrl %>"><%= qrUrl %></a></p>
   </div>
 <% } %>
   <jsp:include page="/include/userstats.jsp"/>

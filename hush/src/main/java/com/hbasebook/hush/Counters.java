@@ -7,8 +7,10 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.NavigableMap;
+import java.util.NavigableSet;
+import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.logging.Log;
@@ -67,8 +69,7 @@ public class Counters {
    * @param reverse Flag to indicate if the result should be reversed.
    * @return The encoded - and optionally reversed - encoded string.
    */
-  public static String longToString(long number, int base,
-      boolean reverse) {
+  public static String longToString(long number, int base, boolean reverse) {
     String result = number == 0 ? "0" : "";
     while (number != 0) {
       int mod = (int) number % base;
@@ -91,8 +92,7 @@ public class Counters {
    * @return The decoded number.
    */
   public static long parseLong(String number, int base, boolean reverse) {
-    int length = number.length();
-    int index = length;
+    int index = number.length();
     int result = 0;
     int multiplier = 1;
     while (index-- > 0) {
@@ -147,7 +147,7 @@ public class Counters {
    * counter by one.
    * 
    * @return The newly created short Id.
-   * @throws Exception When communicating with HBase fails.
+   * @throws IOException When communicating with HBase fails.
    */
   public String getShortId() throws IOException {
     return getShortId(1L);
@@ -165,8 +165,8 @@ public class Counters {
     HTable table = manager.getTable(HushTable.NAME);
     try {
       Increment increment = new Increment(HushTable.GLOBAL_ROW_KEY);
-      increment.addColumn(HushTable.COUNTERS_FAMILY,
-          HushTable.SHORT_ID, incrBy);
+      increment.addColumn(HushTable.COUNTERS_FAMILY, HushTable.SHORT_ID,
+          incrBy);
       Result result = table.increment(increment);
       long id = Bytes.toLong(result.getValue(HushTable.COUNTERS_FAMILY,
           HushTable.SHORT_ID));
@@ -188,7 +188,7 @@ public class Counters {
    * increments the counter by one.
    * 
    * @return The newly created user Id.
-   * @throws Exception When communicating with HBase fails.
+   * @throws IOException When communicating with HBase fails.
    */
   public String getAnonymousUserId() throws IOException {
     return getAnonymousUserId(1L);
@@ -227,7 +227,6 @@ public class Counters {
   /**
    * Increments the usage statistics of a shortened URL.
    * 
-   * 
    * @param shortUrl The short URL details.
    * @param info The request information, may be <code>null</code>.
    * @throws IOException When updating the counter fails.
@@ -245,8 +244,8 @@ public class Counters {
    * @param incrBy The increment value.
    * @throws IOException When updating the counter fails.
    */
-  public void incrementUsage(ShortUrl shortUrl, RequestInfo info,
-      long incrBy) throws IOException {
+  public void incrementUsage(ShortUrl shortUrl, RequestInfo info, long incrBy)
+      throws IOException {
     Date date = new Date();
     Country country = null;
     if (info != null) {
@@ -256,10 +255,10 @@ public class Counters {
     HTable table = rm.getTable(UserShortUrlTable.NAME);
     byte[] rowKey = getRowKey(shortUrl);
     Increment increment = new Increment(rowKey);
-    addIncrement(increment, Category.Click, date, null, incrBy);
+    addIncrement(increment, Category.CLICK, date, null, incrBy);
     if (country != null) {
-      addIncrement(increment, Category.Country, date,
-          country.getCode(), incrBy);
+      addIncrement(increment, Category.COUNTRY, date, country.getCode(),
+          incrBy);
     }
     table.increment(increment);
     rm.putTable(table);
@@ -268,10 +267,10 @@ public class Counters {
     table = rm.getTable(LongUrlTable.NAME);
     rowKey = DigestUtils.md5(shortUrl.getLongUrl());
     increment = new Increment(rowKey);
-    addIncrement(increment, Category.Click, date, null, incrBy);
+    addIncrement(increment, Category.CLICK, date, null, incrBy);
     if (country != null) {
-      addIncrement(increment, Category.Country, date,
-          country.getCode(), incrBy);
+      addIncrement(increment, Category.COUNTRY, date, country.getCode(),
+          incrBy);
     }
     table.increment(increment);
     rm.putTable(table);
@@ -288,37 +287,13 @@ public class Counters {
    */
   private void addIncrement(Increment increment, Category category,
       Date date, String extra, long incrBy) {
-    byte[] qualifier = getQualifier(ColumnQualifier.Day, category,
-        date, extra);
-    increment.addColumn(UserShortUrlTable.DAILY_FAMILY, qualifier,
-        incrBy);
-    qualifier = getQualifier(ColumnQualifier.Week, category, date,
+    byte[] qualifier = getQualifier(ColumnQualifier.DAY, category, date,
         extra);
-    increment.addColumn(UserShortUrlTable.WEEKLY_FAMILY, qualifier,
-        incrBy);
-    qualifier = getQualifier(ColumnQualifier.Month, category, date,
-        extra);
-    increment.addColumn(UserShortUrlTable.MONTHLY_FAMILY, qualifier,
-        incrBy);
-  }
-
-  /**
-   * Creates the qualifier needed for the statistics columns.
-   * 
-   * @param qualifier The qualifier kind.
-   * @param category The statistics category.
-   * @param date The date for the statistics.
-   * @param extra The optional extra category element.
-   * @return The qualifier.
-   */
-  private byte[] getQualifier(ColumnQualifier qualifier,
-      Category category, Date date, String extra) {
-    byte[] result = qualifier.getColumnName(date, category);
-    if (extra != null) {
-      result = Bytes.add(result, ResourceManager.ZERO,
-          Bytes.toBytes(extra));
-    }
-    return result;
+    increment.addColumn(UserShortUrlTable.DAILY_FAMILY, qualifier, incrBy);
+    qualifier = getQualifier(ColumnQualifier.WEEK, category, date, extra);
+    increment.addColumn(UserShortUrlTable.WEEKLY_FAMILY, qualifier, incrBy);
+    qualifier = getQualifier(ColumnQualifier.MONTH, category, date, extra);
+    increment.addColumn(UserShortUrlTable.MONTHLY_FAMILY, qualifier, incrBy);
   }
 
   /**
@@ -334,8 +309,26 @@ public class Counters {
         Bytes.toBytes(shortUrl.getId()));
   }
 
-  public List<ShortUrlStatistics> getUserShortUrlStatistics(
-      String username) throws IOException {
+  /**
+   * Creates the qualifier needed for the statistics columns.
+   * 
+   * @param qualifier The qualifier kind.
+   * @param category The statistics category.
+   * @param date The date for the statistics.
+   * @param extra The optional extra category element.
+   * @return The qualifier.
+   */
+  private byte[] getQualifier(ColumnQualifier qualifier, Category category,
+      Date date, String extra) {
+    byte[] result = qualifier.getColumnName(date, category);
+    if (extra != null) {
+      result = Bytes.add(result, ResourceManager.ZERO, Bytes.toBytes(extra));
+    }
+    return result;
+  }
+
+  public List<ShortUrlStatistics> getUserShortUrlStatistics(String username)
+      throws IOException {
     HTable userShortUrlTable = rm.getTable(UserShortUrlTable.NAME);
 
     byte[] startRow = Bytes.toBytes(username);
@@ -355,6 +348,18 @@ public class Counters {
     }
     rm.putTable(userShortUrlTable);
     return stats;
+  }
+
+  /**
+   * Returns daily statistics for the given shortened URL.
+   * 
+   * @param shortUrl The shortened URL.
+   * @return The statistics.
+   * @throws IOException When loading the statistics fails.
+   */
+  public ShortUrlStatistics getDailyStatistics(ShortUrl shortUrl)
+      throws IOException {
+    return getDailyStatistics(shortUrl, -1);
   }
 
   /**
@@ -394,48 +399,60 @@ public class Counters {
       return null;
     }
 
-    // TODO - Fix this once the reversed sorting is working
-    NavigableMap<Date, Double> clicks = new TreeMap<Date, Double>(
-        new ReverseDateComparator());
+    // create container to hold the computed values
+    NavigableSet<Counter<Date, Double>> clicks = new TreeSet<Counter<Date, Double>>();
+    Map<String, Counter<String, Long>> clicksByCountry = new TreeMap<String, Counter<String, Long>>();
     double maxValue = 0L;
+    int count = 0;
+    // iterate over usage data, sort descending (newest to oldest)
     Map<byte[], byte[]> familyMap = userShortUrlResult.getFamilyMap(
         UserShortUrlTable.DAILY_FAMILY).descendingMap();
-    int count = 0;
-    // iterate over usage data
     for (Map.Entry<byte[], byte[]> entry : familyMap.entrySet()) {
+      // stop if we have enough values
       if (maxValues > 0 && count++ >= maxValues) {
         break;
       }
+      // parse the qualifier back into its details
+      String[] kp = Bytes.toString(entry.getKey()).split("\u0000");
+      // Category category = Category.values()[kp[1].charAt(0) - 1];
+      Category category = Category.forPostfix(kp[1]);
       double clickCount = Bytes.toLong(entry.getValue());
-      maxValue = Math.max(maxValue, clickCount);
-      try {
-        clicks.put(
-            ColumnQualifier.Day.parseDate(Bytes.toString(entry.getKey())),
-            new Double(clickCount));
-      } catch (ParseException e) {
-        throw new IOException(e);
+      switch (category) {
+      case CLICK:
+        maxValue = Math.max(maxValue, clickCount);
+        try {
+          clicks.add(new Counter<Date, Double>(
+              ColumnQualifier.DAY.parseDate(kp[0]), new Double(clickCount),
+              Counter.Sort.KeyDesc));
+        } catch (ParseException e) {
+          throw new IOException(e);
+        }
+        break;
+      case COUNTRY:
+        Counter<String, Long> countryCount = clicksByCountry.get(kp[2]);
+        if (countryCount == null) {
+          countryCount = new Counter<String, Long>(kp[2],
+              Math.round(clickCount), Counter.Sort.ValueDesc);
+        } else {
+          countryCount.setValue(new Long(Math.round(clickCount)
+              + countryCount.getValue().longValue()));
+        }
+        clicksByCountry.put(kp[2], countryCount);
       }
     }
     // optionally normalize the data
     if (normalize > 0) {
-      clicks = normalizeData(clicks, normalize, maxValue);
+      normalizeData(clicks, normalize, maxValue);
     }
 
     manager.putTable(userShortUrltable);
 
-    return new ShortUrlStatistics(shortUrl, clicks, TimeFrame.Day);
-  }
-
-  /**
-   * Returns daily statistics for the given shortened URL.
-   * 
-   * @param shortUrl The shortened URL.
-   * @return The statistics.
-   * @throws IOException When loading the statistics fails.
-   */
-  public ShortUrlStatistics getDailyStatistics(ShortUrl shortUrl)
-      throws IOException {
-    return getDailyStatistics(shortUrl, -1);
+    ShortUrlStatistics statistics = new ShortUrlStatistics(shortUrl,
+        TimeFrame.DAY);
+    statistics.addCounters("clicks", clicks);
+    statistics.addCounters("clicksbycountry",
+        new TreeSet<Counter<String, Long>>(clicksByCountry.values()));
+    return statistics;
   }
 
   /**
@@ -445,16 +462,12 @@ public class Counters {
    * @param data The data to normalize.
    * @param normalize The factor to normalize to.
    * @param maxValue The maximum value in the data.
-   * @return A copy of the list with all values normalized.
    */
-  private NavigableMap<Date, Double> normalizeData(
-      Map<Date, Double> data, double normalize, double maxValue) {
-    NavigableMap<Date, Double> norms = new TreeMap<Date, Double>(
-        new ReverseDateComparator());
-    for (Map.Entry<Date, Double> entry : data.entrySet()) {
-      norms.put(entry.getKey(), new Double(entry.getValue() * normalize
-          / maxValue));
+  private void normalizeData(Set<Counter<Date, Double>> data,
+      double normalize, double maxValue) {
+    for (Counter<Date, Double> counter : data) {
+      counter.setValue(new Double(counter.getValue().doubleValue()
+          * normalize / maxValue));
     }
-    return norms;
   }
 }
