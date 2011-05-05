@@ -34,15 +34,14 @@ public class UrlManager {
    * @return The shortened URL.
    * @throws IOException When reading or writing the data fails.
    */
-  public ShortUrl createShortUrl(URL url, String username,
-      RequestInfo info) throws IOException {
+  public ShortUrl createShortUrl(URL url, String username, RequestInfo info)
+      throws IOException {
     String host = rm.getDomainManager().shorten(url.getHost());
     String shortId = rm.getCounters().getShortId();
     String urlString = url.toString();
-    String refShortId = getReferenceShortId(urlString, shortId,
+    String refShortId = getReferenceShortId(urlString, shortId);
+    ShortUrl shortUrl = new ShortUrl(shortId, host, urlString, refShortId,
         username);
-    ShortUrl shortUrl = new ShortUrl(shortId, host, urlString,
-        refShortId, username);
     createUrlMapping(shortUrl);
     rm.getCounters().incrementUsage(shortUrl, info, 0L);
     return shortUrl;
@@ -55,16 +54,13 @@ public class UrlManager {
    * 
    * @param url The URL to look up.
    * @param shortId The new short Id.
-   * @param username The user name.
    * @return The reference short Id.
    * @throws IOException When reading or writing the data fails.
    */
-  private String getReferenceShortId(String url, String shortId,
-      String username) throws IOException {
+  private String getReferenceShortId(String url, String shortId) throws IOException {
     LongUrl longUrl = getLongUrl(url);
     if (longUrl == null) {
-      longUrl = new LongUrl(url, shortId, username);
-      boolean done = addLongUrl(longUrl);
+      boolean done = addLongUrl(url, shortId);
       // there is now an entry, retrieve instead
       if (!done) {
         longUrl = getLongUrl(url);
@@ -81,21 +77,18 @@ public class UrlManager {
    * @return <code>true</code> when the add has succeeded.
    * @throws IOException When reading or writing the data fails.
    */
-  public boolean addLongUrl(LongUrl longUrl) throws IOException {
+  private boolean addLongUrl(String longUrl, String shortId)
+      throws IOException {
     ResourceManager manager = ResourceManager.getInstance();
     HTable table = manager.getTable(LongUrlTable.NAME);
-    byte[] md5Url = DigestUtils.md5(longUrl.getUrl());
+    byte[] md5Url = DigestUtils.md5(longUrl);
     Put put = new Put(md5Url);
     put.add(LongUrlTable.DATA_FAMILY, LongUrlTable.URL,
-        Bytes.toBytes(longUrl.getUrl()));
+        Bytes.toBytes(longUrl));
     put.add(LongUrlTable.DATA_FAMILY, LongUrlTable.SHORT_ID,
-        Bytes.toBytes(longUrl.getShortId()));
-    if (longUrl.getUser() != null) {
-      put.add(LongUrlTable.DATA_FAMILY, LongUrlTable.USER_ID,
-          Bytes.toBytes(longUrl.getUser()));
-    }
-    boolean hasPut = table.checkAndPut(md5Url,
-        LongUrlTable.DATA_FAMILY, LongUrlTable.URL, null, put);
+        Bytes.toBytes(shortId));
+    boolean hasPut = table.checkAndPut(md5Url, LongUrlTable.DATA_FAMILY,
+        LongUrlTable.URL, null, put);
     manager.putTable(table);
     return hasPut;
   }
@@ -146,15 +139,15 @@ public class UrlManager {
       return null;
     }
 
-    String url = Bytes.toString(result.getValue(
-        ShortUrlTable.DATA_FAMILY, ShortUrlTable.URL));
+    String url = Bytes.toString(result.getValue(ShortUrlTable.DATA_FAMILY,
+        ShortUrlTable.URL));
     if (url == null) {
       LOG.warn("Found " + shortId + " but no URL column.");
       return null;
     }
 
-    String domain = Bytes.toString(result.getValue(
-        ShortUrlTable.DATA_FAMILY, ShortUrlTable.SHORT_DOMAIN));
+    String domain = Bytes.toString(result.getValue(ShortUrlTable.DATA_FAMILY,
+        ShortUrlTable.SHORT_DOMAIN));
     if (domain == null) {
       LOG.warn("Found " + shortId + " but no short domain column.");
       return null;
@@ -162,8 +155,8 @@ public class UrlManager {
 
     String refShortId = Bytes.toString(result.getValue(
         ShortUrlTable.DATA_FAMILY, ShortUrlTable.REF_SHORT_ID));
-    String user = Bytes.toString(result.getValue(
-        ShortUrlTable.DATA_FAMILY, ShortUrlTable.USER_ID));
+    String user = Bytes.toString(result.getValue(ShortUrlTable.DATA_FAMILY,
+        ShortUrlTable.USER_ID));
 
     rm.putTable(table);
     return new ShortUrl(shortId, domain, url, refShortId, user);
@@ -176,20 +169,17 @@ public class UrlManager {
     Get get = new Get(md5Url);
     get.addColumn(LongUrlTable.DATA_FAMILY, LongUrlTable.URL);
     get.addColumn(LongUrlTable.DATA_FAMILY, LongUrlTable.SHORT_ID);
-    get.addColumn(LongUrlTable.DATA_FAMILY, LongUrlTable.USER_ID);
     Result result = table.get(get);
     if (result.isEmpty()) {
       return null;
     }
 
-    String url = Bytes.toString(result.getValue(
-        LongUrlTable.DATA_FAMILY, LongUrlTable.URL));
-    String shortId = Bytes.toString(result.getValue(
-        LongUrlTable.DATA_FAMILY, LongUrlTable.SHORT_ID));
-    String user = Bytes.toString(result.getValue(
-        LongUrlTable.DATA_FAMILY, LongUrlTable.USER_ID));
+    String url = Bytes.toString(result.getValue(LongUrlTable.DATA_FAMILY,
+        LongUrlTable.URL));
+    String shortId = Bytes.toString(result.getValue(LongUrlTable.DATA_FAMILY,
+        LongUrlTable.SHORT_ID));
 
     rm.putTable(table);
-    return new LongUrl(url, shortId, user);
+    return new LongUrl(url, shortId);
   }
 }

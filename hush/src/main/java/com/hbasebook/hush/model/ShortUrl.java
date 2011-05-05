@@ -36,6 +36,10 @@ public class ShortUrl {
     return user;
   }
 
+  public boolean isAnonymous() {
+    return (user == null || user.endsWith(":anon"));
+  }
+
   public String getDisplayUser() {
     if (user == null) {
       return "";
