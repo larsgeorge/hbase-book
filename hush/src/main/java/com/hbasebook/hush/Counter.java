@@ -2,14 +2,16 @@ package com.hbasebook.hush;
 
 /**
  * Helper to sort counters by key or value.
- *
- * @param <K>  The key type.
- * @param <V>  The value type.
+ * 
+ * @param <K> The key type.
+ * @param <V> The value type.
  */
-public class Counter<K extends Comparable, V extends Comparable>
-       implements Comparable<Counter> {
+public class Counter<K extends Comparable<K>, V extends Comparable<V>>
+    implements Comparable<Counter<K, V>> {
 
-  public enum Sort { KeyAsc, KeyDesc, ValueAsc, ValueDesc;}
+  public enum Sort {
+    KeyAsc, KeyDesc, ValueAsc, ValueDesc;
+  }
 
   private K key;
   private V value;
@@ -50,16 +52,16 @@ public class Counter<K extends Comparable, V extends Comparable>
   }
 
   @Override
-  public int compareTo(Counter other) {
+  public int compareTo(Counter<K, V> other) {
     switch (sort) {
-      case KeyDesc:
-        return other.key.compareTo(key);
-      case ValueAsc:
-        return value.compareTo(other.value);
-      case ValueDesc:
-        return other.value.compareTo(value);
-      default:
-        return key.compareTo(other.key);
+    case KeyDesc:
+      return other.key.compareTo(key);
+    case ValueAsc:
+      return value.compareTo(other.value);
+    case ValueDesc:
+      return other.value.compareTo(value);
+    default:
+      return key.compareTo(other.key);
     }
   }
 }
