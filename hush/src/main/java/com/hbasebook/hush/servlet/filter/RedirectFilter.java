@@ -114,9 +114,8 @@ public class RedirectFilter implements Filter {
    */
   private void sendQRCode(HttpServletResponse response, String url)
     throws IOException {
-    URL qrUrl = new URL(
-      "http://chart.apis.google.com/chart?" + "chs=100x100&cht=qr&chl=" +
-        response.encodeURL(url));
+    URL qrUrl = new URL("http://chart.apis.google.com/chart?" +
+      "chs=100x100&cht=qr&chl=" + response.encodeURL(url));
     InputStream in = new BufferedInputStream(qrUrl.openStream());
     OutputStream out = response.getOutputStream();
     byte[] buf = new byte[1024];
