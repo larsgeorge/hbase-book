@@ -174,14 +174,13 @@ public class Counters {
     Map<String, Counter<String, Long>> clicksByCountry =
       new TreeMap<String, Counter<String, Long>>();
     double maxValue = 0L;
-    int count = 0;
     // iterate over usage data, sort descending (newest to oldest)
     Map<byte[], byte[]> familyMap =
       userShortUrlResult.getFamilyMap(ShortUrlTable.DAILY_FAMILY)
         .descendingMap();
     for (Map.Entry<byte[], byte[]> entry : familyMap.entrySet()) {
       // stop if we have enough values
-      if (maxValues > 0 && count++ >= maxValues) {
+      if (maxValues > 0 && clicks.size() >= maxValues) {
         break;
       }
       // parse the qualifier back into its details
