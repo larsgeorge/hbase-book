@@ -29,7 +29,7 @@ public class RedirectFilter implements Filter {
 
   /**
    * Initialized the filter instance.
-   * 
+   *
    * @param filterConfig The filter configuration.
    * @throws ServletException When initializing the filter fails.
    */
@@ -48,7 +48,7 @@ public class RedirectFilter implements Filter {
 
   /**
    * Filter the requests. Used to detect actual pages versus shortened URL Ids.
-   * 
+   *
    * @param request The current request.
    * @param response The response to write to.
    * @param chain The filter chain instance.
@@ -57,23 +57,24 @@ public class RedirectFilter implements Filter {
    */
   @Override
   public void doFilter(ServletRequest request, ServletResponse response,
-      FilterChain chain) throws IOException, ServletException {
+    FilterChain chain) throws IOException, ServletException {
     final HttpServletRequest httpRequest = (HttpServletRequest) request;
     final HttpServletResponse httpResponse = (HttpServletResponse) response;
 
     String uri = httpRequest.getRequestURI();
     // check if the request shall pass
-    if (uri.equals("/") || uri.startsWith("/user")
-        || uri.startsWith("/admin") || uri.endsWith(".jsp")
-        || uri.endsWith(".css")) {
+    if (uri.equals("/") || uri.startsWith("/user") ||
+      uri.startsWith("/admin") || uri.endsWith(".jsp") ||
+      uri.endsWith(".css")) {
       chain.doFilter(request, response);
     } else if (uri.endsWith(DETAILS_EXTENSION)) {
       // redirect http://hostname/shortId+ to
       // http://hostname/details.jsp?sid=shortId
-      String shortId = uri.substring(1, uri.length()
-          - DETAILS_EXTENSION.length());
+      String shortId = uri.substring(1, uri.length() -
+        DETAILS_EXTENSION.length());
       httpRequest.setAttribute("sid", shortId);
-      RequestDispatcher dispatcher = httpRequest.getRequestDispatcher("/details.jsp");
+      RequestDispatcher dispatcher =
+        httpRequest.getRequestDispatcher("/details.jsp");
       if (dispatcher != null) {
         dispatcher.forward(request, response);
       }
@@ -81,8 +82,8 @@ public class RedirectFilter implements Filter {
       // otherwise assume it is a short Id
       ResourceManager rm = ResourceManager.getInstance();
       boolean isQrCode = uri.endsWith(QR_EXTENSION);
-      String shortId = isQrCode ? uri.substring(1, uri.length()
-          - QR_EXTENSION.length()) : uri.substring(1);
+      String shortId = isQrCode ? uri.substring(1, uri.length() -
+        QR_EXTENSION.length()) : uri.substring(1);
       ShortUrl surl = rm.getUrlManager().getShortUrl(shortId);
       if (surl == null) {
         // if the short Id was bogus show a "shush" (our fail whale)
@@ -97,7 +98,7 @@ public class RedirectFilter implements Filter {
         if (refShortId != null) {
           // increment the aggregate link
           rm.getCounters().incrementUsage(refShortId,
-              new RequestInfo(httpRequest));
+            new RequestInfo(httpRequest));
         }
         httpResponse.sendRedirect(surl.getLongUrl());
       }
@@ -106,15 +107,16 @@ public class RedirectFilter implements Filter {
 
   /**
    * Copies a Google Chart API QRCode image to the output stream.
-   * 
+   *
    * @param response The response instance to use.
    * @param url The URL to encode.
    * @throws IOException When reading or writing the image fails.
    */
   private void sendQRCode(HttpServletResponse response, String url)
-      throws IOException {
-    URL qrUrl = new URL("http://chart.apis.google.com/chart?"
-        + "chs=100x100&cht=qr&chl=" + response.encodeURL(url));
+    throws IOException {
+    URL qrUrl = new URL(
+      "http://chart.apis.google.com/chart?" + "chs=100x100&cht=qr&chl=" +
+        response.encodeURL(url));
     InputStream in = new BufferedInputStream(qrUrl.openStream());
     OutputStream out = response.getOutputStream();
     byte[] buf = new byte[1024];
