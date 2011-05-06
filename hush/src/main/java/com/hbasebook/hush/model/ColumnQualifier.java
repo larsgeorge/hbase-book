@@ -12,8 +12,9 @@ import com.hbasebook.hush.ResourceManager;
  * The column qualifiers for the statistics table.
  */
 public enum ColumnQualifier {
-  DAY("yyyyMMdd", TimeFrame.DAY), WEEK("yyyyww", TimeFrame.WEEK), MONTH(
-      "yyyyMM", TimeFrame.MONTH);
+  DAY("yyyyMMdd", TimeFrame.DAY),
+  WEEK("yyyyww", TimeFrame.WEEK),
+  MONTH("yyyyMM", TimeFrame.MONTH);
 
   private final SimpleDateFormat formatter;
   private final TimeFrame timeFrame;
@@ -23,9 +24,9 @@ public enum ColumnQualifier {
     this.timeFrame = timeFrame;
   }
 
-  public byte[] getColumnName(Date date, Category type) {
+  public byte[] getColumnName(Date date, StatisticsCategory type) {
     return Bytes.add(Bytes.toBytes(formatter.format(date)),
-        ResourceManager.ZERO, Bytes.toBytes(type.getPostfix()));
+      ResourceManager.ZERO, new byte[]{type.getCode()});
   }
 
   public TimeFrame getTimeFrame() {
