@@ -17,8 +17,6 @@ import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.HTable;
 import org.apache.hadoop.hbase.client.Increment;
 import org.apache.hadoop.hbase.client.Result;
-import org.apache.hadoop.hbase.client.ResultScanner;
-import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.util.Bytes;
 
 import com.hbasebook.hush.model.Category;
@@ -29,7 +27,6 @@ import com.hbasebook.hush.model.ShortUrlStatistics;
 import com.hbasebook.hush.model.TimeFrame;
 import com.hbasebook.hush.servlet.RequestInfo;
 import com.hbasebook.hush.table.ShortUrlTable;
-import com.hbasebook.hush.table.UserShortUrlTable;
 import com.maxmind.geoip.Country;
 
 public class Counters {
@@ -136,26 +133,11 @@ public class Counters {
 
   public List<ShortUrlStatistics> getUserShortUrlStatistics(String username)
       throws IOException {
-    // TODO: this can be done in one scan because all data is in ShortUrlTable
-    // Possibly make Statistics internal to ShortUrl instead
-    HTable table = rm.getTable(UserShortUrlTable.NAME);
-
-    byte[] startRow = Bytes.toBytes(username);
-    byte[] stopRow = Bytes.add(startRow, ResourceManager.ONE);
-
-    Scan scan = new Scan(startRow, stopRow);
-    scan.addFamily(UserShortUrlTable.DATA_FAMILY);
-
-    ResultScanner scanner = table.getScanner(scan);
     List<ShortUrlStatistics> stats = new ArrayList<ShortUrlStatistics>();
-    for (Result result : scanner) {
-      String rowKey = Bytes.toString(result.getRow());
-      String shortId = rowKey.substring(rowKey.indexOf(0) + 1);
-      ShortUrl shortUrl = rm.getUrlManager().getShortUrl(shortId);
-      ShortUrlStatistics stat = getDailyStatistics(shortUrl, 30, 110.0);
+    for (ShortUrl surl : rm.getUrlManager().getShortUrlsByUser(username)) {
+      ShortUrlStatistics stat = getDailyStatistics(surl, 30, 110.0);
       stats.add(stat);
     }
-    rm.putTable(table);
     return stats;
   }
 
