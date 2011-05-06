@@ -11,32 +11,47 @@ public class HushUtil {
   /**
    * The digits used to BASE encode the short Ids.
    */
-  private static final String baseDigits = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+  private static final String BASE_62_DIGITS = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 
+  /**
+   * Converts a long to a base-62 string in reverse. (Least significant digit
+   * first.)
+   *
+   * @param number
+   * @return
+   */
   public static String hushEncode(long number) {
-    return longToString(number, baseDigits.length(), true);
+    return longToString(number, BASE_62_DIGITS, true);
   }
 
+  /**
+   * Converts a base-62 reverse string to a long.
+   *
+   * @param number
+   * @return
+   */
   public static long hushDecode(String id) {
-    return parseLong(id, baseDigits.length(), true);
+    return parseLong(id, BASE_62_DIGITS, true);
   }
 
   /**
    * Encodes a number in BASE N.
    * 
    * @param number The number to encode.
-   * @param base The base to use for the encoding.
+   * @param digits The character set to use for the encoding.
    * @param reverse Flag to indicate if the result should be reversed.
    * @return The encoded - and optionally reversed - encoded string.
    */
-  private static String longToString(long number, int base, boolean reverse) {
+  private static String longToString(long number, String digits,
+      boolean reverse) {
+    int base = digits.length();
     String result = number == 0 ? "0" : "";
     while (number != 0) {
       int mod = (int) number % base;
       if (reverse) {
-        result += baseDigits.charAt(mod);
+        result += digits.charAt(mod);
       } else {
-        result = baseDigits.charAt(mod) + result;
+        result = digits.charAt(mod) + result;
       }
       number = number / base;
     }
@@ -47,17 +62,18 @@ public class HushUtil {
    * Decodes the given BASE N encoded value.
    * 
    * @param number The encoded value to decode.
-   * @param base The base to decode with.
+   * @param digits The character set to decode with.
    * @param reverse Flag to indicate how the encoding was done.
    * @return The decoded number.
    */
-  private static long parseLong(String number, int base, boolean reverse) {
+  private static long parseLong(String number, String digits, boolean reverse) {
+    int base = digits.length();
     int index = number.length();
     int result = 0;
     int multiplier = 1;
     while (index-- > 0) {
       int pos = reverse ? number.length() - (index + 1) : index;
-      result += baseDigits.indexOf(number.charAt(pos)) * multiplier;
+      result += digits.indexOf(number.charAt(pos)) * multiplier;
       multiplier = multiplier * base;
     }
     return result;

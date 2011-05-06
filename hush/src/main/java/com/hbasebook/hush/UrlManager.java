@@ -166,16 +166,6 @@ public class UrlManager {
     Put put = new Put(rowKey);
     put.add(UserShortUrlTable.DATA_FAMILY, UserShortUrlTable.TIMESTAMP,
         Bytes.toBytes(System.currentTimeMillis()));
-    // put.add(ShortUrlTable.DATA_FAMILY, ShortUrlTable.URL,
-    // Bytes.toBytes(shortUrl.getLongUrl()));
-    // put.add(ShortUrlTable.DATA_FAMILY, ShortUrlTable.SHORT_DOMAIN,
-    // Bytes.toBytes(shortUrl.getDomain()));
-    // put.add(ShortUrlTable.DATA_FAMILY, ShortUrlTable.USER_ID,
-    // Bytes.toBytes(shortUrl.getUser()));
-    // if (shortUrl.getRefShortId() != null) {
-    // put.add(ShortUrlTable.DATA_FAMILY, ShortUrlTable.REF_SHORT_ID,
-    // Bytes.toBytes(shortUrl.getRefShortId()));
-    // }
     table.put(put);
     table.flushCommits();
     rm.putTable(table);
