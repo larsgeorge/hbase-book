@@ -1,4 +1,4 @@
-package com.hbasebook.hush;
+package com.hbasebook.hush.model;
 
 /**
  * Helper to sort counters by key or value.

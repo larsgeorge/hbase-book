@@ -4,10 +4,11 @@
 <%@ page import="java.text.SimpleDateFormat" %>
 <%@ page import="java.util.NavigableMap" %>
 <%@ page import="java.util.Calendar" %>
+<%@ page import="com.hbasebook.hush.model.Counter" %>
 <%@ page import="com.hbasebook.hush.model.ShortUrl" %>
 <%@ page import="com.hbasebook.hush.model.ShortUrlStatistics" %>
+<%@ page import="com.hbasebook.hush.model.User" %>
 <%@ page import="java.util.*" %>
-<%@ page import="com.hbasebook.hush.Counter" %>
 <%
   // check if the parameter was given
   String shortId = request.getParameter("sid");
@@ -28,10 +29,10 @@
       forward(request, response);
   }
   SimpleDateFormat formatter = new SimpleDateFormat("yyyy, MM, dd");
-  String longUrl = shortUrl.getLongUrl();
-  String user = shortUrl.getDisplayUser();
   String qrUrl = shortUrl.toString() + ".q";
+  String longUrl = shortUrl.getLongUrl();
   
+  ShortUrl aggShortUrl = manager.getUrlManager().getShortUrl (shortUrl.getRefShortId());  
 %>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
   "http://www.w3.org/TR/html4/strict.dtd">
@@ -46,9 +47,13 @@
   <h2>Details on <%= shortUrl %></h2>
 
   <div id="summary">
-    <p><a href="<%= longUrl %>"><%= longUrl %></a> created by <%= user %></p>
+    <p><a href="<%= longUrl %>"><%= longUrl %></a> created by <%= User.displayName (shortUrl.getUser()) %></p>
+<% if (aggShortUrl != null) { %>
+    <p>From <%= aggShortUrl.getId() %> created by <%= User.displayName (aggShortUrl.getUser()) %></p>
+<% } %>
     <img src="<%= qrUrl %>"
-     width="60" height="60" alt="<%= qrUrl %>" />    
+     width="60" height="60" alt="<%= qrUrl %>" />  
+   
   </div>
 
   <div id="timeline_chart">

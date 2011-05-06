@@ -3,6 +3,8 @@ package com.hbasebook.hush.model;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.hbasebook.hush.UserManager;
+
 public class User {
   public static final String USER_ROLE = "user";
   public static final String ADMIN_ROLE = "admin";
@@ -15,8 +17,8 @@ public class User {
   private final String roles;
   private transient Set<String> roleSet = null;
 
-  public User(String username, String firstName, String lastName, String email,
-      String credentials, String roles) {
+  public User(String username, String firstName, String lastName,
+      String email, String credentials, String roles) {
     super();
     this.username = username;
     this.firstName = firstName;
@@ -64,5 +66,17 @@ public class User {
 
   public boolean isAdmin() {
     return getRoleSet().contains(ADMIN_ROLE);
+  }
+
+  public static boolean isAnonymous(String username) {
+    return UserManager.isAnonymous(username);
+  }
+
+  public static String displayName(String username) {
+    if (isAnonymous(username)) {
+      return "anonymous";
+    } else {
+      return username;
+    }
   }
 }

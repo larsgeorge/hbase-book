@@ -6,11 +6,11 @@
 <%@ page import="org.apache.hadoop.hbase.client.ResultScanner" %>
 <%@ page import="org.apache.hadoop.hbase.client.Result" %>
 <%@ page import="com.hbasebook.hush.Counters" %>
-<%@ page import="com.hbasebook.hush.Counter" %>
 <%@ page import="com.hbasebook.hush.HushUtil" %>
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.ArrayList" %>
 <%@ page import="java.util.Date" %>
+<%@ page import="com.hbasebook.hush.model.Counter" %>
 <%@ page import="com.hbasebook.hush.model.ShortUrl" %>
 <%@ page import="com.hbasebook.hush.model.ShortUrlStatistics" %>
 <%

@@ -44,8 +44,7 @@ public class ResourceManager {
    * @return The singleton instance.
    * @throws IOException When creating the remote HBase connection fails.
    */
-  public synchronized static ResourceManager getInstance()
-      throws IOException {
+  public synchronized static ResourceManager getInstance() throws IOException {
     assert (INSTANCE != null);
     return INSTANCE;
   }
@@ -58,8 +57,8 @@ public class ResourceManager {
    * @return The new or existing singleton instance.
    * @throws IOException When creating the remote HBase connection fails.
    */
-  public synchronized static ResourceManager getInstance(
-      Configuration conf) throws IOException {
+  public synchronized static ResourceManager getInstance(Configuration conf)
+      throws IOException {
     if (INSTANCE == null) {
       INSTANCE = new ResourceManager(conf);
     }
@@ -113,7 +112,8 @@ public class ResourceManager {
    * @throws IOException When setting up the resources in HBase fails.
    */
   void init() throws IOException {
-    counters.init();
+    userManager.init();
+    urlManager.init();
   }
 
   /**

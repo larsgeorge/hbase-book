@@ -6,6 +6,5 @@ public class LongUrlTable {
   public static final byte[] NAME = Bytes.toBytes("url");
   public static final byte[] DATA_FAMILY = Bytes.toBytes("data");
   public static final byte[] URL = Bytes.toBytes("url");
-  public static final byte[] SHORT_ID = Bytes.toBytes("sid"); // the aggregate
-                                                              // shortId
+  public static final byte[] SHORT_ID = Bytes.toBytes("sid");
 }
