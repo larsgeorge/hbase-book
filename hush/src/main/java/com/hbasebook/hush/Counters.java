@@ -11,7 +11,6 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import com.hbasebook.hush.model.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.hbase.client.Get;
@@ -20,7 +19,12 @@ import org.apache.hadoop.hbase.client.Increment;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.util.Bytes;
 
+import com.hbasebook.hush.model.ColumnQualifier;
+import com.hbasebook.hush.model.Counter;
+import com.hbasebook.hush.model.ShortUrl;
+import com.hbasebook.hush.model.ShortUrlStatistics;
 import com.hbasebook.hush.model.StatisticsCategory;
+import com.hbasebook.hush.model.TimeFrame;
 import com.hbasebook.hush.servlet.RequestInfo;
 import com.hbasebook.hush.table.ShortUrlTable;
 import com.maxmind.geoip.Country;
@@ -77,6 +81,8 @@ public class Counters {
     HTable table = rm.getTable(ShortUrlTable.NAME);
     byte[] rowKey = Bytes.toBytes(shortId);
     Increment increment = new Increment(rowKey);
+    increment.addColumn(ShortUrlTable.DATA_FAMILY, ShortUrlTable.CLICKS,
+      incrBy);
     addIncrement(increment, StatisticsCategory.CLICK, date, null, incrBy);
     if (country != null) {
       addIncrement(increment, StatisticsCategory.COUNTRY, date,

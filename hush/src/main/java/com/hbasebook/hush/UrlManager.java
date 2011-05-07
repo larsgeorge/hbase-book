@@ -40,6 +40,15 @@ public class UrlManager {
    * @throws IOException When preparing the stored data fails.
    */
   public void init() throws IOException {
+    initializeShortIdCounter();
+  }
+
+  /**
+   * Initializes the short ID counter
+   *
+   * @throws IOException
+   */
+  private void initializeShortIdCounter() throws IOException {
     HTable table = rm.getTable(HushTable.NAME);
     try {
       Put put = new Put(HushTable.GLOBAL_ROW_KEY);
@@ -66,7 +75,7 @@ public class UrlManager {
    * @return The shortened URL.
    * @throws IOException When reading or writing the data fails.
    */
-  public ShortUrl createShortUrl(URL url, String username, RequestInfo info)
+  public ShortUrl shorten(URL url, String username, RequestInfo info)
     throws IOException {
     String shortId = generateShortId();
     String host = rm.getDomainManager().shorten(url.getHost());
@@ -77,11 +86,12 @@ public class UrlManager {
     if (refShortId != null && UserManager.isAnonymous(username)) {
       // no need to create a new link, just look up an existing one
       shortUrl = getShortUrl(refShortId);
-      createUserShortUrlMapping(username, refShortId);
+      createUserShortUrl(username, refShortId);
     } else {
-      shortUrl = new ShortUrl(shortId, host, urlString, refShortId, username);
-      createShortUrlMapping(shortUrl);
-      createUserShortUrlMapping(username, shortId);
+      shortUrl = new ShortUrl(shortId, host, urlString, refShortId, username,
+        0);
+      createShortUrl(shortUrl);
+      createUserShortUrl(username, shortId);
       rm.getCounters().incrementUsage(shortId, info, 0L);
     }
     return shortUrl;
@@ -138,7 +148,7 @@ public class UrlManager {
    * @param shortUrl The short URL details.
    * @throws IOException When saving the record fails.
    */
-  private void createShortUrlMapping(ShortUrl shortUrl) throws IOException {
+  private void createShortUrl(ShortUrl shortUrl) throws IOException {
     HTable table = rm.getTable(ShortUrlTable.NAME);
     Put put = new Put(Bytes.toBytes(shortUrl.getId()));
     put.add(ShortUrlTable.DATA_FAMILY, ShortUrlTable.URL,
@@ -151,6 +161,9 @@ public class UrlManager {
       put.add(ShortUrlTable.DATA_FAMILY, ShortUrlTable.REF_SHORT_ID,
         Bytes.toBytes(shortUrl.getRefShortId()));
     }
+    put.add(ShortUrlTable.DATA_FAMILY, ShortUrlTable.CLICKS,
+      Bytes.toBytes(shortUrl.getClicks()));
+
     table.put(put);
     table.flushCommits();
     rm.putTable(table);
@@ -162,7 +175,7 @@ public class UrlManager {
    * @param shortUrl The short URL details.
    * @throws IOException When saving the record fails.
    */
-  private void createUserShortUrlMapping(String username, String shortId)
+  private void createUserShortUrl(String username, String shortId)
     throws IOException {
     HTable table = rm.getTable(UserShortUrlTable.NAME);
     byte[] rowKey = Bytes.add(Bytes.toBytes(username), ResourceManager.ZERO,
@@ -194,6 +207,7 @@ public class UrlManager {
     get.addColumn(ShortUrlTable.DATA_FAMILY, ShortUrlTable.SHORT_DOMAIN);
     get.addColumn(ShortUrlTable.DATA_FAMILY, ShortUrlTable.REF_SHORT_ID);
     get.addColumn(ShortUrlTable.DATA_FAMILY, ShortUrlTable.USER_ID);
+    get.addColumn(ShortUrlTable.DATA_FAMILY, ShortUrlTable.CLICKS);
     Result result = table.get(get);
     if (result.isEmpty()) {
       return null;
@@ -217,9 +231,11 @@ public class UrlManager {
       ShortUrlTable.DATA_FAMILY, ShortUrlTable.REF_SHORT_ID));
     String user = Bytes.toString(result.getValue(ShortUrlTable.DATA_FAMILY,
       ShortUrlTable.USER_ID));
+    long clicks = Bytes.toLong(result.getValue(ShortUrlTable.DATA_FAMILY,
+      ShortUrlTable.CLICKS));
 
     rm.putTable(table);
-    return new ShortUrl(shortId, domain, url, refShortId, user);
+    return new ShortUrl(shortId, domain, url, refShortId, user, clicks);
   }
 
   private LongUrl getLongUrl(String longUrl) throws IOException {

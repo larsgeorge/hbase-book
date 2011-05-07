@@ -21,18 +21,16 @@
   }
   // get statistics
   ResourceManager manager = ResourceManager.getInstance();
-  ShortUrl shortUrl = manager.getUrlManager().getShortUrl(shortId);
-  ShortUrlStatistics stats = manager.getCounters().getDailyStatistics(
-    shortUrl);
-  if (stats == null) {
+  ShortUrl url = manager.getUrlManager().getShortUrl(shortId);
+  ShortUrlStatistics urlStats = manager.getCounters().getDailyStatistics(
+    url);
+  if (urlStats == null) {
     request.getRequestDispatcher("/error.jsp?error=Nothing+found!").
       forward(request, response);
   }
   SimpleDateFormat formatter = new SimpleDateFormat("yyyy, MM, dd");
-  String qrUrl = shortUrl.toString() + ".q";
-  String longUrl = shortUrl.getLongUrl();
-  
-  ShortUrl aggShortUrl = manager.getUrlManager().getShortUrl (shortUrl.getRefShortId());  
+  String qrUrl = url.toString() + ".q";  
+  ShortUrl aggUrl = manager.getUrlManager().getShortUrl (url.getRefShortId());  
 %>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
   "http://www.w3.org/TR/html4/strict.dtd">
@@ -42,18 +40,27 @@
   <link href="/style.css" rel="stylesheet" type="text/css"/>
 </head>
 <body>
+<div class="wrap">
 <jsp:include page="/include/header.jsp"/>
 <div class="main">
-  <h2>Details on <%= shortUrl %></h2>
-
   <div id="summary">
-    <p><a href="<%= longUrl %>"><%= longUrl %></a> created by <%= User.displayName (shortUrl.getUser()) %></p>
-<% if (aggShortUrl != null) { %>
-    <p>From <%= aggShortUrl.getId() %> created by <%= User.displayName (aggShortUrl.getUser()) %></p>
-<% } %>
-    <img src="<%= qrUrl %>"
-     width="60" height="60" alt="<%= qrUrl %>" />  
-   
+    <div id="info">
+	  <h2><%= url %></h2>
+	  <p class="longUrl">Target: <a href="<%= url.getLongUrl() %>"><%= url.getLongUrl() %></a></p>
+	  <p><%= url.getClicks() %> clicks on this link (<%= url.getId() %>
+	    created by <%= User.displayName (url.getUser()) %>)</p>
+<%
+   if (aggUrl != null) {
+      String detailsLink = aggUrl.toString() + "+";
+%>
+	  <p><%= aggUrl.getClicks() %> clicks on aggregate link  
+	    (<a href="<%= detailsLink %>"><%= aggUrl.getId() %></a>
+	    created by <%= User.displayName (aggUrl.getUser()) %>)</p>
+<% } %>		   
+    </div>
+    <div id="code">
+      <img src="<%= qrUrl %>" width="75" height="75" alt="<%= qrUrl %>" />  
+    </div>
   </div>
 
   <div id="timeline_chart">
@@ -67,7 +74,7 @@
         data.addColumn('date', 'Date');
         data.addColumn('number', 'URL Clicks');
       <%
-         NavigableSet<?> clicks = stats.getCounters("clicks").descendingSet();
+         NavigableSet<?> clicks = urlStats.getCounters("clicks").descendingSet();
       %>
         data.addRows(<%= clicks.size()%>);
       <%
@@ -99,11 +106,12 @@
     </script>
     <div id="div_for_timeline" style="width: 620px; height: 280px;"></div>
   </div>
+  
   <div id="country_chart">
     <h3>Clicks by Country</h3>
     <%
       // get details for countries
-      NavigableSet<?> clicksByCountry = stats.getCounters("clicksbycountry");
+      NavigableSet<?> clicksByCountry = urlStats.getCounters("clicksbycountry");
       StringBuffer data = new StringBuffer();
       for (Object obj: clicksByCountry) {
         Counter<String, Long> counter = (Counter<String, Long>) obj;
@@ -115,8 +123,9 @@
       // or use http://code.google.com/apis/visualization/documentation/gallery/piechart.html
     %>
     <img src="http://chart.apis.google.com/chart?chs=300x265&cht=p&chco=3399CC&chd=t:<%= data %>"
-         width="150" height="133" alt="" />
+         width="300" height="265" alt="" />
   </div>
+</div>
 </div>
 <jsp:include page="/include/footer.jsp"/>
 </body>

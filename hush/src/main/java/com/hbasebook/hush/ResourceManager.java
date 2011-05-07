@@ -113,9 +113,9 @@ public class ResourceManager {
    * @throws IOException When setting up the resources in HBase fails.
    */
   void init() throws IOException {
-    userManager.init();
-    urlManager.init();
     domainManager.init();
+    urlManager.init();
+    userManager.init();
   }
 
   /**

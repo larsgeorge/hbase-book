@@ -23,7 +23,7 @@ import com.hbasebook.hush.table.ShortDomainTable;
 public class DomainManager {
   private final Log LOG = LogFactory.getLog(DomainManager.class);
   private final ResourceManager rm;
-  private String defaultDomain = "localhost:8080";
+  private String defaultDomain = "localhost";
 
   /**
    * Package private constructor so only ResourceManager can instantiate.

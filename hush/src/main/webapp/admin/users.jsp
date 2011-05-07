@@ -16,6 +16,7 @@
 <link href="/style.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
+<div class="wrap">
 <jsp:include page="/include/header.jsp" />
 <div class="main">
 <jsp:include page="/include/adminMenu.jsp" />
@@ -47,7 +48,7 @@
 		%>
 	</tbody>
 </table>
-
+</div>
 </div>
 <jsp:include page="/include/footer.jsp" />
 </body>

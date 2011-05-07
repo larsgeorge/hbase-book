@@ -12,4 +12,5 @@ public class ShortUrlTable {
   public static final byte[] SHORT_DOMAIN = Bytes.toBytes("sdom");
   public static final byte[] REF_SHORT_ID = Bytes.toBytes("ref");
   public static final byte[] USER_ID = Bytes.toBytes("uid");
+  public static final byte[] CLICKS = Bytes.toBytes("clk");
 }

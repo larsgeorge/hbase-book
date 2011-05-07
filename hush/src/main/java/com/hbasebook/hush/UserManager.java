@@ -2,10 +2,15 @@ package com.hbasebook.hush;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
 
-import com.hbasebook.hush.model.ShortUrl;
-import com.hbasebook.hush.servlet.RequestInfo;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.hbase.client.Get;
@@ -17,7 +22,9 @@ import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.util.Bytes;
 
+import com.hbasebook.hush.model.ShortUrl;
 import com.hbasebook.hush.model.User;
+import com.hbasebook.hush.servlet.RequestInfo;
 import com.hbasebook.hush.table.HushTable;
 import com.hbasebook.hush.table.UserTable;
 
@@ -53,7 +60,7 @@ public class UserManager {
    *
    * @throws IOException When creating the user fails.
    */
-  public void createRootUser() throws IOException {
+  private void createRootUser() throws IOException {
     HTable table = rm.getTable(UserTable.NAME);
     try {
       Put put = new Put(ADMIN_LOGIN);
@@ -107,7 +114,7 @@ public class UserManager {
       new HashMap<RequestInfo.InfoName, String>();
     props.put(RequestInfo.InfoName.RemoteAddr, getRandomIp());
     RequestInfo info = new RequestInfo(props);
-    ShortUrl shortUrl = rm.getUrlManager().createShortUrl(
+    ShortUrl shortUrl = rm.getUrlManager().shorten(
       new URL("http://hbasebook.com"), "admin", info);
     Calendar startDate = Calendar.getInstance();
     startDate.set(2011, 1, 1);
@@ -121,19 +128,49 @@ public class UserManager {
     }
   }
 
+  private final String[] IP_BLOCK_BY_COUNTRY = { "20.0.0", // usa
+      "20.0.0", // usa
+      "20.0.0", // usa
+      "20.0.0", // usa
+      "20.0.0", // usa
+      "20.0.0", // usa
+      "20.0.0", // usa
+      "20.0.0", // usa
+      "20.0.0", // usa
+      "20.0.0", // usa
+      "20.0.0", // usa
+      "20.0.0", // usa
+      "2.24.0", // uk
+      "2.24.0", // uk
+      "2.24.0", // uk
+      "1.0.1", // china
+      "91.142.133", // russian fed
+      "91.142.133", // russian fed
+      "91.142.133", // russian fed
+      "91.142.133", // russian fed
+      "192.80.208", // whatup bra
+      "192.80.208", // whatup bra
+      "91.198.2", // germany
+      "198.49.164", // argentina
+      "180.149.200", // jp
+      "91.142.143", // it
+      "131.150.6", // ca
+  };
+
   private String getRandomIp() {
-    return String.format("%d.%d.%d.%d", getRandomIpByte(1),
-      getRandomIpByte(2), getRandomIpByte(3), getRandomIpByte(4));
+    return String.format("%s.%d",
+      IP_BLOCK_BY_COUNTRY[RANDOM.nextInt(IP_BLOCK_BY_COUNTRY.length)],
+      RANDOM.nextInt(255));
   }
 
-  private int getRandomIpByte(int pos) {
-    int num = -1;
-    while (num <= 0 || (pos == 1 && (num == 10 || num == 172 || num == 192 ||
-      num == 127 || num == 255))) {
-      num = RANDOM.nextInt(254) + 1;
-    }
-    return num;
-  }
+  // private int getRandomIpByte(int pos) {
+  // int num = -1;
+  // while (num <= 0 || (pos == 1 && (num == 10 || num == 172 || num == 192 ||
+  // num == 127 || num == 255))) {
+  // num = RANDOM.nextInt(254) + 1;
+  // }
+  // return num;
+  // }
 
 
   /**

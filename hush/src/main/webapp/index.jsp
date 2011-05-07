@@ -12,13 +12,13 @@
   String urlParam = request.getParameter("url");
   if (urlParam != null && urlParam.length() > 0) {
     try {
-      URL url = new URL(urlParam);
-      UrlManager urlm = ResourceManager.getInstance().getUrlManager();
-      String username = HushUtil.getOrSetUsername(request, response);
+  URL url = new URL(urlParam);
+  UrlManager urlm = ResourceManager.getInstance().getUrlManager();
+  String username = HushUtil.getOrSetUsername(request, response);
 
-      surl = urlm.createShortUrl(url, username, new RequestInfo(request));
+  surl = urlm.shorten(url, username, new RequestInfo(request));
     } catch (MalformedURLException e) {
-      request.setAttribute("error", "Invalid URL.");
+  request.setAttribute("error", "Invalid URL.");
     }
   }
 %>
@@ -30,6 +30,7 @@
   <link href="/style.css" rel="stylesheet" type="text/css"/>
 </head>
 <body>
+<div class="wrap">
 <jsp:include page="/include/header.jsp"/>
 <div class="main">
   <h2>Welcome to the HBase URL Shortener</h2>
@@ -53,7 +54,7 @@
 <% } %>
   <jsp:include page="/include/userstats.jsp"/>
 </div>
-<!--  main -->
+</div>
 <jsp:include page="/include/footer.jsp"/>
 </body>
 </html>

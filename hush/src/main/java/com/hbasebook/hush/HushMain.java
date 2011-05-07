@@ -80,7 +80,7 @@ public class HushMain {
     }
 
     // get port to bind to
-    int port = manager.getHushPort();
+    int port = ResourceManager.getHushPort();
 
     LOG.info("Web server setup.");
 

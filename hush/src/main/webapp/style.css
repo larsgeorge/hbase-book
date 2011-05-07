@@ -1,17 +1,30 @@
+html {
+	height: 100%;
+}
+
 body {
 	font-family: "Lucida Grande", "Lucida Sans Unicode", Verdana, Arial,
 		Helvetica, sans-serif;
 	font-size: 12px;
+	height: 100%;
 	margin: 0;
+	padding: 0;
+}
+
+.wrap {
+	min-height: 100%;
+	margin: 0;
+	padding: 0;
 }
 
 .main {
 	margin-top: 10px;
 	margin-right: 150px;
 	margin-left: 150px;
+	padding-bottom: 50px;
 }
 
-a, a:visited {
+a,a:visited {
 	color: #117799;
 	text-decoration: none;
 }
@@ -23,7 +36,6 @@ a:hover {
 p,h1,form,button {
 	border: 0;
 	margin-bottom: 15px;
-	padding: 0;
 }
 
 .spacer {
@@ -61,6 +73,7 @@ p,h1,form,button {
 	vertical-align: middle;
 }
 
+/*
 #footer {
 	width: 100%;
 	position: absolute;
@@ -68,6 +81,17 @@ p,h1,form,button {
 	text-align: center;
 	background-color: #add8e6;
 	font-size: 11px;
+}
+*/
+#footer {
+	width: 100%;
+	position: absolute;
+	margin-top: -50px;
+	height: 50px;
+	text-align: center;
+	background-color: #add8e6;
+	font-size: 11px;
+	margin-top: -50px;
 }
 
 /* ----------- Error ----------- */
@@ -195,7 +219,6 @@ div#adminMenu {
 	margin: 0;
 }
 
-
 /* ----------- Tables ----------- */
 table {
 	border: solid 1px #aacfe4;
@@ -272,4 +295,10 @@ td {
 
 #userstats td.trend {
 	width: 200px;
+}
+
+/* ----------- details ----------- */
+#summary div {
+	margin: 5px;
+	margin-bottom: 10px;
 }

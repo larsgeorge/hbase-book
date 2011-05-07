@@ -2,22 +2,22 @@ package com.hbasebook.hush.model;
 
 import com.hbasebook.hush.ResourceManager;
 
-import java.io.IOException;
-
 public class ShortUrl {
   private final String id;
   private final String domain;
   private final String longUrl;
   private final String refShortId;
   private final String user;
+  private final long clicks;
 
   public ShortUrl(String id, String domain, String longUrl,
-      String refShortId, String user) {
+    String refShortId, String user, long clicks) {
     this.id = id;
     this.domain = domain;
     this.longUrl = longUrl;
     this.refShortId = refShortId;
     this.user = user;
+    this.clicks = clicks;
   }
 
   public String getId() {
@@ -38,6 +38,10 @@ public class ShortUrl {
 
   public String getUser() {
     return user;
+  }
+
+  public long getClicks() {
+    return clicks;
   }
 
   @Override
