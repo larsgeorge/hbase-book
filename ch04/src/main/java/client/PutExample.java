@@ -28,7 +28,9 @@ public class PutExample {
     Put put = new Put(Bytes.toBytes("row1")); // co PutExample-3-NewPut Create put with specific row.
 
     put.add(Bytes.toBytes("colfam1"), Bytes.toBytes("qual1"),
-      Bytes.toBytes("val1")); // co PutExample-4-AddCol Add a column, whose name is "colfam1:qual1", to the put.
+      Bytes.toBytes("val1")); // co PutExample-4-AddCol1 Add a column, whose name is "colfam1:qual1", to the put.
+    put.add(Bytes.toBytes("colfam1"), Bytes.toBytes("qual2"),
+      Bytes.toBytes("val2")); // co PutExample-4-AddCol2 Add another column, whose name is "colfam1:qual2", to the put.
 
     table.put(put); // co PutExample-5-DoPut Store row with column into the HBase table.
   }
