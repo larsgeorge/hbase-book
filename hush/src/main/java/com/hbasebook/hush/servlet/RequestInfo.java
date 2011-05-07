@@ -9,15 +9,26 @@ import java.util.Map;
  */
 public class RequestInfo {
 
-  public enum Name { RemoteAddr, UserAgent }
+  public enum InfoName { RemoteAddr, UserAgent }
 
-  private Map<Name, String> info = new HashMap<Name, String>();
+  private final Map<InfoName, String> info;
 
-  public RequestInfo(HttpServletRequest request) {
-    info.put(Name.RemoteAddr, request.getRemoteAddr());
+  public RequestInfo() {
+    info = new HashMap<InfoName, String>();
   }
 
-  public String get(Name name) {
+  public RequestInfo(Map<InfoName, String> info) {
+    this.info = info;
+  }
+
+  public RequestInfo(HttpServletRequest request) {
+    info = new HashMap<InfoName, String>();
+    if (request != null) {
+      info.put(InfoName.RemoteAddr, request.getRemoteAddr());
+    }
+  }
+
+  public String get(InfoName name) {
     return info.get(name);
   }
 }

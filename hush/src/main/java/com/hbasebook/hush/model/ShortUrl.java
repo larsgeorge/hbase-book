@@ -1,5 +1,9 @@
 package com.hbasebook.hush.model;
 
+import com.hbasebook.hush.ResourceManager;
+
+import java.io.IOException;
+
 public class ShortUrl {
   private final String id;
   private final String domain;
@@ -38,6 +42,7 @@ public class ShortUrl {
 
   @Override
   public String toString() {
-    return "http://" + domain + "/" + id;
+    int port = ResourceManager.getHushPort();
+    return "http://" + domain + (port != 80 ? ":" + port : "") + "/" + id;
   }
 }

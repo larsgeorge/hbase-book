@@ -42,7 +42,7 @@ public class Counters {
    */
   public void incrementUsage(String shortId, RequestInfo info)
     throws IOException {
-    incrementUsage(shortId, info, 1L);
+    incrementUsage(shortId, info, 1L, new Date());
   }
 
   /**
@@ -54,11 +54,24 @@ public class Counters {
    * @throws IOException When updating the counter fails.
    */
   public void incrementUsage(String shortId, RequestInfo info, long incrBy)
-    throws IOException {
-    Date date = new Date();
+  throws IOException {
+    incrementUsage(shortId, info, incrBy, new Date());
+  }
+
+  /**
+   * Increments the usage statistics of a shortened URL.
+   *
+   * @param shortId The shortId to increment.
+   * @param info The request information, may be <code>null</code>.
+   * @param incrBy The increment value.
+   * @param date  The date to use for the increment.
+   * @throws IOException When updating the counter fails.
+   */
+  public void incrementUsage(String shortId, RequestInfo info, long incrBy,
+      Date date) throws IOException {
     Country country = null;
     if (info != null) {
-      country = rm.getCountry(info.get(RequestInfo.Name.RemoteAddr));
+      country = rm.getCountry(info.get(RequestInfo.InfoName.RemoteAddr));
     }
     // increment user statistics
     HTable table = rm.getTable(ShortUrlTable.NAME);

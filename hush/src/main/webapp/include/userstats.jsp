@@ -17,7 +17,7 @@
   String username = HushUtil.getOrSetUsername(request, response);
   ResourceManager rm = ResourceManager.getInstance();
   List<ShortUrlStatistics> stats = rm.getCounters().getUserShortUrlStatistics(
-      username);
+    username);
 
   if (stats != null && stats.size() > 0) {
 %>

@@ -24,7 +24,7 @@ public class HushMain {
 
   /**
    * Helper method to print out the command line arguments available.
-   * 
+   *
    * @param options
    *          The command line argument definition.
    * @param exitCode
@@ -39,7 +39,7 @@ public class HushMain {
   /**
    * Main entry point to application. Sets up the resources and launches the
    * Jetty server.
-   * 
+   *
    * @param args
    *          The command line arguments.
    * @throws Exception
@@ -80,7 +80,7 @@ public class HushMain {
     }
 
     // get port to bind to
-    int port = manager.getConfiguration().getInt("hush.port", 8080);
+    int port = manager.getHushPort();
 
     LOG.info("Web server setup.");
 
@@ -107,10 +107,6 @@ public class HushMain {
     HBaseLoginService loginService = new HBaseLoginService("HBaseRealm");
     server.addBean(loginService);
     wac.getSecurityHandler().setLoginService(loginService);
-
-    // seed data
-    manager.getUserManager().createRootUser();
-    manager.getDomainManager().createDomains();
 
     // start the server
     server.start();

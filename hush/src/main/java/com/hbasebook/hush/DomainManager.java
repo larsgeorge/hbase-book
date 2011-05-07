@@ -27,12 +27,16 @@ public class DomainManager {
 
   /**
    * Package private constructor so only ResourceManager can instantiate.
-   * 
+   *
    * @param rm
    * @throws IOException
    */
   DomainManager(ResourceManager rm) throws IOException {
     this.rm = rm;
+  }
+
+  public void init() throws IOException {
+    createDomains();
   }
 
   public void createDomains() throws IOException {
@@ -49,7 +53,7 @@ public class DomainManager {
 
   /**
    * Gets a list of {@link ShortDomain}.
-   * 
+   *
    * @return the list
    * @throws IOException
    */
@@ -84,7 +88,7 @@ public class DomainManager {
 
   /**
    * Adds a short to long domain mapping.
-   * 
+   *
    * @param shortDomain
    * @param longDomain
    * @throws IOException
@@ -100,14 +104,14 @@ public class DomainManager {
 
       // first add to sdom
       Put shortPut = new Put(shortBytes);
-      shortPut.add(ShortDomainTable.DOMAINS_FAMILY, longBytes, Bytes
-          .toBytes(System.currentTimeMillis()));
+      shortPut.add(ShortDomainTable.DOMAINS_FAMILY, longBytes, Bytes.toBytes(
+        System.currentTimeMillis()));
       shortTable.put(shortPut);
 
       // then add to ldom
       Put longPut = new Put(longBytes);
       longPut.add(LongDomainTable.DATA_FAMILY, LongDomainTable.SHORT_DOMAIN,
-          shortBytes);
+        shortBytes);
       longTable.put(longPut);
 
       longTable.flushCommits();
@@ -120,7 +124,7 @@ public class DomainManager {
 
   /**
    * Deletes a long domain mapping.
-   * 
+   *
    * @param longDomain
    * @throws IOException
    */
@@ -152,7 +156,7 @@ public class DomainManager {
 
   /**
    * Deletes a short domain and all its mappings.
-   * 
+   *
    * @param shortDomain
    * @throws IOException
    */
@@ -164,8 +168,8 @@ public class DomainManager {
       byte[] shortBytes = Bytes.toBytes(shortDomain);
       Result result = longTable.get(new Get(shortBytes));
       if (!result.isEmpty()) {
-        Map<byte[], byte[]> domainsMap = result
-            .getFamilyMap(ShortDomainTable.DOMAINS_FAMILY);
+        Map<byte[], byte[]> domainsMap = result.getFamilyMap(
+          ShortDomainTable.DOMAINS_FAMILY);
 
         List<Delete> deletes = new ArrayList<Delete>();
         for (byte[] longDomain : domainsMap.keySet()) {
@@ -193,9 +197,8 @@ public class DomainManager {
 
   /**
    * Shortens a long domain.
-   * 
+   *
    * @param longDomain
-   * @param defaultValue
    * @return The short domain mapped to longDomain, or defaultValue if no
    *         mapping exists.
    * @throws IOException
@@ -207,7 +210,7 @@ public class DomainManager {
       Result result = longTable.get(new Get(Bytes.toBytes(longDomain)));
       if (!result.isEmpty()) {
         byte[] shortBytes = result.getValue(LongDomainTable.DATA_FAMILY,
-            LongDomainTable.SHORT_DOMAIN);
+          LongDomainTable.SHORT_DOMAIN);
         if (shortBytes != null && shortBytes.length != 0) {
           return Bytes.toString(shortBytes);
         }
