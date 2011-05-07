@@ -40,12 +40,21 @@ public class HBaseHelper {
 
   public void createTable(String table, String... colfams)
   throws IOException {
+    createTable(table, null, colfams);
+  }
+
+  public void createTable(String table, byte[][] splitKeys, String... colfams)
+  throws IOException {
     HTableDescriptor desc = new HTableDescriptor(table);
     for (String cf : colfams) {
       HColumnDescriptor coldef = new HColumnDescriptor(cf);
       desc.addFamily(coldef);
     }
-    admin.createTable(desc);
+    if (splitKeys != null) {
+      admin.createTable(desc, splitKeys);
+    } else {
+      admin.createTable(desc);
+    }
   }
 
   public void disableTable(String table) throws IOException {
