@@ -4,7 +4,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.hbase.KeyValue;
 import org.apache.hadoop.hbase.client.Get;
-import org.apache.hadoop.hbase.coprocessor.BaseRegionObserverCoprocessor;
+import org.apache.hadoop.hbase.coprocessor.BaseRegionObserver;
 import org.apache.hadoop.hbase.coprocessor.ObserverContext;
 import org.apache.hadoop.hbase.coprocessor.RegionCoprocessorEnvironment;
 import org.apache.hadoop.hbase.regionserver.HRegion;
@@ -15,7 +15,7 @@ import java.util.List;
 
 // cc RegionObserverExample Example region observer checking for special get requests
 // vv RegionObserverExample
-public class RegionObserverExample extends BaseRegionObserverCoprocessor {
+public class RegionObserverExample extends BaseRegionObserver {
   // ^^ RegionObserverExample
   public static final Log LOG = LogFactory.getLog(HRegion.class);
   // vv RegionObserverExample
