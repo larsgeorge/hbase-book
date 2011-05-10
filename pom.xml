@@ -286,10 +286,18 @@
         </exclusion>
       </exclusions>
     </dependency>
+    <dependency>
+      <groupId>com.google.collections</groupId>
+      <artifactId>google-collections</artifactId>
+      <version>1.0</version>
+    </dependency>
   </dependencies>
 
   <modules>
+    <module>ch03</module>
     <module>ch04</module>
+    <module>ch05</module>
+    <module>ch06</module>
     <module>ch11</module>
     <module>hush</module>
   </modules>
