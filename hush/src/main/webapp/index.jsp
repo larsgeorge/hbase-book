@@ -12,13 +12,12 @@
   String urlParam = request.getParameter("url");
   if (urlParam != null && urlParam.length() > 0) {
     try {
-  URL url = new URL(urlParam);
-  UrlManager urlm = ResourceManager.getInstance().getUrlManager();
-  String username = HushUtil.getOrSetUsername(request, response);
-
-  surl = urlm.shorten(url, username, new RequestInfo(request));
+      URL url = new URL(urlParam);
+      UrlManager urlm = ResourceManager.getInstance().getUrlManager();
+      String username = HushUtil.getOrSetUsername(request, response);
+      surl = urlm.shorten(url, username, new RequestInfo(request));
     } catch (MalformedURLException e) {
-  request.setAttribute("error", "Invalid URL.");
+      request.setAttribute("error", "Invalid URL.");
     }
   }
 %>
@@ -31,29 +30,30 @@
 </head>
 <body>
 <div class="wrap">
-<jsp:include page="/include/header.jsp"/>
-<div class="main">
-  <h2>Welcome to the HBase URL Shortener</h2>
-  <jsp:include page="/include/error.jsp"/>
+  <jsp:include page="/include/header.jsp"/>
+  <div class="main">
+    <h2>Welcome to the HBase URL Shortener</h2>
+    <jsp:include page="/include/error.jsp"/>
 
-  <div id="shorten">
-    <p>Shorten your URLs!</p>
+    <div id="shorten">
+      <p>Shorten your URLs!</p>
 
-    <form action="/index.jsp" method="post">
-      <input type="text" name="url" size="60" />
-      <input type="submit" value="Shorten it"/>
-    </form>
+      <form action="/index.jsp" method="post">
+        <input type="text" name="url" size="60"/>
+        <input type="submit" value="Shorten it"/>
+      </form>
+    </div>
+    <% if (surl != null) {
+      String qrUrl = surl.toString() + ".q";
+    %>
+    <div id="short_url">
+      <p>Your new shortened URL is:</p>
+      <input type="text" size="50" value="<%= surl.toString() %>"
+             disabled="disabled"/>
+    </div>
+    <% } %>
+    <jsp:include page="/include/userstats.jsp"/>
   </div>
-<% if (surl != null) {
-  String qrUrl = surl.toString() + ".q";
-%>
-  <div id="short_url">
-    <p>Your new shortened URL is:</p>
-    <input type="text" size="50" value="<%= surl.toString() %>" disabled="disabled"/>
-  </div>
-<% } %>
-  <jsp:include page="/include/userstats.jsp"/>
-</div>
 </div>
 <jsp:include page="/include/footer.jsp"/>
 </body>

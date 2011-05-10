@@ -29,8 +29,8 @@
       forward(request, response);
   }
   SimpleDateFormat formatter = new SimpleDateFormat("yyyy, MM, dd");
-  String qrUrl = url.toString() + ".q";  
-  ShortUrl aggUrl = manager.getUrlManager().getShortUrl (url.getRefShortId());  
+  String qrUrl = url.toString() + ".q";
+  ShortUrl aggUrl = manager.getUrlManager().getShortUrl(url.getRefShortId());
 %>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
   "http://www.w3.org/TR/html4/strict.dtd">
@@ -53,13 +53,13 @@
    if (aggUrl != null) {
       String detailsLink = aggUrl.toString() + "+";
 %>
-	  <p><%= aggUrl.getClicks() %> clicks on aggregate link  
+	  <p><%= aggUrl.getClicks() %> clicks on aggregate link
 	    (<a href="<%= detailsLink %>"><%= aggUrl.getId() %></a>
 	    created by <%= User.displayName (aggUrl.getUser()) %>)</p>
-<% } %>		   
+<% } %>
     </div>
     <div id="code">
-      <img src="<%= qrUrl %>" width="75" height="75" alt="<%= qrUrl %>" />  
+      <img src="<%= qrUrl %>" width="75" height="75" alt="<%= qrUrl %>" />
     </div>
   </div>
 
@@ -106,7 +106,7 @@
     </script>
     <div id="div_for_timeline" style="width: 620px; height: 280px;"></div>
   </div>
-  
+
   <div id="country_chart">
     <h3>Clicks by Country</h3>
     <%
