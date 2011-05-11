@@ -78,18 +78,17 @@ public class UrlManager {
   public ShortUrl shorten(URL url, String username, RequestInfo info)
     throws IOException {
     String shortId = generateShortId();
-    String host = rm.getDomainManager().shorten(url.getHost());
+    String domain = rm.getDomainManager().shorten(url.getHost());
     String urlString = url.toString();
-    String refShortId = getReferenceShortId(urlString, shortId);
+    String refShortId = getReferenceShortId(domain, urlString, username);
 
-    ShortUrl shortUrl = null;
+    ShortUrl shortUrl;
     if (refShortId != null && UserManager.isAnonymous(username)) {
       // no need to create a new link, just look up an existing one
       shortUrl = getShortUrl(refShortId);
       createUserShortUrl(username, refShortId);
     } else {
-      shortUrl = new ShortUrl(shortId, host, urlString, refShortId, username,
-        0);
+      shortUrl = new ShortUrl(shortId, domain, urlString, refShortId, username);
       createShortUrl(shortUrl);
       createUserShortUrl(username, shortId);
       rm.getCounters().incrementUsage(shortId, info, 0L);
@@ -100,46 +99,56 @@ public class UrlManager {
   /**
    * Returns the reference short Id of a given URL. The reference Id is the
    * first short Id created for a URL. If there is no entry yet a new one is
-   * created, and it the reference Id for the new entry is the shortId
-   * parameter.
+   * created.
    *
-   * @param url The URL to look up.
-   * @param shortId Assign this as the reference ID if the URL does not exist.
-   * @return The shortId for the URL, if an entry exists, or null if a new entry
-   *         was created.
+   * @param domain  The domain name to use.
+   * @param url  The long URL to look up.
+   * @param username  The current username.
+   * @return The reference shortId for the URL.
    * @throws IOException When reading or writing the data fails.
    */
-  private String getReferenceShortId(String url, String shortId)
+  private String getReferenceShortId(String domain, String url, String username)
     throws IOException {
-    if (!addLongUrl(url, shortId)) {
+    String shortId = addLongUrl(domain, url, username);
+    if (shortId == null) {
       LongUrl longUrl = getLongUrl(url);
-      return longUrl.getShortId();
+      shortId = longUrl != null ? longUrl.getShortId() : null;
     }
-    return null;
+    return shortId;
   }
 
   /**
    * Adds a new long URL record to the table, but only if there is no previous
    * entry.
    *
-   * @param longUrl The details of what to add.
-   * @return <code>true</code> when the add has succeeded.
-   * @throws IOException When reading or writing the data fails.
+   * @param domain  The domain name to use.
+   * @param url  The long URL to look up.
+   * @param username  The current username.
+   * @return The new short Id when the add has succeeded.
+   * @throws IOException When adding the new URL fails.
    */
-  private boolean addLongUrl(String longUrl, String shortId)
+  private String addLongUrl(String domain, String url, String username)
     throws IOException {
     ResourceManager manager = ResourceManager.getInstance();
     HTable table = manager.getTable(LongUrlTable.NAME);
-    byte[] md5Url = DigestUtils.md5(longUrl);
+    byte[] md5Url = DigestUtils.md5(url);
     Put put = new Put(md5Url);
     put.add(LongUrlTable.DATA_FAMILY, LongUrlTable.URL,
-      Bytes.toBytes(longUrl));
-    put.add(LongUrlTable.DATA_FAMILY, LongUrlTable.SHORT_ID,
-      Bytes.toBytes(shortId));
+      Bytes.toBytes(url));
     boolean hasPut = table.checkAndPut(md5Url, LongUrlTable.DATA_FAMILY,
       LongUrlTable.URL, null, put);
+    String shortId = null;
+    // check if we added a new URL, if so assign an Id subsequently
+    if (hasPut) {
+      shortId = generateShortId();
+      createShortUrl(new ShortUrl(shortId, domain, url, null, username));
+      put.add(LongUrlTable.DATA_FAMILY, LongUrlTable.SHORT_ID,
+        Bytes.toBytes(shortId));
+      table.put(put);
+      table.flushCommits();
+    }
     manager.putTable(table);
-    return hasPut;
+    return shortId;
   }
 
   /**
@@ -172,7 +181,8 @@ public class UrlManager {
   /**
    * Saves a mapping between the short Id and long URL.
    *
-   * @param shortUrl The short URL details.
+   * @param username  The current username.
+   * @param shortId  The short Id to kink the user to.
    * @throws IOException When saving the record fails.
    */
   private void createUserShortUrl(String username, String shortId)
@@ -192,7 +202,7 @@ public class UrlManager {
    * Loads the details of a shortened URL by Id.
    *
    * @param shortId The Id to load.
-   * @return The shortened URL details.
+   * @return The shortened URL details, or <code>null</code> if not found.
    * @throws IOException When reading the data fails.
    */
   public ShortUrl getShortUrl(String shortId) throws IOException {
@@ -238,6 +248,13 @@ public class UrlManager {
     return new ShortUrl(shortId, domain, url, refShortId, user, clicks);
   }
 
+  /**
+   * Loads a URL from the URL table.
+   *
+   * @param longUrl  The URL to load.
+   * @return The URL with its details, or <code>null</code> if not found.
+   * @throws IOException When loading the URL fails.
+   */
   private LongUrl getLongUrl(String longUrl) throws IOException {
     HTable table = rm.getTable(LongUrlTable.NAME);
 
