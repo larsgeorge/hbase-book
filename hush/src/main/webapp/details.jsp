@@ -100,9 +100,15 @@
          Date zoomStart = cal.getTime();
          if (zoomStart.before(firstDate)) zoomStart = firstDate;
       %>
-        var chart = new google.visualization.AnnotatedTimeLine(document.getElementById('div_for_timeline'));
+        var chart = new google.visualization.AnnotatedTimeLine(
+          document.getElementById("div_for_timeline"));
         chart.draw(data, {zoomStartTime: new Date(<%= formatter.format(zoomStart)%>),
           zoomEndTime: new Date(<%= formatter.format(lastDate)%>)});
+
+//        google.visualization.events.addListener(chart, "rangechange", rangeChangeHandler);
+//        function rangeChangeHandler(e) {
+//          alert("Start: " + e.start + ", End: " + e.end);
+//        }
       }
     </script>
     <div id="div_for_timeline" style="width: 620px; height: 280px;"></div>
@@ -116,6 +122,7 @@
       StringBuffer data = new StringBuffer();
       StringBuffer label = new StringBuffer();
       StringBuffer legend = new StringBuffer();
+      long min = 0, max = 0;
       for (Object obj: clicksByCountry) {
         Counter<String, Long> counter = (Counter<String, Long>) obj;
         if (data.length() > 0) {
@@ -127,10 +134,12 @@
         String country = new Locale("", counter.getKey()).getDisplayCountry();
         label.append(counter.getValue());
         legend.append(country);
+        min = Math.min(min, counter.getValue().longValue());
+        max = Math.max(max, counter.getValue().longValue());
       }
       // or use http://code.google.com/apis/visualization/documentation/gallery/piechart.html
     %>
-    <img src="http://chart.apis.google.com/chart?chs=600x300&cht=p&chco=3399CC&chd=t:<%= data %>&chl=<%= label%>&chdl=<%= legend%>"
+    <img src="http://chart.apis.google.com/chart?chs=600x300&cht=p&chco=3399CC&chd=t:<%= data %>&chl=<%= label%>&chdl=<%= legend%>&chds=<%=min%>,<%=max%>"
          width="600" height="300" alt="" />
   </div>
 </div>
