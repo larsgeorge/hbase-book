@@ -119,6 +119,11 @@
     <%
       // get details for countries
       NavigableSet<?> clicksByCountry = urlStats.getCounters("clicksbycountry");
+      // the schema maps in the table and column schema, plus key formats etc.
+      // StatisticsSelector ss = manager.getStatisticsSelector("url",
+      //   StatisticsSelector.Granularity.DAILY, url); // schema, granularity, and value (optional)
+      // using a value narrows down the selected data -> performance
+      // List<Counter> counters = ss.getCounters("/clicks[between(startDate, endDate)]/country/@ISOCode");
       StringBuffer data = new StringBuffer();
       StringBuffer label = new StringBuffer();
       StringBuffer legend = new StringBuffer();
