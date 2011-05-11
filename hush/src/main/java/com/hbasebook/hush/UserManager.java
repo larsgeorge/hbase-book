@@ -122,10 +122,16 @@ public class UserManager {
     endDate.setTime(new Date());
     while (startDate.before(endDate)) {
       props.put(RequestInfo.InfoName.RemoteAddr, getRandomIp());
+      int count = RANDOM.nextInt(200);
       rm.getCounters().incrementUsage(shortUrl.getId(), info,
-        RANDOM.nextInt(200), startDate.getTime());
+        count, startDate.getTime());
+      if (shortUrl.getRefShortId() != null) {
+        rm.getCounters().incrementUsage(shortUrl.getRefShortId(), info,
+          count, startDate.getTime());
+      }
       startDate.add(Calendar.DATE, 1);
     }
+    LOG.info("Admin statistics initialized.");
   }
 
   private final String[] IP_BLOCK_BY_COUNTRY = { "20.0.0", // usa
