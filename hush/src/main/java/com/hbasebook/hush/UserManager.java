@@ -134,6 +134,9 @@ public class UserManager {
     LOG.info("Admin statistics initialized.");
   }
 
+  /**
+   * Defines some well-known IP ranges, up to the first three octets.
+   */
   private final String[] IP_BLOCK_BY_COUNTRY = { "20.0.0", // usa
       "20.0.0", // usa
       "20.0.0", // usa
@@ -163,21 +166,18 @@ public class UserManager {
       "131.150.6", // ca
   };
 
+  /**
+   * Returns a "random" IP address based on weighted blocks of IP ranges. The
+   * idea is to not get roughly the same amount of hits per country but get
+   * some more popular to those that have barely any hits. Clear, Eh?
+   *
+   * @return
+   */
   private String getRandomIp() {
     return String.format("%s.%d",
       IP_BLOCK_BY_COUNTRY[RANDOM.nextInt(IP_BLOCK_BY_COUNTRY.length)],
       RANDOM.nextInt(255));
   }
-
-  // private int getRandomIpByte(int pos) {
-  // int num = -1;
-  // while (num <= 0 || (pos == 1 && (num == 10 || num == 172 || num == 192 ||
-  // num == 127 || num == 255))) {
-  // num = RANDOM.nextInt(254) + 1;
-  // }
-  // return num;
-  // }
-
 
   /**
    * Creates a user in the user table.
