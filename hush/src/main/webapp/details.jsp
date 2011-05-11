@@ -25,7 +25,8 @@
   ShortUrlStatistics urlStats = manager.getCounters().getDailyStatistics(
     url);
   if (urlStats == null) {
-    request.getRequestDispatcher("/error.jsp?error=Nothing+found!").
+    request.getRequestDispatcher("/error.jsp?error=Nothing+to+report!+" +
+      "Click+on+the+short+URL+first.").
       forward(request, response);
   }
   SimpleDateFormat formatter = new SimpleDateFormat("yyyy, MM, dd");
@@ -106,24 +107,31 @@
     </script>
     <div id="div_for_timeline" style="width: 620px; height: 280px;"></div>
   </div>
-
+  <br/><br/>
   <div id="country_chart">
     <h3>Clicks by Country</h3>
     <%
       // get details for countries
       NavigableSet<?> clicksByCountry = urlStats.getCounters("clicksbycountry");
       StringBuffer data = new StringBuffer();
+      StringBuffer label = new StringBuffer();
+      StringBuffer legend = new StringBuffer();
       for (Object obj: clicksByCountry) {
         Counter<String, Long> counter = (Counter<String, Long>) obj;
         if (data.length() > 0) {
           data.append(",");
+          label.append("|");
+          legend.append("|");
         }
         data.append(counter.getValue());
+        String country = new Locale("", counter.getKey()).getDisplayCountry();
+        label.append(counter.getValue());
+        legend.append(country);
       }
       // or use http://code.google.com/apis/visualization/documentation/gallery/piechart.html
     %>
-    <img src="http://chart.apis.google.com/chart?chs=300x265&cht=p&chco=3399CC&chd=t:<%= data %>"
-         width="300" height="265" alt="" />
+    <img src="http://chart.apis.google.com/chart?chs=600x300&cht=p&chco=3399CC&chd=t:<%= data %>&chl=<%= label%>&chdl=<%= legend%>"
+         width="600" height="300" alt="" />
   </div>
 </div>
 </div>
