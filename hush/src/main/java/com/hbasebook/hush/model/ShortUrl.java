@@ -2,6 +2,9 @@ package com.hbasebook.hush.model;
 
 import com.hbasebook.hush.ResourceManager;
 
+/**
+ * Container for all the information needed for a shortened URL.
+ */
 public class ShortUrl {
   private final String id;
   private final String domain;
@@ -9,6 +12,11 @@ public class ShortUrl {
   private final String refShortId;
   private final String user;
   private final long clicks;
+
+  public ShortUrl(String id, String domain, String longUrl,
+    String refShortId, String user) {
+    this(id, domain, longUrl, refShortId, user, 0);
+  }
 
   public ShortUrl(String id, String domain, String longUrl,
     String refShortId, String user, long clicks) {
