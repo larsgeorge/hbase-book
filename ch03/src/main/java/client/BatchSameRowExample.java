@@ -15,15 +15,14 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class BatchExample {
+public class BatchSameRowExample {
 
     // vv BatchExample
     private final static byte[] ROW1 = Bytes.toBytes("row1");
     private final static byte[] ROW2 = Bytes.toBytes("row2");
     private final static byte[] COLFAM1 = Bytes.toBytes("colfam1"); // co BatchExample-1-Const Use constants for easy reuse.
-    private final static byte[] COLFAM2 = Bytes.toBytes("colfam2");
+    private final static byte[] COLFAM3 = Bytes.toBytes("colfam3");
     private final static byte[] QUAL1 = Bytes.toBytes("qual1");
-    private final static byte[] QUAL2 = Bytes.toBytes("qual2");
 
     // ^^ BatchExample
 
@@ -32,15 +31,15 @@ public class BatchExample {
 
     HBaseHelper helper = HBaseHelper.getHelper(conf);
     helper.dropTable("testtable");
-    helper.createTable("testtable", "colfam1", "colfam2");
+    helper.createTable("testtable", "colfam1", "colfam2", "colfam3");
     helper.put("testtable",
-      new String[] { "row1" },
-      new String[] { "colfam1" },
-      new String[] { "qual1", "qual2", "qual3" },
-      new long[] { 1, 2, 3 },
-      new String[] { "val1", "val2", "val3" });
+      new String[]{"row1"},
+      new String[]{"colfam1", "colfam2"},
+      new String[]{"qual1", "qual1", "qual2", "qual2", "qual3", "qual3"},
+      new long[]{1, 2, 3, 4, 5, 6},
+      new String[]{"val1", "val2", "val3", "val4", "val5", "val6"});
     System.out.println("Before batch call...");
-    helper.dump("testtable", new String[] { "row1", "row2" }, null, null);
+    helper.dump("testtable", new String[]{ "row1", "row2" }, null, null);
 
     HTable table = new HTable(conf, "testtable");
 
@@ -48,7 +47,7 @@ public class BatchExample {
     List<Row> batch = new ArrayList<Row>(); // co BatchExample-2-CreateList Create a list to hold all values.
 
     Put put = new Put(ROW2);
-    put.add(COLFAM2, QUAL1, Bytes.toBytes("val5")); // co BatchExample-3-AddPut Add a Put instance.
+    put.add(COLFAM3, QUAL1, Bytes.toBytes("val7")); // co BatchExample-3-AddPut Add a Put instance.
     batch.add(put);
 
     Get get1 = new Get(ROW1);
@@ -56,7 +55,7 @@ public class BatchExample {
     batch.add(get1);
 
     Delete delete = new Delete(ROW1);
-    delete.deleteColumns(COLFAM1, QUAL2); // co BatchExample-5-AddDelete Add a Delete instance.
+    delete.deleteColumns(COLFAM1, QUAL1); // co BatchExample-5-AddDelete Add a Delete instance.
     batch.add(delete);
 
     Get get2 = new Get(ROW2);
