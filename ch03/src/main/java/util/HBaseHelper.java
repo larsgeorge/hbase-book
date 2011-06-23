@@ -124,6 +124,15 @@ public class HBaseHelper {
     return res;
   }
 
+  public void put(String table, String row, String fam, String qual,
+                  String val) throws IOException {
+    HTable tbl = new HTable(conf, table);
+    Put put = new Put(Bytes.toBytes(row));
+    put.add(Bytes.toBytes(fam), Bytes.toBytes(qual), Bytes.toBytes(val));
+    tbl.put(put);
+    tbl.close();
+  }
+
   public void put(String table, String row, String fam, String qual, long ts,
                   String val) throws IOException {
     HTable tbl = new HTable(conf, table);
