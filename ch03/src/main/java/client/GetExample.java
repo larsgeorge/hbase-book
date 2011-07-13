@@ -1,6 +1,6 @@
 package client;
 
-// cc GetExample Example application inserting data into HBase
+// cc GetExample Example application retrieving data from HBase
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.client.Get;

@@ -45,7 +45,7 @@ public class PutWriteBufferExample {
     Result res1 = table.get(get);
     System.out.println("Result: " + res1); // co PutWriteBufferExample-6-Get1 Try to load previously stored row, this will print "Result: keyvalues=NONE".
 
-    table.flushCommits(); // co PutWriteBufferExample-7-Flush Force a flush, this causes a RPC to occur.
+    table.flushCommits(); // co PutWriteBufferExample-7-Flush Force a flush, this causes an RPC to occur.
 
     Result res2 = table.get(get);
     System.out.println("Result: " + res2); // co PutWriteBufferExample-8-Get2 Now the row is persisted and can be loaded.
