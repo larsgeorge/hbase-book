@@ -30,8 +30,8 @@ public class LoadWithTableDescriptorExample {
     HTableDescriptor htd = new HTableDescriptor("testtable"); // co LoadWithTableDescriptorExample-2-Define Define a table descriptor.
     htd.addFamily(new HColumnDescriptor("colfam1"));
     htd.setValue("COPROCESSOR$1", path.toString() +
-      ":" + RegionObserverExample.class.getCanonicalName() + // co LoadWithTableDescriptorExample-3-AddCP Add the coprocessor definition to the descriptor.
-      ":" + Coprocessor.Priority.USER);
+      "|" + RegionObserverExample.class.getCanonicalName() + // co LoadWithTableDescriptorExample-3-AddCP Add the coprocessor definition to the descriptor.
+      "|" + Coprocessor.Priority.USER);
 
     HBaseAdmin admin = new HBaseAdmin(conf); // co LoadWithTableDescriptorExample-4-Admin Instantiate an administrative API to the cluster and add the table.
     admin.createTable(htd);
