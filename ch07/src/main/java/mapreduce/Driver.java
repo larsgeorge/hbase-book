@@ -21,6 +21,10 @@ public class Driver {
       "Analyze imported JSON");
     pgd.addClass(ParseJson.NAME, ParseJson.class,
       "Parse JSON into columns");
+    pgd.addClass(ParseJson2.NAME, ParseJson2.class,
+      "Parse JSON into columns (map only)");
+    pgd.addClass(ParseJsonMulti.NAME, ParseJsonMulti.class,
+      "Parse JSON into multiple tables");
     pgd.driver(args);
   }
 }

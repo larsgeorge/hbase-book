@@ -60,6 +60,17 @@
         <enabled>false</enabled>
       </snapshots>
     </repository>
+    <repository>
+      <id>hadoop-non-releases</id>
+      <name>Hadoop non-releases</name>
+      <url>http://people.apache.org/~larsgeorge/repo/</url>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+    </repository>
   </repositories>
 
   <dependencies>
@@ -76,7 +87,7 @@
     <dependency>
       <groupId>org.apache.hadoop</groupId>
       <artifactId>hadoop-core</artifactId>
-      <version>0.20-append-r1044525</version>
+      <version>0.20-append-r1057313</version>
       <exclusions>
         <exclusion>
           <groupId>commons-cli</groupId>
@@ -284,12 +295,19 @@
           <groupId>tomcat</groupId>
           <artifactId>jasper-runtime</artifactId>
         </exclusion>
+        <exclusion>
+          <groupId>com.github.stephenc.high-scale-lib</groupId>
+          <artifactId>high-scale-lib</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.apache.thrift</groupId>
+          <artifactId>libthrift</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.jamon</groupId>
+          <artifactId>jamon-runtime</artifactId>
+        </exclusion>
       </exclusions>
-    </dependency>
-    <dependency>
-      <groupId>com.google.collections</groupId>
-      <artifactId>google-collections</artifactId>
-      <version>1.0</version>
     </dependency>
   </dependencies>
 
@@ -298,6 +316,8 @@
     <module>ch04</module>
     <module>ch05</module>
     <module>ch06</module>
+    <module>ch07</module>
+    <module>ch09</module>
     <module>ch11</module>
     <module>hush</module>
   </modules>

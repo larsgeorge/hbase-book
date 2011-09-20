@@ -31,9 +31,9 @@ import org.json.simple.parser.JSONParser;
 
 import java.io.IOException;
 
-public class ParseJson {
+public class ParseJson2 {
 
-  private static final Log LOG = LogFactory.getLog(ParseJson.class);
+  private static final Log LOG = LogFactory.getLog(ParseJson2.class);
 
   public static final String NAME = "ParseJson";
   public enum Counters { ROWS, COLS, ERROR, VALID }
@@ -203,10 +203,12 @@ public class ParseJson {
     }
 
     Job job = new Job(conf, "Parse data in " + input + ", write to " + output);
-    job.setJarByClass(ParseJson.class);
-    TableMapReduceUtil.initTableMapperJob(input, scan, ParseMapper.class, // co ParseJson-3-SetMap Setup map phase details using the utility method.
+    job.setJarByClass(ParseJson2.class);
+    TableMapReduceUtil.initTableMapperJob(input, scan, ParseMapper.class,
+      // co ParseJson-3-SetMap Setup map phase details using the utility method.
       ImmutableBytesWritable.class, Put.class, job);
-    TableMapReduceUtil.initTableReducerJob(output, // co ParseJson-4-SetReduce Configure an identity reducer to store the parsed data.
+    TableMapReduceUtil.initTableReducerJob(output,
+      // co ParseJson-4-SetReduce Configure an identity reducer to store the parsed data.
       IdentityTableReducer.class, job);
 
     System.exit(job.waitForCompletion(true) ? 0 : 1);
