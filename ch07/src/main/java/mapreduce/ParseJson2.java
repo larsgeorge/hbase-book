@@ -1,6 +1,6 @@
 package mapreduce;
 
-// cc ParseJson MapReduce job that parses the raw data into separate columns.
+// cc ParseJson2 MapReduce job that parses the raw data into separate columns (map phase only).
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.HelpFormatter;
@@ -35,14 +35,13 @@ public class ParseJson2 {
 
   private static final Log LOG = LogFactory.getLog(ParseJson2.class);
 
-  public static final String NAME = "ParseJson";
+  public static final String NAME = "ParseJson2";
   public enum Counters { ROWS, COLS, ERROR, VALID }
 
   /**
    * Implements the <code>Mapper</code> that reads the data and extracts the
    * required information.
    */
-  // vv ParseJson
   static class ParseMapper
   extends TableMapper<ImmutableBytesWritable, Writable> {
 
@@ -56,7 +55,6 @@ public class ParseJson2 {
         context.getConfiguration().get("conf.columnfamily"));
     }
 
-    // ^^ ParseJson
     /**
      * Maps the input.
      *
@@ -65,7 +63,6 @@ public class ParseJson2 {
      * @param context The task context.
      * @throws java.io.IOException When mapping the input fails.
      */
-    // vv ParseJson
     @Override
     public void map(ImmutableBytesWritable row, Result columns, Context context)
     throws IOException {
@@ -79,7 +76,7 @@ public class ParseJson2 {
           JSONObject json = (JSONObject) parser.parse(value);
           for (Object key : json.keySet()) {
             Object val = json.get(key);
-            put.add(columnFamily, Bytes.toBytes(key.toString()), // co ParseJson-1-Put Store the top-level JSON keys as columns, with their value set as the column value.
+            put.add(columnFamily, Bytes.toBytes(key.toString()),
               Bytes.toBytes(val.toString()));
           }
         }
@@ -92,7 +89,6 @@ public class ParseJson2 {
         context.getCounter(Counters.ERROR).increment(1);
       }
     }
-    // ^^ ParseJson
     /*
        {
          "updated": "Mon, 14 Sep 2009 17:09:02 +0000",
@@ -121,10 +117,8 @@ public class ParseJson2 {
              e104984ea5f37cf8ae70451a619c9ac0#outernationalist"
        }
     */
-    // vv ParseJson
   }
 
-  // ^^ ParseJson
   /**
    * Parse the command line parameters.
    *
@@ -173,10 +167,7 @@ public class ParseJson2 {
    * @param args  The command line parameters.
    * @throws Exception When running the job fails.
    */
-  // vv ParseJson
   public static void main(String[] args) throws Exception {
-    /*...*/
-    // ^^ ParseJson
     Configuration conf = HBaseConfiguration.create();
     String[] otherArgs =
       new GenericOptionsParser(conf, args).getRemainingArgs();
@@ -188,13 +179,12 @@ public class ParseJson2 {
     String output = cmd.getOptionValue("o");
     String column = cmd.getOptionValue("c");
 
-    // vv ParseJson
     Scan scan = new Scan();
     if (column != null) {
       byte[][] colkey = KeyValue.parseColumn(Bytes.toBytes(column));
       if (colkey.length > 1) {
         scan.addColumn(colkey[0], colkey[1]);
-        conf.set("conf.columnfamily", Bytes.toStringBinary(colkey[0])); // co ParseJson-2-Conf Store the column family in the configuration for later use in the mapper.
+        conf.set("conf.columnfamily", Bytes.toStringBinary(colkey[0])); // co ParseJson2-2-Conf Store the column family in the configuration for later use in the mapper.
         conf.set("conf.columnqualifier", Bytes.toStringBinary(colkey[1]));
       } else {
         scan.addFamily(colkey[0]);
@@ -202,16 +192,19 @@ public class ParseJson2 {
       }
     }
 
-    Job job = new Job(conf, "Parse data in " + input + ", write to " + output);
+    // vv ParseJson2
+    /*...*/
+    Job job = new Job(conf, "Parse data in " + input + ", write to " + output +
+      "(map only)");
     job.setJarByClass(ParseJson2.class);
     TableMapReduceUtil.initTableMapperJob(input, scan, ParseMapper.class,
-      // co ParseJson-3-SetMap Setup map phase details using the utility method.
       ImmutableBytesWritable.class, Put.class, job);
     TableMapReduceUtil.initTableReducerJob(output,
-      // co ParseJson-4-SetReduce Configure an identity reducer to store the parsed data.
       IdentityTableReducer.class, job);
+    /*[*/job.setNumReduceTasks(0);/*]*/
+    /*...*/
+    // ^^ ParseJson2
 
     System.exit(job.waitForCompletion(true) ? 0 : 1);
   }
-  // ^^ ParseJson
 }
