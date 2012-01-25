@@ -151,7 +151,7 @@ public class HBaseHelper {
       for (String fam : fams) {
         int v = 0;
         for (String qual : quals) {
-          String val = vals[v < vals.length ? v : vals.length];
+          String val = vals[v < vals.length ? v : vals.length - 1];
           long t = ts[v < ts.length ? v : ts.length - 1];
           put.add(Bytes.toBytes(fam), Bytes.toBytes(qual), t,
             Bytes.toBytes(val));
