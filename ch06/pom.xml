@@ -6,29 +6,22 @@
   <parent>
     <artifactId>hbase-book</artifactId>
     <groupId>com.larsgeorge</groupId>
-    <version>1.0</version>
+    <version>2.0</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
 
   <groupId>com.larsgeorge</groupId>
   <artifactId>hbase-book-ch06</artifactId>
-  <version>1.0</version>
+  <version>2.0</version>
   <packaging>jar</packaging>
 
   <name>HBase Book Chapter 6</name>
-
-  <repositories>
-    <repository>
-      <id>apache release</id>
-      <url>https://repository.apache.org/content/repositories/releases/</url>
-    </repository>
-  </repositories>
 
   <dependencies>
     <dependency>
       <groupId>org.apache.pig</groupId>
       <artifactId>pig</artifactId>
-      <version>0.8.0</version>
+      <version>0.14.0</version>
       <exclusions>
         <exclusion>
           <artifactId>commons-cli</artifactId>
@@ -110,12 +103,48 @@
           <artifactId>oro</artifactId>
           <groupId>oro</groupId>
         </exclusion>
+        <exclusion>
+          <artifactId>jline</artifactId>
+          <groupId>jline</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>ST4</artifactId>
+          <groupId>org.antlr</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>automaton</artifactId>
+          <groupId>dk.brics.automaton</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>jackson-mapper-asl</artifactId>
+          <groupId>org.codehaus.jackson</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>antlr-runtime</artifactId>
+          <groupId>org.antlr</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>guava</artifactId>
+          <groupId>com.google.guava</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>jackson-core-asl</artifactId>
+          <groupId>org.codehaus.jackson</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>avro</artifactId>
+          <groupId>org.apache.avro</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>joda-time</artifactId>
+          <groupId>joda-time</groupId>
+        </exclusion>
       </exclusions>
     </dependency>
     <dependency>
       <groupId>com.googlecode.json-simple</groupId>
       <artifactId>json-simple</artifactId>
-      <version>1.1</version>
+      <version>1.1.1</version>
     </dependency>
     <dependency>
       <groupId>commons-httpclient</groupId>
@@ -135,12 +164,12 @@
     <dependency>
       <groupId>com.google.protobuf</groupId>
       <artifactId>protobuf-java</artifactId>
-      <version>2.3.0</version>
+      <version>2.6.1</version>
     </dependency>
     <dependency>
       <groupId>org.apache.thrift</groupId>
       <artifactId>libthrift</artifactId>
-      <version>0.6.1</version>
+      <version>0.9.2</version>
       <exclusions>
         <exclusion>
           <artifactId>slf4j-api</artifactId>
@@ -171,7 +200,7 @@
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-log4j12</artifactId>
-      <version>1.6.0</version>
+      <version>1.7.10</version>
       <exclusions>
         <exclusion>
           <artifactId>log4j</artifactId>
