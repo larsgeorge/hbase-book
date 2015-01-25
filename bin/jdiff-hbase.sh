@@ -69,6 +69,7 @@ JAVADOC_OPTIONS="-J-Xmx512M -encoding UTF-8 -subpackages org.apache.hadoop.hbase
 JAVADOC_OPTIONS="-firstsentence $JAVADOC_OPTIONS"
 SVN_URL="http://svn.apache.org/repos/asf/hbase/trunk"
 OUTFILE="/dev/null"
+SOURCEPATH="@/src/main/java/:@/hbase-client/src/main/java:@/hbase-common/src/main/java:@/hbase-server/src/main/java"
 
 if [[ $VERBOSE -eq 1 ]]; then
   OUTFILE="/dev/fd/1"
@@ -103,7 +104,7 @@ if [[ $FORCE_REFRESH -eq 1 ]]; then
   svn checkout ${SVN_URL}@$OLD_REV $OLD_NAME > $OUTFILE 2>&1
   echo "Building JavaDocs for old revision $OLD_REV..."
   cd $OLD_NAME
-  mvn javadoc:javadoc > $OUTFILE 2>&1
+  mvn -DskipTests install javadoc:javadoc > $OUTFILE 2>&1
 
   cd $OUT_DIR
 
@@ -111,19 +112,19 @@ if [[ $FORCE_REFRESH -eq 1 ]]; then
   svn checkout ${SVN_URL}${2:+@$NEW_REV} $NEW_NAME > $OUTFILE 2>&1
   echo "Building JavaDocs for new revision $NEW_REV..."
   cd $NEW_NAME
-  mvn javadoc:javadoc > $OUTFILE 2>&1
+  mvn -DskipTests install javadoc:javadoc > $OUTFILE 2>&1
 
   cd $OUT_DIR
 fi
 
 echo "Running JDiff on old revision $OLD_REV..."
 javadoc -doclet jdiff.JDiff -docletpath $DOCLET_PATH \
-    -apiname "$OLD_NAME" -sourcepath $OLD_NAME/src/main/java/ \
+    -apiname "$OLD_NAME" -sourcepath ${SOURCEPATH//@//$OUT_DIR/$OLD_NAME} \
     $JAVADOC_OPTIONS > $OUTFILE 2>&1
 
 echo "Running JDiff on new revision $NEW_REV..."
 javadoc -doclet jdiff.JDiff -docletpath $DOCLET_PATH \
-    -apiname "$NEW_NAME" -sourcepath $NEW_NAME/src/main/java/ \
+    -apiname "$NEW_NAME" -sourcepath ${SOURCEPATH//@//$OUT_DIR/$NEW_NAME} \
     $JAVADOC_OPTIONS > $OUTFILE 2>&1
 
 echo "Running JDiff to compare $OLD_REV with $NEW_REV..."
