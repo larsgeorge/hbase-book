@@ -5,7 +5,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.client.HTable;
 import org.apache.hadoop.hbase.client.Put;
-import org.apache.hadoop.hbase.client.RowLock;
+//import org.apache.hadoop.hbase.client.RowLock;
 import org.apache.hadoop.hbase.util.Bytes;
 import util.HBaseHelper;
 
@@ -52,8 +52,8 @@ public class RowLockExample {
 
     // vv RowLockExample
     System.out.println("Taking out lock...");
-    RowLock lock = table.lockRow(ROW1); // co RowLockExample-3-Lock Lock the entire row.
-    System.out.println("Lock ID: " + lock.getLockId());
+    //RowLock lock = table.lockRow(ROW1); // co RowLockExample-3-Lock Lock the entire row.
+    //System.out.println("Lock ID: " + lock.getLockId());
 
     Thread thread = new Thread(new UnlockedPut()); // co RowLockExample-4-Start Start the asynchronous thread, which will block.
     thread.start();
@@ -66,18 +66,18 @@ public class RowLockExample {
     }
 
     try {
-      Put put1 = new Put(ROW1, lock); // co RowLockExample-6-NewPut1 Create Put under own lock.
-      put1.add(COLFAM1, QUAL1, VAL1);
-      table.put(put1);
+      //Put put1 = new Put(ROW1, lock); // co RowLockExample-6-NewPut1 Create Put under own lock.
+      //put1.add(COLFAM1, QUAL1, VAL1);
+      //table.put(put1);
 
-      Put put2 = new Put(ROW1, lock); // co RowLockExample-7-NewPut2 Create another Put under own lock.
-      put2.add(COLFAM1, QUAL1, VAL2);
-      table.put(put2);
+      //Put put2 = new Put(ROW1, lock); // co RowLockExample-7-NewPut2 Create another Put under own lock.
+      //put2.add(COLFAM1, QUAL1, VAL2);
+      //table.put(put2);
     } catch (Exception e) {
       System.err.println("Error: " + e);
     } finally {
       System.out.println("Releasing lock..."); // co RowLockExample-8-Unlock Release the lock, which will make the thread continue.
-      table.unlockRow(lock);
+      //table.unlockRow(lock);
     }
     // ^^ RowLockExample
     try {
