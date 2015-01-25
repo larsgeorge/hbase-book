@@ -1,11 +1,14 @@
 package client;
 
-// cc GetExample Example application retrieving data from HBase
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
+import org.apache.hadoop.hbase.client.Delete;
 import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.HTable;
+import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Result;
+import org.apache.hadoop.hbase.client.ResultScanner;
+import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.util.Bytes;
 import util.HBaseHelper;
 
@@ -14,27 +17,38 @@ import java.io.IOException;
 public class CRUDExample {
 
   public static void main(String[] args) throws IOException {
-    // vv GetExample
-    Configuration conf = HBaseConfiguration.create(); // co GetExample-1-CreateConf Create the configuration.
+    Configuration conf = HBaseConfiguration.create();
 
-    // ^^ GetExample
     HBaseHelper helper = HBaseHelper.getHelper(conf);
     if (!helper.existsTable("testtable")) {
-      helper.createTable("testtable", "colfam1");
+      helper.createTable("testtable", "fam-A", "fam-B");
     }
-    // vv GetExample
-    HTable table = new HTable(conf, "testtable"); // co GetExample-2-NewTable Instantiate a new table reference.
 
-    Get get = new Get(Bytes.toBytes("row1")); // co GetExample-3-NewGet Create get with specific row.
+    HTable table = new HTable(conf, "testtable");
 
-    get.addColumn(Bytes.toBytes("colfam1"), Bytes.toBytes("qual1")); // co GetExample-4-AddCol Add a column to the get.
+    Put put = new Put(Bytes.toBytes("myrow-1"));
+    put.add(Bytes.toBytes("fam-A"), Bytes.toBytes("col-A"),
+      Bytes.toBytes("val-1"));
+    put.add(Bytes.toBytes("fam-B"), Bytes.toBytes("col-B"),
+      Bytes.toBytes("val-2"));
+    table.put(put);
 
-    Result result = table.get(get); // co GetExample-5-DoGet Retrieve row with selected columns from HBase.
+    Get get = new Get(Bytes.toBytes("myrow-1"));
+    get.addColumn(Bytes.toBytes("fam-A"), Bytes.toBytes("col-A"));
+    Result result = table.get(get);
+    System.out.println(result);
+    byte[] val = result.getValue(Bytes.toBytes("fam-A"),
+      Bytes.toBytes("col-A"));
+    System.out.println("Value: " + Bytes.toString(val));
 
-    byte[] val = result.getValue(Bytes.toBytes("colfam1"),
-      Bytes.toBytes("qual1")); // co GetExample-6-GetValue Get a specific value for the given column.
+    Delete delete = new Delete(Bytes.toBytes("myrow-1"));
+    delete.deleteColumns(Bytes.toBytes("fam-A"), Bytes.toBytes("col-A"));
+    table.delete(delete);
 
-    System.out.println("Value: " + Bytes.toString(val)); // co GetExample-7-Print Print out the value while converting it back.
-    // ^^ GetExample
+    Scan scan = new Scan();
+    ResultScanner scanner = table.getScanner(scan);
+    for (Result result2 : scanner) {
+      System.out.println(result2);
+    }
   }
 }
