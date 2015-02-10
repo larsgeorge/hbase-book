@@ -9,11 +9,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.hbase.client.Delete;
 import org.apache.hadoop.hbase.client.Get;
-import org.apache.hadoop.hbase.client.HTable;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.Scan;
+import org.apache.hadoop.hbase.client.Table;
 import org.apache.hadoop.hbase.util.Bytes;
 
 import com.hbasebook.hush.model.ShortDomain;
@@ -28,10 +28,9 @@ public class DomainManager {
   /**
    * Package private constructor so only ResourceManager can instantiate.
    *
-   * @param rm
-   * @throws IOException
+   * @param rm The reference to the resource manager.
    */
-  DomainManager(ResourceManager rm) throws IOException {
+  DomainManager(ResourceManager rm) {
     this.rm = rm;
   }
 
@@ -58,7 +57,7 @@ public class DomainManager {
    * @throws IOException
    */
   public List<ShortDomain> listShortDomains() throws IOException {
-    HTable table = null;
+    Table table = null;
 
     List<ShortDomain> domains = new ArrayList<ShortDomain>();
 
@@ -95,8 +94,8 @@ public class DomainManager {
    */
   public void addLongDomain(String shortDomain, String longDomain)
       throws IOException {
-    HTable shortTable = rm.getTable(ShortDomainTable.NAME);
-    HTable longTable = rm.getTable(LongDomainTable.NAME);
+    Table shortTable = rm.getTable(ShortDomainTable.NAME);
+    Table longTable = rm.getTable(LongDomainTable.NAME);
 
     try {
       byte[] shortBytes = Bytes.toBytes(shortDomain);
@@ -113,9 +112,6 @@ public class DomainManager {
       longPut.add(LongDomainTable.DATA_FAMILY, LongDomainTable.SHORT_DOMAIN,
         shortBytes);
       longTable.put(longPut);
-
-      longTable.flushCommits();
-      shortTable.flushCommits();
     } finally {
       rm.putTable(shortTable);
       rm.putTable(longTable);
@@ -129,24 +125,19 @@ public class DomainManager {
    * @throws IOException
    */
   public void deleteLongDomain(String longDomain) throws IOException {
-    HTable shortTable = rm.getTable(ShortDomainTable.NAME);
-    HTable longTable = rm.getTable(LongDomainTable.NAME);
+    Table shortTable = rm.getTable(ShortDomainTable.NAME);
+    Table longTable = rm.getTable(LongDomainTable.NAME);
 
     try {
       byte[] longBytes = Bytes.toBytes(longDomain);
       Result result = longTable.get(new Get(longBytes));
       if (!result.isEmpty()) {
-        byte[] shortBytes = result.getValue(LongDomainTable.DATA_FAMILY,
-            LongDomainTable.SHORT_DOMAIN);
-
+        byte[] shortBytes = result
+          .getValue(LongDomainTable.DATA_FAMILY, LongDomainTable.SHORT_DOMAIN);
         Delete d = new Delete(shortBytes);
-        d.deleteColumn(ShortDomainTable.DOMAINS_FAMILY, longBytes);
+        d.addColumn(ShortDomainTable.DOMAINS_FAMILY, longBytes);
         shortTable.delete(d);
-
         longTable.delete(new Delete(longBytes));
-
-        longTable.flushCommits();
-        shortTable.flushCommits();
       }
     } finally {
       rm.putTable(shortTable);
@@ -161,8 +152,8 @@ public class DomainManager {
    * @throws IOException
    */
   public void deleteShortDomain(String shortDomain) throws IOException {
-    HTable shortTable = rm.getTable(ShortDomainTable.NAME);
-    HTable longTable = rm.getTable(LongDomainTable.NAME);
+    Table shortTable = rm.getTable(ShortDomainTable.NAME);
+    Table longTable = rm.getTable(LongDomainTable.NAME);
 
     try {
       byte[] shortBytes = Bytes.toBytes(shortDomain);
@@ -177,9 +168,6 @@ public class DomainManager {
         }
         longTable.delete(deletes);
         shortTable.delete(new Delete(shortBytes));
-
-        longTable.flushCommits();
-        shortTable.flushCommits();
       }
     } finally {
       rm.putTable(shortTable);
@@ -204,7 +192,7 @@ public class DomainManager {
    * @throws IOException
    */
   public String shorten(String longDomain) throws IOException {
-    HTable longTable = rm.getTable(LongDomainTable.NAME);
+    Table longTable = rm.getTable(LongDomainTable.NAME);
 
     try {
       Result result = longTable.get(new Get(Bytes.toBytes(longDomain)));

@@ -25,8 +25,8 @@ public class FetchUrlInfoObserver extends BaseRegionObserver
   public void updateUrlMD5(String urlMD5) throws IOException {
   }
 
-  @Override
-  public long getProtocolVersion(String s, long l) throws IOException {
-    return 1L;
-  }
+//  @Override
+//  public long getProtocolVersion(String s, long l) throws IOException {
+//    return 1L;
+//  }
 }

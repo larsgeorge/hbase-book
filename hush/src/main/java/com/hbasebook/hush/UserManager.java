@@ -14,12 +14,12 @@ import java.util.Random;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.hbase.client.Get;
-import org.apache.hadoop.hbase.client.HTable;
 import org.apache.hadoop.hbase.client.Increment;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.Scan;
+import org.apache.hadoop.hbase.client.Table;
 import org.apache.hadoop.hbase.util.Bytes;
 
 import com.hbasebook.hush.model.ShortUrl;
@@ -61,7 +61,7 @@ public class UserManager {
    * @throws IOException When creating the user fails.
    */
   private void createRootUser() throws IOException {
-    HTable table = rm.getTable(UserTable.NAME);
+    Table table = rm.getTable(UserTable.NAME);
     try {
       Put put = new Put(ADMIN_LOGIN);
       put.add(UserTable.DATA_FAMILY, UserTable.CREDENTIALS, ADMIN_PASSWORD);
@@ -85,7 +85,7 @@ public class UserManager {
    * @throws IOException When initializing the counter fails.
    */
   private void initializeAnonUserCounter() throws IOException {
-    HTable table = rm.getTable(HushTable.NAME);
+    Table table = rm.getTable(HushTable.NAME);
     try {
       Put put = new Put(HushTable.GLOBAL_ROW_KEY);
       put.add(HushTable.COUNTERS_FAMILY, HushTable.ANONYMOUS_USER_ID,
@@ -95,7 +95,6 @@ public class UserManager {
       if (hasPut) {
         LOG.info("Anonymous User Id counter initialized.");
       }
-      table.flushCommits();
     } catch (Exception e) {
       LOG.error("Unable to initialize counters.", e);
       throw new IOException(e);
@@ -189,12 +188,13 @@ public class UserManager {
    * @param password The password of the user.
    * @param roles The user roles assigned to the new user.
    * @throws IOException When adding the user fails.
+   * todo: Fix since no pool anymore
    */
   // cc HushHTablePoolUsage Using the pool in application code
   // vv HushHTablePoolUsage
   public void createUser(String username, String firstName, String lastName,
     String email, String password, String roles) throws IOException {
-    /*[*/HTable table = rm.getTable(UserTable.NAME);/*]*/
+    /*[*/Table table = rm.getTable(UserTable.NAME);/*]*/
     Put put = new Put(Bytes.toBytes(username));
     put.add(UserTable.DATA_FAMILY, UserTable.FIRSTNAME,
       Bytes.toBytes(firstName));
@@ -204,7 +204,6 @@ public class UserManager {
       Bytes.toBytes(password));
     put.add(UserTable.DATA_FAMILY, UserTable.ROLES, Bytes.toBytes(roles));
     table.put(put);
-    table.flushCommits();
     /*[*/rm.putTable(table);/*]*/
   }
   // ^^ HushHTablePoolUsage
@@ -220,45 +219,42 @@ public class UserManager {
    */
   public void updateUser(String username, String firstName, String lastName,
     String email) throws IOException {
-    HTable table = rm.getTable(UserTable.NAME);
+    Table table = rm.getTable(UserTable.NAME);
     Put put = new Put(Bytes.toBytes(username));
     put.add(UserTable.DATA_FAMILY, UserTable.FIRSTNAME,
       Bytes.toBytes(firstName));
     put.add(UserTable.DATA_FAMILY, UserTable.LASTNAME, Bytes.toBytes(lastName));
     put.add(UserTable.DATA_FAMILY, UserTable.EMAIL, Bytes.toBytes(email));
     table.put(put);
-    table.flushCommits();
     rm.putTable(table);
   }
 
   public boolean changePassword(String username, String oldPassword,
     String newPassword) throws IOException {
-    HTable table = rm.getTable(UserTable.NAME);
+    Table table = rm.getTable(UserTable.NAME);
     Put put = new Put(Bytes.toBytes(username));
     put.add(UserTable.DATA_FAMILY, UserTable.CREDENTIALS,
       Bytes.toBytes(newPassword));
     boolean check = table.checkAndPut(Bytes.toBytes(username),
       UserTable.DATA_FAMILY, UserTable.CREDENTIALS, Bytes.toBytes(oldPassword),
       put);
-    table.flushCommits();
     rm.putTable(table);
     return check;
   }
 
   public void adminChangePassword(String username, String newPassword)
     throws IOException {
-    HTable table = rm.getTable(UserTable.NAME);
+    Table table = rm.getTable(UserTable.NAME);
     Put put = new Put(Bytes.toBytes(username));
     put.add(UserTable.DATA_FAMILY, UserTable.CREDENTIALS,
       Bytes.toBytes(newPassword));
     table.put(put);
-    table.flushCommits();
     rm.putTable(table);
   }
 
   public User getUser(String username) throws IOException {
     User user = null;
-    HTable table = null;
+    Table table = null;
     try {
       table = rm.getTable(UserTable.NAME);
       Get get = new Get(Bytes.toBytes(username));
@@ -284,13 +280,12 @@ public class UserManager {
     } finally {
       rm.putTable(table);
     }
-
     return user;
   }
 
   public List<User> getUsers() throws IOException {
     List<User> users = new ArrayList<User>();
-    HTable table = rm.getTable(UserTable.NAME);
+    Table table = rm.getTable(UserTable.NAME);
 
     Scan scan = new Scan();
     ResultScanner scanner = table.getScanner(scan);
@@ -346,8 +341,8 @@ public class UserManager {
    * @throws IOException When the counter fails to increment.
    */
   private String generateAnonymousUserId(long incrBy) throws IOException {
-    ResourceManager manager = ResourceManager.getInstance();
-    HTable table = manager.getTable(HushTable.NAME);
+    ResourceManager rm = ResourceManager.getInstance();
+    Table table = rm.getTable(HushTable.NAME);
     try {
       Increment increment = new Increment(HushTable.GLOBAL_ROW_KEY);
       increment.addColumn(HushTable.COUNTERS_FAMILY,
@@ -360,11 +355,7 @@ public class UserManager {
       LOG.error("Unable to create a new anonymous user Id.", e);
       throw new IOException(e);
     } finally {
-      try {
-        manager.putTable(table);
-      } catch (Exception e) {
-        // ignore
-      }
+      rm.putTable(table, true);
     }
   }
 

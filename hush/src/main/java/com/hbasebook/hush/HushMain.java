@@ -9,9 +9,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
-import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.nio.SelectChannelConnector;
 import org.eclipse.jetty.webapp.WebAppContext;
 
 import com.hbasebook.hush.schema.SchemaManager;
@@ -85,14 +83,8 @@ public class HushMain {
     LOG.info("Web server setup.");
 
     // create server and configure basic settings
-    Server server = new Server();
+    Server server = new Server(port);
     server.setStopAtShutdown(true);
-
-    // set up connector
-    Connector connector = new SelectChannelConnector();
-    connector.setPort(port);
-    // connector.setHost("127.0.0.1");
-    server.addConnector(connector);
 
     // set up context
     WebAppContext wac = new WebAppContext();

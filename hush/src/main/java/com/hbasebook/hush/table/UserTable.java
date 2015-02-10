@@ -2,10 +2,11 @@ package com.hbasebook.hush.table;
 
 import java.io.IOException;
 
+import org.apache.hadoop.hbase.TableName;
 import org.apache.hadoop.hbase.util.Bytes;
 
 public class UserTable {
-  public static final byte[] NAME = Bytes.toBytes("user");
+  public static final TableName NAME = TableName.valueOf("user");
   public static final byte[] DATA_FAMILY = Bytes.toBytes("data");
 
   public static final byte[] CREDENTIALS = Bytes.toBytes("credentials");

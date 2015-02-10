@@ -1,5 +1,11 @@
 package com.hbasebook.hush.schema;
 
+import java.io.IOException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.StringTokenizer;
+
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.XMLConfiguration;
@@ -8,15 +14,13 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HColumnDescriptor;
 import org.apache.hadoop.hbase.HTableDescriptor;
-import org.apache.hadoop.hbase.client.HBaseAdmin;
-import org.apache.hadoop.hbase.util.Bytes;
-
-import java.io.IOException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import org.apache.hadoop.hbase.TableName;
+import org.apache.hadoop.hbase.client.Admin;
+import org.apache.hadoop.hbase.client.Connection;
+import org.apache.hadoop.hbase.client.ConnectionFactory;
+import org.apache.hadoop.hbase.client.Durability;
+import org.apache.hadoop.hbase.io.compress.Compression;
+import org.apache.hadoop.hbase.regionserver.BloomType;
 
 /**
  * This class provides support for XML based schemas. It handles creation and
@@ -25,169 +29,246 @@ import java.util.Map;
 public class SchemaManager {
   private static final Log LOG = LogFactory.getLog(SchemaManager.class);
 
+  // possible XML tag names, first the shared ones
+  private static final String KEY_NAME = "name";
+  private static final String KEY_DESCRIPTION = "description";
+  private static final String KEY_KEY_VALUE = "key_value"; // for setValue()
+  // table related keys
+  private static final String KEY_MEMSTORE_FLUSH_SIZE = "memstore_flush_size";
+  private static final String KEY_SPLIT_POLICY = "split_policy";
+  private static final String KEY_MAX_FILE_SIZE = "max_file_size";
+  private static final String KEY_OWNER = "owner";
+  private static final String KEY_READ_ONLY = "read_only";
+  private static final String KEY_COMPACTION_ENABLED = "compaction_enabled";
+  private static final String KEY_DURABILITY = "durability";
+  private static final String KEY_REGION_REPLICATION = "region_replication";
+  private static final String KEY_COPROCESSORS = "coprocessors";
+  // column family related keys
+  private static final String KEY_COLUMN_FAMILY = "column_family";
+  private static final String KEY_MAX_VERSIONS = "max_versions";
+  private static final String KEY_MIN_VERSIONS = "min_versions";
+  private static final String KEY_COMPRESSION = "compression";
+  private static final String KEY_COMPACTION_COMPRESSION = "compaction_compression";
+  private static final String KEY_IN_MEMORY = "in_memory";
+  private static final String KEY_BLOCK_CACHE_ENABLED = "block_cache_enabled";
+  private static final String KEY_BLOCK_SIZE = "block_size";
+  private static final String KEY_TIME_TO_LIVE = "time_to_live";
+  private static final String KEY_BLOOM_FILTER = "bloom_filter";
+  private static final String KEY_REPLICATION_SCOPE = "replication_scope";
+  private static final String KEY_ENCODE_ON_DISK = "encode_on_disk";
+  private static final String KEY_DATA_BLOCK_ENCODING = "data_block_encoding";
+  private static final String KEY_CACHE_DATA_ON_WRITE = "cache_data_on_write";
+  private static final String KEY_CACHE_INDEXES_ON_WRITE = "cache_indexes_on_write";
+  private static final String KEY_CACHE_BLOOMS_ON_WRITE = "cache_blooms_on_write";
+  private static final String KEY_EVICT_BLOCKS_ON_CLOSE = "evict_blocks_on_close";
+  private static final String KEY_CACHE_DATA_IN_L1 = "cache_data_in_l1";
+  private static final String KEY_PREFETCH_BLOCKS_ON_OPEN = "prefetch_blocks_on_open";
+  private static final String KEY_KEEP_DELETED_CELLS = "keep_deleted_cells";
+  private static final String KEY_COMPRESS_TAGS = "compress_tags";
+  private static final String KEY_ENCRYPTION_TYPE = "encryption_type";
+  private static final String KEY_ENCRYPTION_KEY = "encryption_key";
+
   private Configuration conf = null;
-  private HBaseAdmin hbaseAdmin;
+  private Connection connection = null;
+  private Admin admin = null;
   private XMLConfiguration config = null;
-  private ArrayList<TableSchema> schemas = null;
+  private ArrayList<HTableDescriptor> schemas = null;
   private HTableDescriptor[] remoteTables = null;
 
   public SchemaManager(Configuration conf, String schemaName)
-    throws ParseException, ConfigurationException {
+  throws ParseException, ConfigurationException, IOException {
     this.conf = conf;
     readConfiguration(schemaName);
   }
 
   private void readConfiguration(String schemaName)
-    throws ConfigurationException {
+  throws ConfigurationException, IOException {
     URL schemaUrl = Thread.currentThread().getContextClassLoader().
       getResource(schemaName);
     config = new XMLConfiguration(schemaUrl);
-    schemas = new ArrayList<TableSchema>();
+    schemas = new ArrayList<HTableDescriptor>();
     readTableSchemas();
   }
 
-  private void readTableSchemas() {
-    final int maxTables = config.getMaxIndex("schema.table");
+  private void readTableSchemas() throws IOException {
+    int maxTables = config.getMaxIndex("schema.table");
+    // parse all tables
     for (int t = 0; t <= maxTables; t++) {
-      final String base = "schema.table(" + t + ").";
-      final TableSchema ts = new TableSchema();
-      ts.setName(config.getString(base + "name"));
-      if (config.containsKey(base + "description")) {
-        ts.setDescription(config.getString(base + "description"));
+      // first the table descriptor
+      String base = "schema.table(" + t + ").";
+      TableName name = TableName.valueOf(config.getString(base + KEY_NAME));
+      HTableDescriptor htd = new HTableDescriptor(name);
+      if (config.containsKey(base + KEY_DESCRIPTION)) {
+        htd.setValue(KEY_DESCRIPTION, config.getString(base + "description"));
       }
-      if (config.containsKey(base + "deferred_log_flush")) {
-        ts.setDeferredLogFlush(config.getBoolean(base + "deferred_log_flush"));
+      if (config.containsKey(base + KEY_OWNER)) {
+        // deprecated for 0.95+ in HBASE-6188
+        htd.setOwnerString(config.getString(base + KEY_OWNER));
       }
-      if (config.containsKey(base + "max_file_size")) {
-        ts.setMaxFileSize(config.getLong(base + "max_file_size"));
+      if (config.containsKey(base + KEY_SPLIT_POLICY)) {
+        htd.setRegionSplitPolicyClassName(
+          config.getString(base + KEY_SPLIT_POLICY));
       }
-      if (config.containsKey(base + "memstore_flush_size")) {
-        ts.setMemStoreFlushSize(config.getLong(base + "memstore_flush_size"));
+      if (config.containsKey(base + KEY_MAX_FILE_SIZE)) {
+        htd.setMaxFileSize(config.getLong(base + KEY_MAX_FILE_SIZE));
       }
-      if (config.containsKey(base + "read_only")) {
-        ts.setReadOnly(config.getBoolean(base + "read_only"));
+      if (config.containsKey(base + KEY_MEMSTORE_FLUSH_SIZE)) {
+        htd.setMemStoreFlushSize(config.getLong(base + KEY_MEMSTORE_FLUSH_SIZE));
       }
+      if (config.containsKey(base + KEY_DURABILITY)) {
+        htd.setDurability(
+          Durability.valueOf(config.getString(base + KEY_DURABILITY)));
+      }
+      if (config.containsKey(base + KEY_COMPACTION_ENABLED)) {
+        htd.setCompactionEnabled(
+          config.getBoolean(base + KEY_COMPACTION_ENABLED));
+      }
+      if (config.containsKey(base + KEY_READ_ONLY)) {
+        htd.setReadOnly(config.getBoolean(base + KEY_READ_ONLY));
+      }
+      if (config.containsKey(base + KEY_REGION_REPLICATION)) {
+        htd.setRegionReplication(config.getInt(base + KEY_REGION_REPLICATION));
+      }
+      if (config.containsKey(base + KEY_COPROCESSORS)) {
+        StringTokenizer st = new StringTokenizer(
+          config.getString(base + KEY_COPROCESSORS), ",");
+        while (st.hasMoreTokens()) htd.addCoprocessor(st.nextToken().trim());
+      }
+      // read all generic key/value pairs into the table definition
       int idx = 0;
       while (true) {
-        String kvKey = base + "key_value" + (idx++ == 0 ? "" : idx);
+        String kvKey = base + KEY_KEY_VALUE + (idx++ == 0 ? "" : idx);
         if (config.containsKey(kvKey)) {
           String[] kv = config.getString(kvKey).split("=", 2);
-          ts.addKeyValue(kv[0], kv.length > 1 ? kv[1] : null);
+          htd.setValue(kv[0], kv.length > 1 ? kv[1] : null);
         } else {
           break;
         }
       }
-      final int maxCols = config.getMaxIndex(base + "column_family");
+      // parse all column families
+      int maxCols = config.getMaxIndex(base + KEY_COLUMN_FAMILY);
       for (int c = 0; c <= maxCols; c++) {
-        final String base2 = base + "column_family(" + c + ").";
-        final ColumnDefinition cd = new ColumnDefinition();
-        cd.setName(config.getString(base2 + "name"));
-        cd.setDescription(config.getString(base2 + "description"));
-        String val = config.getString(base2 + "max_versions");
+        String base2 = base + KEY_COLUMN_FAMILY + "(" + c + ").";
+        HColumnDescriptor hcd = new HColumnDescriptor(config.getString(base2 + KEY_NAME));
+        String val = config.getString(base2 + KEY_MAX_VERSIONS);
         if (val != null && val.length() > 0) {
-          cd.setMaxVersions(Integer.parseInt(val));
+          hcd.setMaxVersions(Integer.parseInt(val));
         }
-        val = config.getString(base2 + "compression");
+        val = config.getString(base2 + KEY_COMPRESSION);
         if (val != null && val.length() > 0) {
-          cd.setCompression(val);
+          hcd.setCompressionType(Compression.getCompressionAlgorithmByName(val));
         }
-        val = config.getString(base2 + "in_memory");
+        val = config.getString(base2 + KEY_IN_MEMORY);
         if (val != null && val.length() > 0) {
-          cd.setInMemory(Boolean.parseBoolean(val));
+          hcd.setInMemory(Boolean.parseBoolean(val));
         }
-        val = config.getString(base2 + "block_cache_enabled");
+        val = config.getString(base2 + KEY_BLOCK_CACHE_ENABLED);
         if (val != null && val.length() > 0) {
-          cd.setBlockCacheEnabled(Boolean.parseBoolean(val));
+          hcd.setBlockCacheEnabled(Boolean.parseBoolean(val));
         }
-        val = config.getString(base2 + "block_size");
+        val = config.getString(base2 + KEY_BLOCK_SIZE);
         if (val != null && val.length() > 0) {
-          cd.setBlockSize(Integer.parseInt(val));
+          hcd.setBlocksize(Integer.parseInt(val));
         }
-        val = config.getString(base2 + "time_to_live");
+        val = config.getString(base2 + KEY_TIME_TO_LIVE);
         if (val != null && val.length() > 0) {
-          cd.setTimeToLive(Integer.parseInt(val));
+          hcd.setTimeToLive(Integer.parseInt(val));
         }
-        val = config.getString(base2 + "bloom_filter");
+        val = config.getString(base2 + KEY_BLOOM_FILTER);
         if (val != null && val.length() > 0) {
-          cd.setBloomFilter(val);
+          hcd.setBloomFilterType(BloomType.valueOf(val));
         }
-        val = config.getString(base2 + "replication_scope");
+        val = config.getString(base2 + KEY_REPLICATION_SCOPE);
         if (val != null && val.length() > 0) {
-          //cd.setScope(Integer.parseInt(val)); Add in 0.90
+          //hcd.setScope(Integer.parseInt(val)); Add in 0.90
           LOG.warn("Cannot set replication scope!");
         }
-        ts.addColumn(cd);
+        // read all generic key/value pairs into the family definition
+        idx = 0;
+        while (true) {
+          String kvKey = base2 + KEY_KEY_VALUE + (idx++ == 0 ? "" : idx);
+          if (config.containsKey(kvKey)) {
+            String[] kv = config.getString(kvKey).split("=", 2);
+            hcd.setValue(kv[0], kv.length > 1 ? kv[1] : null);
+          } else {
+            break;
+          }
+        }
+        htd.addFamily(hcd);
       }
-      schemas.add(ts);
+      schemas.add(htd);
     }
   }
 
+  /**
+   * The main processing starts here.
+   *
+   * @throws IOException When creating a connection to HBase fails.
+   */
   public void process() throws IOException {
-    hbaseAdmin = new HBaseAdmin(conf);
-    for (final TableSchema schema : schemas) {
+    connection = ConnectionFactory.createConnection(conf);
+    admin = connection.getAdmin();
+    for (final HTableDescriptor schema : schemas) {
       createOrChangeTable(schema);
     }
   }
 
   // cc HushSchemaManager Creating or modifying table schemas using the HBase administrative API
   // vv HushSchemaManager
-  private void createOrChangeTable(final TableSchema schema)
-    throws IOException {
+  private void createOrChangeTable(final HTableDescriptor schema)
+  throws IOException {
     HTableDescriptor desc = null;
-    if (tableExists(schema.getName(), false)) {
-      desc = getTable(schema.getName(), false);
+    if (tableExists(schema.getTableName(), false)) {
+      desc = getTable(schema.getTableName(), false);
       LOG.info("Checking table " + desc.getNameAsString() + "...");
-      final HTableDescriptor d = convertSchemaToDescriptor(schema);
 
       final List<HColumnDescriptor> modCols =
         new ArrayList<HColumnDescriptor>();
       for (final HColumnDescriptor cd : desc.getFamilies()) {
-        final HColumnDescriptor cd2 = d.getFamily(cd.getName());
+        final HColumnDescriptor cd2 = schema.getFamily(cd.getName());
         if (cd2 != null && !cd.equals(cd2)) { // co HushSchemaManager-1-Diff Compute the differences between the XML based schema and what is currently in HBase.
           modCols.add(cd2);
         }
       }
       final List<HColumnDescriptor> delCols =
         new ArrayList<HColumnDescriptor>(desc.getFamilies());
-      delCols.removeAll(d.getFamilies());
+      delCols.removeAll(schema.getFamilies());
       final List<HColumnDescriptor> addCols =
-        new ArrayList<HColumnDescriptor>(d.getFamilies());
+        new ArrayList<HColumnDescriptor>(schema.getFamilies());
       addCols.removeAll(desc.getFamilies());
 
       if (modCols.size() > 0 || addCols.size() > 0 || delCols.size() > 0 || // co HushSchemaManager-2-Check See if there are any differences in the column and table definitions.
-          !hasSameProperties(desc, d)) {
+          !hasSameProperties(desc, schema)) {
         LOG.info("Disabling table...");
-        hbaseAdmin.disableTable(schema.getName());
+        admin.disableTable(schema.getTableName());
         if (modCols.size() > 0 || addCols.size() > 0 || delCols.size() > 0) {
           for (final HColumnDescriptor col : modCols) {
             LOG.info("Found different column -> " + col);
-            hbaseAdmin.modifyColumn(schema.getName(), col.getNameAsString(), // co HushSchemaManager-3-AlterCol Alter the columns that have changed. The table was properly disabled first.
-              col);
+            admin.modifyColumn(schema.getTableName(), col); // co HushSchemaManager-3-AlterCol Alter the columns that have changed. The table was properly disabled first.
           }
           for (final HColumnDescriptor col : addCols) {
             LOG.info("Found new column -> " + col);
-            hbaseAdmin.addColumn(schema.getName(), col); // co HushSchemaManager-4-AddCol Add newly defined columns.
+            admin.addColumn(schema.getTableName(), col); // co HushSchemaManager-4-AddCol Add newly defined columns.
           }
           for (final HColumnDescriptor col : delCols) {
             LOG.info("Found removed column -> " + col);
-            hbaseAdmin.deleteColumn(schema.getName(), col.getNameAsString()); // co HushSchemaManager-5-DelCol Delete removed columns.
+            admin.deleteColumn(schema.getTableName(), col.getName()); // co HushSchemaManager-5-DelCol Delete removed columns.
           }
-        } else if (!hasSameProperties(desc, d)) {
+        } else if (!hasSameProperties(desc, schema)) {
           LOG.info("Found different table properties...");
-          hbaseAdmin.modifyTable(Bytes.toBytes(schema.getName()), d); // co HushSchemaManager-6-AlterTable Alter the table itself, if there are any differences found.
+          admin.modifyTable(schema.getTableName(), schema); // co HushSchemaManager-6-AlterTable Alter the table itself, if there are any differences found.
         }
         LOG.info("Enabling table...");
-        hbaseAdmin.enableTable(schema.getName());
+        admin.enableTable(schema.getTableName());
         LOG.info("Table enabled");
-        desc = getTable(schema.getName(), false);
+        getTable(schema.getTableName(), false);
         LOG.info("Table changed");
       } else {
         LOG.info("No changes detected!");
       }
     } else {
-      desc = convertSchemaToDescriptor(schema);
-      LOG.info("Creating table " + desc.getNameAsString() + "...");
-      hbaseAdmin.createTable(desc); // co HushSchemaManager-7-CreateTable In case the table did not exist yet create it now.
+      LOG.info("Creating table " + schema.getNameAsString() + "...");
+      admin.createTable(schema); // co HushSchemaManager-7-CreateTable In case the table did not exist yet create it now.
       LOG.info("Table created");
     }
   }
@@ -195,61 +276,31 @@ public class SchemaManager {
 
   private boolean hasSameProperties(HTableDescriptor desc1,
     HTableDescriptor desc2) {
-    return desc1.isDeferredLogFlush() == desc2.isDeferredLogFlush() &&
+    return //desc1.isDeferredLogFlush() == desc2.isDeferredLogFlush() &&
       desc1.getMaxFileSize() == desc2.getMaxFileSize() &&
       desc1.getMemStoreFlushSize() == desc2.getMemStoreFlushSize() &&
       desc1.isReadOnly() == desc2.isReadOnly();
   }
 
-  private HTableDescriptor convertSchemaToDescriptor(final TableSchema schema) {
-    HTableDescriptor desc;
-    desc = new HTableDescriptor(schema.getName());
-    desc.setDeferredLogFlush(schema.isDeferredLogFlush());
-    desc.setMaxFileSize(schema.getMaxFileSize());
-    desc.setMemStoreFlushSize(schema.getMemStoreFlushSize());
-    desc.setReadOnly(schema.isReadOnly());
-    for (Map.Entry<String, String> entry : schema.getKeyValues().entrySet()) {
-      desc.setValue(entry.getKey(), entry.getValue());
-    }
-    final Collection<ColumnDefinition> cols = schema.getColumns();
-    for (final ColumnDefinition col : cols) {
-      final HColumnDescriptor cd =
-        new HColumnDescriptor(Bytes.toBytes(col.getColumnName()),
-          col.getMaxVersions(), col.getCompression(), col.isInMemory(),
-          col.isBlockCacheEnabled(), col.getBlockSize(), col.getTimeToLive(),
-          col.getBloomFilter(), col.getReplicationScope());
-      desc.addFamily(cd);
-    }
-    return desc;
-  }
-
-  private synchronized HTableDescriptor getTable(final String name,
+  private synchronized HTableDescriptor getTable(final TableName name,
     final boolean force) throws IOException {
-    if (remoteTables == null || force) {
-      remoteTables = hbaseAdmin.listTables();
-    }
+    getTables(force);
     for (final HTableDescriptor d : remoteTables) {
-      if (d.getNameAsString().equals(name)) {
+      if (d.getTableName().equals(name)) {
         return d;
       }
     }
     return null;
   }
 
-  private boolean tableExists(final String name, final boolean force)
-    throws IOException {
-    getTables(force);
-    for (final HTableDescriptor d : remoteTables) {
-      if (d.getNameAsString().equals(name)) {
-        return true;
-      }
-    }
-    return false;
+  private boolean tableExists(final TableName name, final boolean force)
+  throws IOException {
+    return getTable(name, force) != null ? true : false;
   }
 
   private void getTables(final boolean force) throws IOException {
     if (remoteTables == null || force) {
-      remoteTables = hbaseAdmin.listTables();
+      remoteTables = admin.listTables();
     }
   }
 }

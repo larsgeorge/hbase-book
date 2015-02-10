@@ -14,9 +14,9 @@ import java.util.TreeSet;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.hbase.client.Get;
-import org.apache.hadoop.hbase.client.HTable;
 import org.apache.hadoop.hbase.client.Increment;
 import org.apache.hadoop.hbase.client.Result;
+import org.apache.hadoop.hbase.client.Table;
 import org.apache.hadoop.hbase.util.Bytes;
 
 import com.hbasebook.hush.model.ColumnQualifier;
@@ -40,7 +40,7 @@ public class Counters {
   /**
    * Increments the usage statistics of a shortened URL.
    *
-   * @param shortUrl The shortId to increment.
+   * @param shortId The shortId to increment.
    * @param info The request information, may be <code>null</code>.
    * @throws IOException When updating the counter fails.
    */
@@ -78,7 +78,7 @@ public class Counters {
       country = rm.getCountry(info.get(RequestInfo.InfoName.RemoteAddr));
     }
     // increment user statistics
-    HTable table = rm.getTable(ShortUrlTable.NAME);
+    Table table = rm.getTable(ShortUrlTable.NAME);
     byte[] rowKey = Bytes.toBytes(shortId);
     Increment increment = new Increment(rowKey);
     increment.addColumn(ShortUrlTable.DATA_FAMILY, ShortUrlTable.CLICKS,
@@ -134,7 +134,7 @@ public class Counters {
     List<ShortUrlStatistics> stats = new ArrayList<ShortUrlStatistics>();
     for (ShortUrl surl : rm.getUrlManager().getShortUrlsByUser(username)) {
       ShortUrlStatistics stat = getDailyStatistics(surl, 30, 110.0);
-      stats.add(stat);
+      if (stat != null) stats.add(stat);
     }
     return stats;
   }
@@ -175,8 +175,8 @@ public class Counters {
    */
   public ShortUrlStatistics getDailyStatistics(ShortUrl shortUrl, int maxValues,
     double normalize) throws IOException {
-    ResourceManager manager = ResourceManager.getInstance();
-    HTable table = manager.getTable(ShortUrlTable.NAME);
+    ResourceManager rm = ResourceManager.getInstance();
+    Table table = rm.getTable(ShortUrlTable.NAME);
 
     // get short Id usage data
     byte[] rowKey = Bytes.toBytes(shortUrl.getId());
@@ -236,7 +236,7 @@ public class Counters {
       normalizeData(clicks, normalize, maxValue);
     }
 
-    manager.putTable(table);
+    rm.putTable(table);
 
     ShortUrlStatistics statistics = new ShortUrlStatistics(shortUrl,
       TimeFrame.DAY);

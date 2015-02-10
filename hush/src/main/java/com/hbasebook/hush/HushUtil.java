@@ -17,8 +17,8 @@ public class HushUtil {
    * Converts a long to a base-62 string in reverse. (Least significant digit
    * first.)
    *
-   * @param number
-   * @return
+   * @param number The value to convert.
+   * @return The converted value.
    */
   public static String hushEncode(long number) {
     return longToString(number, BASE_62_DIGITS, true);
@@ -27,16 +27,16 @@ public class HushUtil {
   /**
    * Converts a base-62 reverse string to a long.
    *
-   * @param number
-   * @return
+   * @param number Value to convert.
+   * @return The converted value.
    */
-  public static long hushDecode(String id) {
-    return parseLong(id, BASE_62_DIGITS, true);
+  public static long hushDecode(String number) {
+    return parseLong(number, BASE_62_DIGITS, true);
   }
 
   /**
    * Encodes a number in BASE N.
-   * 
+   *
    * @param number The number to encode.
    * @param digits The character set to use for the encoding.
    * @param reverse Flag to indicate if the result should be reversed.
@@ -60,7 +60,7 @@ public class HushUtil {
 
   /**
    * Decodes the given BASE N encoded value.
-   * 
+   *
    * @param number The encoded value to decode.
    * @param digits The character set to decode with.
    * @param reverse Flag to indicate how the encoding was done.
@@ -79,6 +79,12 @@ public class HushUtil {
     return result;
   }
 
+  /**
+   * Replaces an unset string with an empty one.
+   *
+   * @param s The string to check.
+   * @return Return the original string or an empty one.
+   */
   public static String fixNull(String s) {
     if (s == null) {
       return "";
@@ -86,6 +92,14 @@ public class HushUtil {
     return s;
   }
 
+  /**
+   * Helps with login credentials.
+   *
+   * @param request The current request.
+   * @param response The current response.
+   * @return The user name.
+   * @throws IOException When something is wrong with the request.
+   */
   public static String getOrSetUsername(HttpServletRequest request,
       HttpServletResponse response) throws IOException {
     Principal principal = request.getUserPrincipal();
@@ -93,7 +107,7 @@ public class HushUtil {
     if (principal != null) {
       username = principal.getName();
     }
-    if (username == null) {
+    if (username == null && request.getCookies() != null) {
       // no principal found
       for (Cookie cookie : request.getCookies()) {
         if (cookie.getName().equals("auid")) {

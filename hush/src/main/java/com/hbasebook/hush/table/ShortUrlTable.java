@@ -1,9 +1,10 @@
 package com.hbasebook.hush.table;
 
+import org.apache.hadoop.hbase.TableName;
 import org.apache.hadoop.hbase.util.Bytes;
 
 public class ShortUrlTable {
-  public static final byte[] NAME = Bytes.toBytes("surl");
+  public static final TableName NAME = TableName.valueOf("surl");
   public static final byte[] DATA_FAMILY = Bytes.toBytes("data");
   public static final byte[] DAILY_FAMILY = Bytes.toBytes("std");
   public static final byte[] WEEKLY_FAMILY = Bytes.toBytes("stw");
