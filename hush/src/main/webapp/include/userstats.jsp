@@ -35,20 +35,20 @@
     <tbody>
     <%
       int rowNum = 0;
-        for (ShortUrlStatistics stat : stats) {
-          rowNum++;
-          ShortUrl shortUrl = stat.getShortUrl() ;
-          String url = shortUrl.toString();
-          String detailsUrl = url + "+";
-          String longUrl = shortUrl.getLongUrl();
-          StringBuffer sparkData = new StringBuffer();
-          for (Object obj : stat.getCounters("clicks").descendingSet()) {
-            Counter<Date, Double> counter = (Counter<Date, Double>) obj;
-            if (sparkData.length() > 0) {
-              sparkData.append(",");
-            }
-            sparkData.append(counter.getValue());
+      for (ShortUrlStatistics stat : stats) {
+        rowNum++;
+        ShortUrl shortUrl = stat.getShortUrl() ;
+        String url = shortUrl.toString();
+        String detailsUrl = url + "+";
+        String longUrl = shortUrl.getLongUrl();
+        StringBuffer sparkData = new StringBuffer();
+        for (Object obj : stat.getCounters("clicks").descendingSet()) {
+          Counter<Date, Double> counter = (Counter<Date, Double>) obj;
+          if (sparkData.length() > 0) {
+            sparkData.append(",");
           }
+          sparkData.append(counter.getValue());
+        }
     %>
     <tr>
       <td class="rowNum"><%=rowNum%></td>
