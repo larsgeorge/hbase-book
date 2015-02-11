@@ -47,8 +47,9 @@ public class PutListErrorExample2 {
       table.put(puts);
     /*[*/} catch (Exception e) {
       System.err.println("Error: " + e);
-      //table.flushCommits();/*]*/ // co PutListErrorExample2-2-Catch Catch local exception and commit queued updates.
+      //table.flushCommits();
       // todo: FIX!
+      /*]*/ // co PutListErrorExample2-2-Catch Catch local exception and commit queued updates.
     /*[*/}/*]*/
     // ^^ PutListErrorExample2
   }
