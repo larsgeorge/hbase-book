@@ -3,11 +3,14 @@ package client;
 // cc BatchSameRowExample Example application using batch operations, modifying the same row
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
+import org.apache.hadoop.hbase.TableName;
+import org.apache.hadoop.hbase.client.Connection;
+import org.apache.hadoop.hbase.client.ConnectionFactory;
 import org.apache.hadoop.hbase.client.Delete;
 import org.apache.hadoop.hbase.client.Get;
-import org.apache.hadoop.hbase.client.HTable;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Row;
+import org.apache.hadoop.hbase.client.Table;
 import org.apache.hadoop.hbase.util.Bytes;
 import util.HBaseHelper;
 
@@ -31,7 +34,8 @@ public class BatchSameRowExample {
     System.out.println("Before batch call...");
     helper.dump("testtable", new String[] { "row1" }, null, null);
 
-    HTable table = new HTable(conf, "testtable");
+    Connection connection = ConnectionFactory.createConnection(conf);
+    Table table = connection.getTable(TableName.valueOf("testtable"));
 
     // vv BatchSameRowExample
     List<Row> batch = new ArrayList<Row>();
@@ -45,7 +49,7 @@ public class BatchSameRowExample {
     batch.add(get1);
 
     Delete delete = new Delete(ROW1);
-    delete.deleteColumns(COLFAM1, QUAL1, 3L); // co BatchSameRowExample-1-AddDelete Delete the row that was just put above.
+    delete.addColumns(COLFAM1, QUAL1, 3L); // co BatchSameRowExample-1-AddDelete Delete the row that was just put above.
     batch.add(delete);
 
     Get get2 = new Get(ROW1);
@@ -63,7 +67,8 @@ public class BatchSameRowExample {
     for (int i = 0; i < results.length; i++) {
       System.out.println("Result[" + i + "]: " + results[i]);
     }
+    table.close();
     System.out.println("After batch call...");
-    helper.dump("testtable", new String[]{ "row1" }, null, null);
+    helper.dump("testtable", new String[]{"row1"}, null, null);
   }
 }

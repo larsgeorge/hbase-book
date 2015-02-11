@@ -3,8 +3,11 @@ package client;
 // cc PutListExample Example inserting data into HBase using a list
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
-import org.apache.hadoop.hbase.client.HTable;
+import org.apache.hadoop.hbase.TableName;
+import org.apache.hadoop.hbase.client.Connection;
+import org.apache.hadoop.hbase.client.ConnectionFactory;
 import org.apache.hadoop.hbase.client.Put;
+import org.apache.hadoop.hbase.client.Table;
 import org.apache.hadoop.hbase.util.Bytes;
 import util.HBaseHelper;
 
@@ -19,7 +22,8 @@ public class PutListExample {
     HBaseHelper helper = HBaseHelper.getHelper(conf);
     helper.dropTable("testtable");
     helper.createTable("testtable", "colfam1");
-    HTable table = new HTable(conf, "testtable");
+    Connection connection = ConnectionFactory.createConnection(conf);
+    Table table = connection.getTable(TableName.valueOf("testtable"));
 
     // vv PutListExample
     List<Put> puts = new ArrayList<Put>(); // co PutListExample-1-CreateList Create a list that holds the Put instances.
@@ -41,5 +45,6 @@ public class PutListExample {
 
     table.put(puts); // co PutListExample-5-DoPut Store multiple rows with columns into HBase.
     // ^^ PutListExample
+    table.close();
   }
 }

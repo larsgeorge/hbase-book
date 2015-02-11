@@ -3,10 +3,13 @@ package client;
 // cc ScanCacheBatchExample Example using caching and batch parameters for scans
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
-import org.apache.hadoop.hbase.client.HTable;
+import org.apache.hadoop.hbase.TableName;
+import org.apache.hadoop.hbase.client.Connection;
+import org.apache.hadoop.hbase.client.ConnectionFactory;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.Scan;
+import org.apache.hadoop.hbase.client.Table;
 import org.apache.log4j.Appender;
 import org.apache.log4j.AppenderSkeleton;
 import org.apache.log4j.Level;
@@ -18,7 +21,7 @@ import java.io.IOException;
 
 public class ScanCacheBatchExample {
 
-  private static HTable table = null;
+  private static Table table = null;
 
   // vv ScanCacheBatchExample
   private static void scan(int caching, int batch) throws IOException {
@@ -66,7 +69,8 @@ public class ScanCacheBatchExample {
     helper.createTable("testtable", "colfam1", "colfam2");
     helper.fillTable("testtable", 1, 10, 10, "colfam1", "colfam2");
 
-    table = new HTable(conf, "testtable");
+    Connection connection = ConnectionFactory.createConnection(conf);
+    table = connection.getTable(TableName.valueOf("testtable"));
 
     // vv ScanCacheBatchExample
     scan(1, 1);

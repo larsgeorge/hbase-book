@@ -2,13 +2,16 @@ package client;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
+import org.apache.hadoop.hbase.TableName;
+import org.apache.hadoop.hbase.client.Connection;
+import org.apache.hadoop.hbase.client.ConnectionFactory;
 import org.apache.hadoop.hbase.client.Delete;
 import org.apache.hadoop.hbase.client.Get;
-import org.apache.hadoop.hbase.client.HTable;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.Scan;
+import org.apache.hadoop.hbase.client.Table;
 import org.apache.hadoop.hbase.util.Bytes;
 import util.HBaseHelper;
 
@@ -24,7 +27,8 @@ public class CRUDExample {
       helper.createTable("testtable", "fam-A", "fam-B");
     }
 
-    HTable table = new HTable(conf, "testtable");
+    Connection connection = ConnectionFactory.createConnection(conf);
+    Table table = connection.getTable(TableName.valueOf("testtable"));
 
     Put put = new Put(Bytes.toBytes("myrow-1"));
     put.add(Bytes.toBytes("fam-A"), Bytes.toBytes("col-A"),
@@ -50,5 +54,7 @@ public class CRUDExample {
     for (Result result2 : scanner) {
       System.out.println(result2);
     }
+
+    table.close();
   }
 }

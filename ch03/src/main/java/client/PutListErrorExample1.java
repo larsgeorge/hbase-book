@@ -3,8 +3,11 @@ package client;
 // cc PutListErrorExample1 Example inserting a faulty column family into HBase
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
-import org.apache.hadoop.hbase.client.HTable;
+import org.apache.hadoop.hbase.TableName;
+import org.apache.hadoop.hbase.client.Connection;
+import org.apache.hadoop.hbase.client.ConnectionFactory;
 import org.apache.hadoop.hbase.client.Put;
+import org.apache.hadoop.hbase.client.Table;
 import org.apache.hadoop.hbase.util.Bytes;
 import util.HBaseHelper;
 
@@ -19,7 +22,8 @@ public class PutListErrorExample1 {
     HBaseHelper helper = HBaseHelper.getHelper(conf);
     helper.dropTable("testtable");
     helper.createTable("testtable", "colfam1");
-    HTable table = new HTable(conf, "testtable");
+    Connection connection = ConnectionFactory.createConnection(conf);
+    Table table = connection.getTable(TableName.valueOf("testtable"));
 
     List<Put> puts = new ArrayList<Put>();
 
@@ -39,5 +43,6 @@ public class PutListErrorExample1 {
 
     table.put(puts); // co PutListErrorExample1-2-DoPut Store multiple rows with columns into HBase.
     // ^^ PutListErrorExample1
+    table.close();
   }
 }

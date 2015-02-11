@@ -2,11 +2,15 @@ package client;
 
 // cc GetListExample Example of retrieving data from HBase using lists of Get instances
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.hbase.Cell;
+import org.apache.hadoop.hbase.CellUtil;
 import org.apache.hadoop.hbase.HBaseConfiguration;
-import org.apache.hadoop.hbase.KeyValue;
+import org.apache.hadoop.hbase.TableName;
+import org.apache.hadoop.hbase.client.Connection;
+import org.apache.hadoop.hbase.client.ConnectionFactory;
 import org.apache.hadoop.hbase.client.Get;
-import org.apache.hadoop.hbase.client.HTable;
 import org.apache.hadoop.hbase.client.Result;
+import org.apache.hadoop.hbase.client.Table;
 import org.apache.hadoop.hbase.util.Bytes;
 import util.HBaseHelper;
 
@@ -22,7 +26,8 @@ public class GetListExample {
     if (!helper.existsTable("testtable")) {
       helper.createTable("testtable", "colfam1");
     }
-    HTable table = new HTable(conf, "testtable");
+    Connection connection = ConnectionFactory.createConnection(conf);
+    Table table = connection.getTable(TableName.valueOf("testtable"));
 
     // vv GetListExample
     byte[] cf1 = Bytes.toBytes("colfam1");
@@ -64,9 +69,11 @@ public class GetListExample {
 
     System.out.println("Second iteration...");
     for (Result result : results) {
-      for (KeyValue kv : result.raw()) {
-        System.out.println("Row: " + Bytes.toString(kv.getRow()) + // co GetListExample-6-GetValue2 Iterate over results again, printing out all values.
-          " Value: " + Bytes.toString(kv.getValue()));
+      for (Cell cell : result.listCells()) { // co GetListExample-6-GetValue2 Iterate over results again, printing out all values.
+        System.out.println(
+          "Row: " + Bytes.toString(
+            cell.getRowArray(), cell.getRowOffset(), cell.getRowLength()) + // co GetListExample-7-GetValue2 Two different ways to access the cell data.
+          " Value: " + Bytes.toString(CellUtil.cloneValue(cell)));
       }
     }
     // ^^ GetListExample

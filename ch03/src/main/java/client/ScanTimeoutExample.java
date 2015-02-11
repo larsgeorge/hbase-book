@@ -4,10 +4,13 @@ package client;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.HConstants;
-import org.apache.hadoop.hbase.client.HTable;
+import org.apache.hadoop.hbase.TableName;
+import org.apache.hadoop.hbase.client.Connection;
+import org.apache.hadoop.hbase.client.ConnectionFactory;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.Scan;
+import org.apache.hadoop.hbase.client.Table;
 import util.HBaseHelper;
 
 import java.io.IOException;
@@ -23,7 +26,8 @@ public class ScanTimeoutExample {
     System.out.println("Adding rows to table...");
     helper.fillTable("testtable", 1, 10, 10, "colfam1", "colfam2");
 
-    HTable table = new HTable(conf, "testtable");
+    Connection connection = ConnectionFactory.createConnection(conf);
+    Table table = connection.getTable(TableName.valueOf("testtable"));
 
     // vv ScanTimeoutExample
     Scan scan = new Scan();
@@ -55,5 +59,6 @@ public class ScanTimeoutExample {
     }
     scanner.close();
     // ^^ ScanTimeoutExample
+    table.close();
   }
 }

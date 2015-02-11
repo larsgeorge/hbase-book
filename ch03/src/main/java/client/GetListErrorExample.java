@@ -3,9 +3,12 @@ package client;
 // cc GetListErrorExample Example trying to read an erroneous column family
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
+import org.apache.hadoop.hbase.TableName;
+import org.apache.hadoop.hbase.client.Connection;
+import org.apache.hadoop.hbase.client.ConnectionFactory;
 import org.apache.hadoop.hbase.client.Get;
-import org.apache.hadoop.hbase.client.HTable;
 import org.apache.hadoop.hbase.client.Result;
+import org.apache.hadoop.hbase.client.Table;
 import org.apache.hadoop.hbase.util.Bytes;
 import util.HBaseHelper;
 
@@ -21,7 +24,8 @@ public class GetListErrorExample {
     if (!helper.existsTable("testtable")) {
       helper.createTable("testtable", "colfam1");
     }
-    HTable table = new HTable(conf, "testtable");
+    Connection connection = ConnectionFactory.createConnection(conf);
+    Table table = connection.getTable(TableName.valueOf("testtable"));
 
     byte[] cf1 = Bytes.toBytes("colfam1");
     byte[] qf1 = Bytes.toBytes("qual1");
@@ -52,5 +56,6 @@ public class GetListErrorExample {
 
     System.out.println("Result count: " + results.length); // co GetListErrorExample-4-SOUT This line will never reached!
     // ^^ GetListErrorExample
+    table.close();
   }
 }

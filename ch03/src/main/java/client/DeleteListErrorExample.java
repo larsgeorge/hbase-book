@@ -3,8 +3,11 @@ package client;
 // cc DeleteListErrorExample Example deleting faulty data from HBase
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
+import org.apache.hadoop.hbase.TableName;
+import org.apache.hadoop.hbase.client.Connection;
+import org.apache.hadoop.hbase.client.ConnectionFactory;
 import org.apache.hadoop.hbase.client.Delete;
-import org.apache.hadoop.hbase.client.HTable;
+import org.apache.hadoop.hbase.client.Table;
 import org.apache.hadoop.hbase.util.Bytes;
 import util.HBaseHelper;
 
@@ -19,7 +22,8 @@ public class DeleteListErrorExample {
     HBaseHelper helper = HBaseHelper.getHelper(conf);
     helper.dropTable("testtable");
     helper.createTable("testtable", "colfam1", "colfam2");
-    HTable table = new HTable(conf, "testtable");
+    Connection connection = ConnectionFactory.createConnection(conf);
+    Table table = connection.getTable(TableName.valueOf("testtable"));
     helper.put("testtable",
       new String[] { "row1" },
       new String[] { "colfam1", "colfam2" },
@@ -48,18 +52,18 @@ public class DeleteListErrorExample {
     deletes.add(delete1);
 
     Delete delete2 = new Delete(Bytes.toBytes("row2"));
-    delete2.deleteColumn(Bytes.toBytes("colfam1"), Bytes.toBytes("qual1"));
-    delete2.deleteColumns(Bytes.toBytes("colfam2"), Bytes.toBytes("qual3"), 5);
+    delete2.addColumn(Bytes.toBytes("colfam1"), Bytes.toBytes("qual1"));
+    delete2.addColumns(Bytes.toBytes("colfam2"), Bytes.toBytes("qual3"), 5);
     deletes.add(delete2);
 
     Delete delete3 = new Delete(Bytes.toBytes("row3"));
-    delete3.deleteFamily(Bytes.toBytes("colfam1"));
-    delete3.deleteFamily(Bytes.toBytes("colfam2"), 3);
+    delete3.addFamily(Bytes.toBytes("colfam1"));
+    delete3.addFamily(Bytes.toBytes("colfam2"), 3);
     deletes.add(delete3);
 
     // vv DeleteListErrorExample
     Delete delete4 = new Delete(Bytes.toBytes("row2"));
-    /*[*/delete4.deleteColumn(Bytes.toBytes("BOGUS"),/*]*/ Bytes.toBytes("qual1")); // co DeleteListErrorExample-1-DelColNoTS Add bogus column family to trigger an error.
+    /*[*/delete4.addColumn(Bytes.toBytes("BOGUS"),/*]*/ Bytes.toBytes("qual1")); // co DeleteListErrorExample-1-DelColNoTS Add bogus column family to trigger an error.
     deletes.add(delete4);
 
     try {
@@ -74,6 +78,7 @@ public class DeleteListErrorExample {
       System.out.println(delete); // co DeleteListErrorExample-5-Dump Print out failed delete for debugging purposes.
     }
     // ^^ DeleteListErrorExample
+    table.close();
     System.out.println("After delete call...");
     helper.dump("testtable", new String[]{ "row1", "row2", "row3" }, null, null);
   }

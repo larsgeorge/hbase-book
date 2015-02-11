@@ -3,9 +3,12 @@ package client;
 // cc GetExample Example application retrieving data from HBase
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
+import org.apache.hadoop.hbase.TableName;
+import org.apache.hadoop.hbase.client.Connection;
+import org.apache.hadoop.hbase.client.ConnectionFactory;
 import org.apache.hadoop.hbase.client.Get;
-import org.apache.hadoop.hbase.client.HTable;
 import org.apache.hadoop.hbase.client.Result;
+import org.apache.hadoop.hbase.client.Table;
 import org.apache.hadoop.hbase.util.Bytes;
 import util.HBaseHelper;
 
@@ -23,7 +26,8 @@ public class GetExample {
       helper.createTable("testtable", "colfam1");
     }
     // vv GetExample
-    HTable table = new HTable(conf, "testtable"); // co GetExample-2-NewTable Instantiate a new table reference.
+    Connection connection = ConnectionFactory.createConnection(conf);
+    Table table = connection.getTable(TableName.valueOf("testtable")); // co GetExample-2-NewTable Instantiate a new table reference.
 
     Get get = new Get(Bytes.toBytes("row1")); // co GetExample-3-NewGet Create get with specific row.
 
@@ -35,6 +39,8 @@ public class GetExample {
       Bytes.toBytes("qual1")); // co GetExample-6-GetValue Get a specific value for the given column.
 
     System.out.println("Value: " + Bytes.toString(val)); // co GetExample-7-Print Print out the value while converting it back.
+
+    table.close(); // co GetExample-8-Close Close the table instance to free resources.
     // ^^ GetExample
   }
 }

@@ -3,11 +3,14 @@ package client;
 // cc BatchExample Example application using batch operations
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
+import org.apache.hadoop.hbase.TableName;
+import org.apache.hadoop.hbase.client.Connection;
+import org.apache.hadoop.hbase.client.ConnectionFactory;
 import org.apache.hadoop.hbase.client.Delete;
 import org.apache.hadoop.hbase.client.Get;
-import org.apache.hadoop.hbase.client.HTable;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Row;
+import org.apache.hadoop.hbase.client.Table;
 import org.apache.hadoop.hbase.util.Bytes;
 import util.HBaseHelper;
 
@@ -42,7 +45,8 @@ public class BatchExample {
     System.out.println("Before batch call...");
     helper.dump("testtable", new String[] { "row1", "row2" }, null, null);
 
-    HTable table = new HTable(conf, "testtable");
+    Connection connection = ConnectionFactory.createConnection(conf);
+    Table table = connection.getTable(TableName.valueOf("testtable"));
 
     // vv BatchExample
     List<Row> batch = new ArrayList<Row>(); // co BatchExample-2-CreateList Create a list to hold all values.
@@ -74,7 +78,8 @@ public class BatchExample {
       System.out.println("Result[" + i + "]: " + results[i]); // co BatchExample-9-Dump Print all results.
     }
     // ^^ BatchExample
+    table.close();
     System.out.println("After batch call...");
-    helper.dump("testtable", new String[]{ "row1", "row2" }, null, null);
+    helper.dump("testtable", new String[]{"row1", "row2"}, null, null);
   }
 }

@@ -3,10 +3,13 @@ package client;
 // cc ScanExample Example using a scanner to access data in a table
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
-import org.apache.hadoop.hbase.client.HTable;
+import org.apache.hadoop.hbase.TableName;
+import org.apache.hadoop.hbase.client.Connection;
+import org.apache.hadoop.hbase.client.ConnectionFactory;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.Scan;
+import org.apache.hadoop.hbase.client.Table;
 import org.apache.hadoop.hbase.util.Bytes;
 import util.HBaseHelper;
 
@@ -23,7 +26,8 @@ public class ScanExample {
     System.out.println("Adding rows to table...");
     helper.fillTable("testtable", 1, 100, 100, "colfam1", "colfam2");
 
-    HTable table = new HTable(conf, "testtable");
+    Connection connection = ConnectionFactory.createConnection(conf);
+    Table table = connection.getTable(TableName.valueOf("testtable"));
 
     System.out.println("Scanning table #1...");
     // vv ScanExample
@@ -59,5 +63,6 @@ public class ScanExample {
     }
     scanner3.close();
     // ^^ ScanExample
+    table.close();
   }
 }

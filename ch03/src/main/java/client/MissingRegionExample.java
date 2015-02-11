@@ -4,6 +4,7 @@ package client;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.HRegionLocation;
+import org.apache.hadoop.hbase.TableName;
 import org.apache.hadoop.hbase.client.*;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.hadoop.hbase.util.Pair;
@@ -72,10 +73,11 @@ public class MissingRegionExample {
     helper.fillTable("testtable", 1, 100, 1, 3, false, "colfam1", "colfam2");
     printTableRegions(conf, "testtable");
 
-    HTable table = new HTable(conf, "testtable");
+    Connection connection = ConnectionFactory.createConnection(conf);
+    Table table = connection.getTable(TableName.valueOf("testtable"));
 
     // vv MissingRegionExample
-    HBaseAdmin admin = new HBaseAdmin(conf);
+    Admin admin = connection.getAdmin();
 
     Thread thread = new Thread(new Getter()); // co MissingRegionExample-4-Start Start the asynchronous thread.
     thread.setDaemon(true);
@@ -88,13 +90,16 @@ public class MissingRegionExample {
       // ignore
     }
 
-    HRegionLocation location = table.getRegionLocation("row-050");
+    RegionLocator locator = connection.getRegionLocator(
+      TableName.valueOf("testtable"));
+    HRegionLocation location = locator.getRegionLocation(
+      Bytes.toBytes("row-050"));
     System.out.println("\nUnassigning region: " + location.getRegionInfo().
       getRegionNameAsString());
     admin.closeRegion(location.getRegionInfo().getRegionName(), null); // co MissingRegionExample-6-Close Close the region containing the row the reading thread is retrieving. Note that unassign() does not work here because the master would automatically reopen the region when the thread is calling the get() method.
 
     int count = 0;
-    while (table.getRegionLocations().size() >= 3 && count++ < 10) // co MissingRegionExample-7-Check Use the number of online regions to confirm the close.
+    while (locator.getAllRegionLocations().size() >= 3 && count++ < 10) // co MissingRegionExample-7-Check Use the number of online regions to confirm the close.
       try {
         System.out.println("\nWaiting for region to be offline in main()...");
         Thread.sleep(500);
@@ -118,6 +123,9 @@ public class MissingRegionExample {
     } catch (InterruptedException e) {
       // ignore
     }
+    locator.close();
+    table.close();
+    admin.close();
     // ^^ MissingRegionExample
   }
 }
