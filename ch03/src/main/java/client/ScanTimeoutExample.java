@@ -34,7 +34,7 @@ public class ScanTimeoutExample {
     ResultScanner scanner = table.getScanner(scan);
 
     int scannerTimeout = (int) conf.getLong(
-      HConstants.HBASE_REGIONSERVER_LEASE_PERIOD_KEY, -1); // co ScanTimeoutExample-1-GetConf Get currently configured lease timeout.
+      HConstants.HBASE_CLIENT_SCANNER_TIMEOUT_PERIOD, -1); // co ScanTimeoutExample-1-GetConf Get currently configured lease timeout.
     // ^^ ScanTimeoutExample
     System.out.println("Current (local) lease period: " + scannerTimeout + "ms");
     System.out.println("Sleeping now for " + (scannerTimeout + 5000) + "ms...");
