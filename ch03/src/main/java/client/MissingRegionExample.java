@@ -124,8 +124,10 @@ public class MissingRegionExample {
       // ignore
     }
     locator.close();
-    table.close();
     admin.close();
     // ^^ MissingRegionExample
+    table.close();
+    connection.close();
+    helper.close();
   }
 }

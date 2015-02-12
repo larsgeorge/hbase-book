@@ -19,11 +19,10 @@ public class DeleteListErrorExample {
 
   public static void main(String[] args) throws IOException {
     Configuration conf = HBaseConfiguration.create();
+
     HBaseHelper helper = HBaseHelper.getHelper(conf);
     helper.dropTable("testtable");
     helper.createTable("testtable", "colfam1", "colfam2");
-    Connection connection = ConnectionFactory.createConnection(conf);
-    Table table = connection.getTable(TableName.valueOf("testtable"));
     helper.put("testtable",
       new String[] { "row1" },
       new String[] { "colfam1", "colfam2" },
@@ -44,6 +43,9 @@ public class DeleteListErrorExample {
       new String[] { "val1", "val2", "val3", "val4", "val5", "val6" });
     System.out.println("Before delete call...");
     helper.dump("testtable", new String[]{ "row1", "row2", "row3" }, null, null);
+
+    Connection connection = ConnectionFactory.createConnection(conf);
+    Table table = connection.getTable(TableName.valueOf("testtable"));
 
     List<Delete> deletes = new ArrayList<Delete>();
 
@@ -79,7 +81,9 @@ public class DeleteListErrorExample {
     }
     // ^^ DeleteListErrorExample
     table.close();
+    connection.close();
     System.out.println("After delete call...");
     helper.dump("testtable", new String[]{ "row1", "row2", "row3" }, null, null);
+    helper.close();
   }
 }

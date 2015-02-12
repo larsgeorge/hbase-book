@@ -20,10 +20,12 @@ public class GetListErrorExample {
 
   public static void main(String[] args) throws IOException {
     Configuration conf = HBaseConfiguration.create();
+    
     HBaseHelper helper = HBaseHelper.getHelper(conf);
     if (!helper.existsTable("testtable")) {
       helper.createTable("testtable", "colfam1");
     }
+    
     Connection connection = ConnectionFactory.createConnection(conf);
     Table table = connection.getTable(TableName.valueOf("testtable"));
 
@@ -57,5 +59,7 @@ public class GetListErrorExample {
     System.out.println("Result count: " + results.length); // co GetListErrorExample-4-SOUT This line will never reached!
     // ^^ GetListErrorExample
     table.close();
+    connection.close();
+    helper.close();
   }
 }

@@ -37,7 +37,11 @@ public class PutExample {
       Bytes.toBytes("val2")); // co PutExample-4-AddCol2 Add another column, whose name is "colfam1:qual2", to the put.
 
     table.put(put); // co PutExample-5-DoPut Store row with column into the HBase table.
-    table.close(); // co PutExample-6-DoPut Close table instance to free resources.
+    table.close(); // co PutExample-6-DoPut Close table and connection instances to free resources.
+    connection.close();
+    // ^^ PutExample
+    helper.close();
+    // vv PutExample
   }
 }
 // ^^ PutExample

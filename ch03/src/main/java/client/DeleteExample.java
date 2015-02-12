@@ -17,11 +17,10 @@ public class DeleteExample {
 
   public static void main(String[] args) throws IOException {
     Configuration conf = HBaseConfiguration.create();
+
     HBaseHelper helper = HBaseHelper.getHelper(conf);
     helper.dropTable("testtable");
     helper.createTable("testtable", "colfam1", "colfam2");
-    Connection connection = ConnectionFactory.createConnection(conf);
-    Table table = connection.getTable(TableName.valueOf("testtable"));
     helper.put("testtable",
       new String[] { "row1" },
       new String[] { "colfam1", "colfam2" },
@@ -30,6 +29,10 @@ public class DeleteExample {
       new String[] { "val1", "val2", "val3", "val4", "val5", "val6" });
     System.out.println("Before delete call...");
     helper.dump("testtable", new String[]{ "row1" }, null, null);
+
+    Connection connection = ConnectionFactory.createConnection(conf);
+    Table table = connection.getTable(TableName.valueOf("testtable"));
+
     // vv DeleteExample
     Delete delete = new Delete(Bytes.toBytes("row1")); // co DeleteExample-1-NewDel Create delete with specific row.
 
@@ -47,8 +50,10 @@ public class DeleteExample {
     table.delete(delete); // co DeleteExample-9-DoDel Delete the data from the HBase table.
 
     table.close();
+    connection.close();
     // ^^ DeleteExample
     System.out.println("After delete call...");
     helper.dump("testtable", new String[] { "row1" }, null, null);
+    helper.close();
   }
 }

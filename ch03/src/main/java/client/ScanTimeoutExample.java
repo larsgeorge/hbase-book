@@ -60,5 +60,7 @@ public class ScanTimeoutExample {
     scanner.close();
     // ^^ ScanTimeoutExample
     table.close();
+    connection.close();
+    helper.close();
   }
 }

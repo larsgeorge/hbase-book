@@ -40,7 +40,9 @@ public class GetExample {
 
     System.out.println("Value: " + Bytes.toString(val)); // co GetExample-7-Print Print out the value while converting it back.
 
-    table.close(); // co GetExample-8-Close Close the table instance to free resources.
+    table.close(); // co GetExample-8-Close Close the table and connection instances to free resources.
+    connection.close();
     // ^^ GetExample
+    helper.close();
   }
 }

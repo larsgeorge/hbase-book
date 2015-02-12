@@ -64,5 +64,7 @@ public class ScanExample {
     scanner3.close();
     // ^^ ScanExample
     table.close();
+    connection.close();
+    helper.close();
   }
 }

@@ -54,8 +54,10 @@ public class PutWriteBufferExample1 {
     Result res2 = table.get(get);
     System.out.println("Result: " + res2); // co PutWriteBufferExample1-5-Get2 Now the row is persisted and can be loaded.
 
-    table.close();
     mutator.close();
+    table.close();
+    connection.close();
     // ^^ PutWriteBufferExample1
+    helper.close();
   }
 }

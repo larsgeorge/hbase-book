@@ -22,10 +22,12 @@ public class GetListExample {
 
   public static void main(String[] args) throws IOException {
     Configuration conf = HBaseConfiguration.create();
+
     HBaseHelper helper = HBaseHelper.getHelper(conf);
     if (!helper.existsTable("testtable")) {
       helper.createTable("testtable", "colfam1");
     }
+
     Connection connection = ConnectionFactory.createConnection(conf);
     Table table = connection.getTable(TableName.valueOf("testtable"));
 
@@ -77,5 +79,8 @@ public class GetListExample {
       }
     }
     // ^^ GetListExample
+    table.close();
+    connection.close();
+    helper.close();
   }
 }

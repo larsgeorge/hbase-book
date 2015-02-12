@@ -23,6 +23,7 @@ public class PutIdenticalExample {
     HBaseHelper helper = HBaseHelper.getHelper(conf);
     helper.dropTable("testtable");
     helper.createTable("testtable", "colfam1");
+
     Connection connection = ConnectionFactory.createConnection(conf);
     Table table = connection.getTable(TableName.valueOf("testtable"));
 
@@ -39,5 +40,8 @@ public class PutIdenticalExample {
     System.out.println("Result: " + result + ", Value: " + Bytes.toString(
       result.getValue(Bytes.toBytes("colfam1"), Bytes.toBytes("qual1")))); // co PutIdenticalExample-2-Get Perform a get to verify that "val1" was actually stored.
     // ^^ PutIdenticalExample
+    table.close();
+    connection.close();
+    helper.close();
   }
 }

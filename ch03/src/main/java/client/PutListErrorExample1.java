@@ -19,9 +19,11 @@ public class PutListErrorExample1 {
 
   public static void main(String[] args) throws IOException {
     Configuration conf = HBaseConfiguration.create();
+
     HBaseHelper helper = HBaseHelper.getHelper(conf);
     helper.dropTable("testtable");
     helper.createTable("testtable", "colfam1");
+
     Connection connection = ConnectionFactory.createConnection(conf);
     Table table = connection.getTable(TableName.valueOf("testtable"));
 
@@ -44,5 +46,7 @@ public class PutListErrorExample1 {
     table.put(puts); // co PutListErrorExample1-2-DoPut Store multiple rows with columns into HBase.
     // ^^ PutListErrorExample1
     table.close();
+    connection.close();
+    helper.close();
   }
 }

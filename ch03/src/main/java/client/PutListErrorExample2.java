@@ -19,9 +19,11 @@ public class PutListErrorExample2 {
 
   public static void main(String[] args) throws IOException {
     Configuration conf = HBaseConfiguration.create();
+
     HBaseHelper helper = HBaseHelper.getHelper(conf);
     helper.dropTable("testtable");
     helper.createTable("testtable", "colfam1");
+
     Connection connection = ConnectionFactory.createConnection(conf);
     Table table = connection.getTable(TableName.valueOf("testtable"));
 
@@ -52,5 +54,8 @@ public class PutListErrorExample2 {
       /*]*/ // co PutListErrorExample2-2-Catch Catch local exception and commit queued updates.
     /*[*/}/*]*/
     // ^^ PutListErrorExample2
+    table.close();
+    connection.close();
+    helper.close();
   }
 }

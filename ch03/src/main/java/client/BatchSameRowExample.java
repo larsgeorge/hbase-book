@@ -65,10 +65,13 @@ public class BatchSameRowExample {
     // ^^ BatchSameRowExample
 
     for (int i = 0; i < results.length; i++) {
-      System.out.println("Result[" + i + "]: " + results[i]);
+      System.out.println("Result[" + i + "]: type = " +
+        results[i].getClass().getSimpleName() + "; " + results[i]);
     }
     table.close();
+    connection.close();
     System.out.println("After batch call...");
     helper.dump("testtable", new String[]{"row1"}, null, null);
+    helper.close();
   }
 }

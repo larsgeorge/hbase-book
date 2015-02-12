@@ -24,9 +24,9 @@ public class CheckAndDeleteExample {
     helper.put("testtable",
       new String[] { "row1" },
       new String[] { "colfam1", "colfam2" },
-      new String[] { "qual1", "qual1", "qual2", "qual2", "qual3", "qual3" },
-      new long[]   { 1, 2, 3, 4, 5, 6 },
-      new String[] { "val1", "val2", "val3", "val4", "val5", "val6" });
+      new String[] { "qual1", "qual2", "qual3" },
+      new long[]   { 1, 2, 3 },
+      new String[] { "val1", "val2", "val3" });
     System.out.println("Before delete call...");
     helper.dump("testtable", new String[]{ "row1" }, null, null);
 
@@ -39,7 +39,7 @@ public class CheckAndDeleteExample {
 
     boolean res1 = table.checkAndDelete(Bytes.toBytes("row1"),
       Bytes.toBytes("colfam2"), Bytes.toBytes("qual3"), null, delete1); // co CheckAndDeleteExample-2-CAS1 Check if column does not exist and perform optional delete operation.
-    System.out.println("Delete successful: " + res1); // co CheckAndDeleteExample-3-SOUT1 Print out the result, should be "Delete successful: false".
+    System.out.println("Delete 1 successful: " + res1); // co CheckAndDeleteExample-3-SOUT1 Print out the result, should be "Delete successful: false".
 
     Delete delete2 = new Delete(Bytes.toBytes("row1"));
     delete2.addColumns(Bytes.toBytes("colfam2"), Bytes.toBytes("qual3")); // co CheckAndDeleteExample-4-Delete2 Delete checked column manually.
@@ -47,7 +47,7 @@ public class CheckAndDeleteExample {
 
     boolean res2 = table.checkAndDelete(Bytes.toBytes("row1"),
       Bytes.toBytes("colfam2"), Bytes.toBytes("qual3"), null, delete1); // co CheckAndDeleteExample-5-CAS2 Attempt to delete same cell again.
-    System.out.println("Delete successful: " + res2); // co CheckAndDeleteExample-6-SOUT2 Print out the result, should be "Delete successful: true" as the column now already exists.
+    System.out.println("Delete 2 successful: " + res2); // co CheckAndDeleteExample-6-SOUT2 Print out the result, should be "Delete successful: true" since the checked column now is gone.
 
     Delete delete3 = new Delete(Bytes.toBytes("row2"));
     delete3.addFamily(Bytes.toBytes("colfam1")); // co CheckAndDeleteExample-7-Delete3 Create yet another Delete instance, but using a different row.
@@ -55,14 +55,16 @@ public class CheckAndDeleteExample {
     try{
       boolean res4 = table.checkAndDelete(Bytes.toBytes("row1"),
         Bytes.toBytes("colfam1"), Bytes.toBytes("qual1"), // co CheckAndDeleteExample-8-CAS4 Try to delete while checking a different row.
-        Bytes.toBytes("val1"), delete3); // todo: check if this is still the same
-      System.out.println("Delete successful: " + res4); // co CheckAndDeleteExample-9-SOUT4 We will not get here as an exception is thrown beforehand!
+        Bytes.toBytes("val1"), delete3);
+      System.out.println("Delete 3 successful: " + res4); // co CheckAndDeleteExample-9-SOUT4 We will not get here as an exception is thrown beforehand!
     } catch (Exception e) {
-      System.err.println("Error: " + e);
+      System.err.println("Error: " + e.getMessage());
     }
     // ^^ CheckAndDeleteExample
     table.close();
+    connection.close();
     System.out.println("After delete call...");
     helper.dump("testtable", new String[]{"row1"}, null, null);
+    helper.close();
   }
 }

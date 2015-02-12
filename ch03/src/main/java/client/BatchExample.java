@@ -60,7 +60,7 @@ public class BatchExample {
     batch.add(get1);
 
     Delete delete = new Delete(ROW1);
-    delete.deleteColumns(COLFAM1, QUAL2); // co BatchExample-5-AddDelete Add a Delete instance.
+    delete.addColumns(COLFAM1, QUAL2); // co BatchExample-5-AddDelete Add a Delete instance.
     batch.add(delete);
 
     Get get2 = new Get(ROW2);
@@ -75,11 +75,14 @@ public class BatchExample {
     }
 
     for (int i = 0; i < results.length; i++) {
-      System.out.println("Result[" + i + "]: " + results[i]); // co BatchExample-9-Dump Print all results.
+      System.out.println("Result[" + i + "]: type = " + // co BatchExample-9-Dump Print all results and class types.
+        results[i].getClass().getSimpleName() + "; " + results[i]);
     }
     // ^^ BatchExample
     table.close();
+    connection.close();
     System.out.println("After batch call...");
     helper.dump("testtable", new String[]{"row1", "row2"}, null, null);
+    helper.close();
   }
 }

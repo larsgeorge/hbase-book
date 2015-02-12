@@ -27,6 +27,7 @@ public class PutWriteBufferExample2 {
     HBaseHelper helper = HBaseHelper.getHelper(conf);
     helper.dropTable("testtable");
     helper.createTable("testtable", "colfam1");
+    
     TableName name = TableName.valueOf("testtable");
     Connection connection = ConnectionFactory.createConnection(conf);
     Table table = connection.getTable(name);
@@ -61,7 +62,8 @@ public class PutWriteBufferExample2 {
     Result res2 = table.get(get);
     System.out.println("Result: " + res2); // co PutWriteBufferExample2-6-Get2 Now the row is persisted and can be loaded.
     // ^^ PutWriteBufferExample2
-    table.close();
     mutator.close();
+    table.close();
+    connection.close();
   }
 }

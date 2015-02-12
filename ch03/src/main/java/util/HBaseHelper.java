@@ -38,6 +38,10 @@ public class HBaseHelper {
     return new HBaseHelper(conf);
   }
 
+  public void close() throws IOException {
+    connection.close();
+  }
+
   public Connection getConnection() {
     return connection;
   }
@@ -229,6 +233,7 @@ public class HBaseHelper {
         for (String qual : quals) {
           String val = vals[v < vals.length ? v : vals.length - 1];
           long t = ts[v < ts.length ? v : ts.length - 1];
+          System.out.println("Adding: " + fam + " " + qual + " " + t + " " + val);
           put.add(Bytes.toBytes(fam), Bytes.toBytes(qual), t,
             Bytes.toBytes(val));
           v++;
