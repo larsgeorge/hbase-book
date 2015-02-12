@@ -4,9 +4,12 @@ package client;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.KeyValue;
-import org.apache.hadoop.hbase.client.HTable;
+import org.apache.hadoop.hbase.TableName;
+import org.apache.hadoop.hbase.client.Connection;
+import org.apache.hadoop.hbase.client.ConnectionFactory;
 import org.apache.hadoop.hbase.client.Increment;
 import org.apache.hadoop.hbase.client.Result;
+import org.apache.hadoop.hbase.client.Table;
 import org.apache.hadoop.hbase.util.Bytes;
 import util.HBaseHelper;
 
@@ -18,10 +21,11 @@ public class IncrementMultipleExample {
     Configuration conf = HBaseConfiguration.create();
 
     HBaseHelper helper = HBaseHelper.getHelper(conf);
-    helper.dropTable("counters");
-    helper.createTable("counters", "daily", "weekly");
+    helper.dropTable("testtable");
+    helper.createTable("testtable", "daily", "weekly");
 
-    HTable table = new HTable(conf, "counters");
+    Connection connection = ConnectionFactory.createConnection(conf);
+    Table table = connection.getTable(TableName.valueOf("testtable"));
 
     // vv IncrementMultipleExample
     Increment increment1 = new Increment(Bytes.toBytes("20110101"));
@@ -52,5 +56,8 @@ public class IncrementMultipleExample {
         " Value: " + Bytes.toLong(kv.getValue()));
     }
     // ^^ IncrementMultipleExample
+    table.close();
+    connection.close();
+    helper.close();
   }
 }
