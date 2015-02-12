@@ -19,29 +19,6 @@
     <url>http://github.com/larsgeorge/hbase-book</url>
   </scm>
 
-  <properties>
-    <jdkLevel>1.7</jdkLevel>
-    <requiredMavenVersion>[2.1,)</requiredMavenVersion>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <project.build.outputEncoding>UTF-8</project.build.outputEncoding>
-  </properties>
-
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.2</version>
-        <configuration>
-          <source>${jdkLevel}</source>
-          <target>${jdkLevel}</target>
-          <showDeprecation>true</showDeprecation>
-          <showWarnings>true</showWarnings>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
-
   <repositories>
     <repository>
       <id>apache-releases</id>
@@ -70,11 +47,46 @@
     </repository>
   </repositories>
 
+  <properties>
+    <jdkLevel>1.7</jdkLevel>
+    <requiredMavenVersion>[2.1,)</requiredMavenVersion>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.build.outputEncoding>UTF-8</project.build.outputEncoding>
+  </properties>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.2</version>
+        <configuration>
+          <source>${jdkLevel}</source>
+          <target>${jdkLevel}</target>
+          <showDeprecation>true</showDeprecation>
+          <showWarnings>true</showWarnings>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+  <modules>
+    <module>ch03</module>
+    <module>ch04</module>
+    <module>ch05</module>
+    <module>ch06</module>
+    <module>ch07</module>
+    <module>ch09</module>
+    <module>ch11</module>
+    <module>hush</module>
+  </modules>
+
   <dependencies>
+    <!-- HBase and Hadoop dependencies -->
     <dependency>
       <groupId>org.apache.hadoop</groupId>
       <artifactId>hadoop-client</artifactId>
-      <version>2.5.0</version>
+      <version>2.6.0</version>
       <exclusions>
         <exclusion>
           <groupId>commons-cli</groupId>
@@ -233,7 +245,7 @@
     <dependency>
       <groupId>org.apache.hadoop</groupId>
       <artifactId>hadoop-common</artifactId>
-      <version>2.5.0</version>
+      <version>2.6.0</version>
       <exclusions>
         <exclusion>
           <artifactId>hadoop-annotations</artifactId>
@@ -374,6 +386,65 @@
         <exclusion>
           <artifactId>commons-compress</artifactId>
           <groupId>org.apache.commons</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>commons-logging</artifactId>
+          <groupId>commons-logging</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>log4j</artifactId>
+          <groupId>log4j</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>log4j</artifactId>
+          <groupId>log4j</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>htrace-core</artifactId>
+          <groupId>org.htrace</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>gson</artifactId>
+          <groupId>com.google.code.gson</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>curator-client</artifactId>
+          <groupId>org.apache.curator</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>curator-recipes</artifactId>
+          <groupId>org.apache.curator</groupId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.hadoop</groupId>
+      <artifactId>hadoop-auth</artifactId>
+      <version>2.6.0</version>
+      <exclusions>
+        <exclusion>
+          <artifactId>commons-codec</artifactId>
+          <groupId>commons-codec</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>log4j</artifactId>
+          <groupId>log4j</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>slf4j-log4j12</artifactId>
+          <groupId>org.slf4j</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>httpclient</artifactId>
+          <groupId>org.apache.httpcomponents</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>apacheds-kerberos-codec</artifactId>
+          <groupId>org.apache.directory.server</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>curator-framework</artifactId>
+          <groupId>org.apache.curator</groupId>
         </exclusion>
       </exclusions>
     </dependency>
@@ -589,6 +660,22 @@
           <artifactId>junit</artifactId>
           <groupId>junit</groupId>
         </exclusion>
+        <exclusion>
+          <artifactId>hadoop-auth</artifactId>
+          <groupId>org.apache.hadoop</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>htrace-core</artifactId>
+          <groupId>org.apache.htrace</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>jcodings</artifactId>
+          <groupId>org.jruby.jcodings</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>hadoop-auth</artifactId>
+          <groupId>org.apache.hadoop</groupId>
+        </exclusion>
       </exclusions>
     </dependency>
     <dependency>
@@ -635,6 +722,49 @@
         <exclusion>
           <artifactId>commons-io</artifactId>
           <groupId>commons-io</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>jetty-util</artifactId>
+          <groupId>org.mortbay.jetty</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>commons-logging</artifactId>
+          <groupId>commons-logging</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>htrace-core</artifactId>
+          <groupId>org.apache.htrace</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>log4j</artifactId>
+          <groupId>log4j</groupId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.hbase</groupId>
+      <artifactId>hbase-protocol</artifactId>
+      <version>1.0.0</version>
+      <exclusions>
+        <exclusion>
+          <artifactId>findbugs-annotations</artifactId>
+          <groupId>com.github.stephenc.findbugs</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>log4j</artifactId>
+          <groupId>log4j</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>hbase-annotations</artifactId>
+          <groupId>org.apache.hbase</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>junit</artifactId>
+          <groupId>junit</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>commons-logging</artifactId>
+          <groupId>commons-logging</groupId>
         </exclusion>
       </exclusions>
     </dependency>
@@ -767,8 +897,37 @@
           <artifactId>jetty-util</artifactId>
           <groupId>org.mortbay.jetty</groupId>
         </exclusion>
+        <exclusion>
+          <artifactId>commons-codec</artifactId>
+          <groupId>commons-codec</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>jersey-core</artifactId>
+          <groupId>com.sun.jersey</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>jersey-server</artifactId>
+          <groupId>com.sun.jersey</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>log4j</artifactId>
+          <groupId>log4j</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>htrace-core</artifactId>
+          <groupId>org.apache.htrace</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>commons-logging</artifactId>
+          <groupId>commons-logging</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>commons-logging</artifactId>
+          <groupId>commons-logging</groupId>
+        </exclusion>
       </exclusions>
     </dependency>
+    <!-- Shared dependencies -->
     <dependency>
       <groupId>jdk.tools</groupId>
       <artifactId>jdk.tools</artifactId>
@@ -782,30 +941,77 @@
         <version>1.7</version>
     </dependency -->
     <dependency>
+      <groupId>org.apache.htrace</groupId>
+      <artifactId>htrace-core</artifactId>
+      <version>3.1.0-incubating</version>
+    </dependency>
+    <dependency>
+      <groupId>io.netty</groupId>
+      <artifactId>netty-all</artifactId>
+      <version>4.0.23.Final</version>
+    </dependency>
+    <dependency>
+      <groupId>com.google.protobuf</groupId>
+      <artifactId>protobuf-java</artifactId>
+      <version>2.6.1</version>
+    </dependency>
+    <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
-      <version>18.0</version>
+      <!-- Need to set Guava to 15.0 since Hadoop dependencies break
+      with newer version. -->
+      <version>15.0</version>
     </dependency>
+    <dependency>
+      <groupId>commons-lang</groupId>
+      <artifactId>commons-lang</artifactId>
+      <version>2.6</version>
+    </dependency>
+    <dependency>
+      <groupId>commons-collections</groupId>
+      <artifactId>commons-collections</artifactId>
+      <version>3.2.1</version>
+    </dependency>
+    <dependency>
+      <groupId>commons-codec</groupId>
+      <artifactId>commons-codec</artifactId>
+      <version>1.10</version>
+    </dependency>
+    <dependency>
+      <groupId>commons-configuration</groupId>
+      <artifactId>commons-configuration</artifactId>
+      <version>1.10</version>
+      <exclusions>
+        <exclusion>
+          <artifactId>commons-lang</artifactId>
+          <groupId>commons-lang</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>commons-logging</artifactId>
+          <groupId>commons-logging</groupId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <!-- Logging related dependencies -->
     <dependency>
       <groupId>commons-logging</groupId>
       <artifactId>commons-logging</artifactId>
       <version>1.2</version>
     </dependency>
     <dependency>
-      <groupId>log4j</groupId>
-      <artifactId>log4j</artifactId>
-      <version>1.2.17</version>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <version>1.7.10</version>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-simple</artifactId>
+      <version>1.7.10</version>
+    </dependency>
+    <dependency>
+      <groupId>ch.qos.logback</groupId>
+      <artifactId>logback-core</artifactId>
+      <version>1.1.2</version>
     </dependency>
   </dependencies>
-
-  <modules>
-    <module>ch03</module>
-    <module>ch04</module>
-    <module>ch05</module>
-    <module>ch06</module>
-    <module>ch07</module>
-    <module>ch09</module>
-    <module>ch11</module>
-    <module>hush</module>
-  </modules>
 </project>
