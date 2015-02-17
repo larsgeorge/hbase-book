@@ -19,6 +19,11 @@
 
   <dependencies>
     <dependency>
+      <groupId>com.larsgeorge</groupId>
+      <artifactId>hbase-book-common</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
       <groupId>org.apache.pig</groupId>
       <artifactId>pig</artifactId>
       <version>0.14.0</version>
