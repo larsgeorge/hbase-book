@@ -5,7 +5,12 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.HRegionLocation;
 import org.apache.hadoop.hbase.TableName;
-import org.apache.hadoop.hbase.client.*;
+import org.apache.hadoop.hbase.client.Admin;
+import org.apache.hadoop.hbase.client.Connection;
+import org.apache.hadoop.hbase.client.ConnectionFactory;
+import org.apache.hadoop.hbase.client.Get;
+import org.apache.hadoop.hbase.client.RegionLocator;
+import org.apache.hadoop.hbase.client.Table;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.hadoop.hbase.util.Pair;
 import util.HBaseHelper;
@@ -14,13 +19,14 @@ import java.io.IOException;
 
 public class MissingRegionExample {
 
-  private static Configuration conf = HBaseConfiguration.create();
+  private static Connection connection = null;
+  private static TableName tableName = null;
 
-  private static void printTableRegions(Configuration conf,
-    String tableName) throws IOException {
+  private static void printTableRegions() throws IOException {
     System.out.println("Printing regions of table: " + tableName);
-    HTable table = new HTable(conf, Bytes.toBytes(tableName));
-    Pair<byte[][], byte[][]> pair = table.getStartEndKeys();
+    Table table = connection.getTable(tableName);
+    RegionLocator locator = connection.getRegionLocator(tableName);
+    Pair<byte[][], byte[][]> pair = locator.getStartEndKeys();
     for (int n = 0; n < pair.getFirst().length; n++) {
       byte[] sk = pair.getFirst()[n];
       byte[] ek = pair.getSecond()[n];
@@ -38,7 +44,7 @@ public class MissingRegionExample {
       public void run() {
         try {
           while (true) {
-            HTable table = new HTable(conf, "testtable");
+            Table table = connection.getTable(tableName);
             Get get = new Get(Bytes.toBytes("row-050"));
             long time = System.currentTimeMillis();
             table.get(get);
@@ -62,19 +68,20 @@ public class MissingRegionExample {
     // ^^ MissingRegionExample
 
   public static void main(String[] args) throws IOException {
+    Configuration conf = HBaseConfiguration.create();
+    tableName = TableName.valueOf("testtable");
+    connection = ConnectionFactory.createConnection(conf);
+    Table table = connection.getTable(tableName);
+
     HBaseHelper helper = HBaseHelper.getHelper(conf);
     helper.dropTable("testtable");
-
     byte[][] regions = new byte[][] {
       Bytes.toBytes("row-030"),
       Bytes.toBytes("row-060")
     };
     helper.createTable("testtable", regions, "colfam1", "colfam2");
     helper.fillTable("testtable", 1, 100, 1, 3, false, "colfam1", "colfam2");
-    printTableRegions(conf, "testtable");
-
-    Connection connection = ConnectionFactory.createConnection(conf);
-    Table table = connection.getTable(TableName.valueOf("testtable"));
+    printTableRegions();
 
     // vv MissingRegionExample
     Admin admin = connection.getAdmin();
