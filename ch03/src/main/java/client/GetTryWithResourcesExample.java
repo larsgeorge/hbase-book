@@ -26,8 +26,8 @@ public class GetTryWithResourcesExample {
       helper.createTable("testtable", "colfam1");
     }
     // vv GetTryWithResourcesExample
-    Connection connection = ConnectionFactory.createConnection(conf);
     try (
+      Connection connection = ConnectionFactory.createConnection(conf);
       Table table = connection.getTable(TableName.valueOf("testtable")); // co GetTryWithResourcesExample-2-NewTable Instantiate a new table reference in "try" block.
     ) {
       Get get = new Get(Bytes.toBytes("row1"));
