@@ -41,7 +41,7 @@ public class BufferedMutatorExample {
   public static void main(String[] args) throws Exception {
     Configuration configuration = HBaseConfiguration.create();
     // ^^ BufferedMutatorExample
-    HBaseHelper helper = HBaseHelper.getHelper(conf);
+    HBaseHelper helper = HBaseHelper.getHelper(configuration);
     helper.dropTable("testtable");
     helper.createTable("testtable", "colfam1");
     // vv BufferedMutatorExample
