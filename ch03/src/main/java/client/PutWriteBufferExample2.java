@@ -27,7 +27,7 @@ public class PutWriteBufferExample2 {
     HBaseHelper helper = HBaseHelper.getHelper(conf);
     helper.dropTable("testtable");
     helper.createTable("testtable", "colfam1");
-    
+
     TableName name = TableName.valueOf("testtable");
     Connection connection = ConnectionFactory.createConnection(conf);
     Table table = connection.getTable(name);
@@ -37,17 +37,17 @@ public class PutWriteBufferExample2 {
     List<Mutation> mutations = new ArrayList<Mutation>(); // co PutWriteBufferExample2-1-DoPut Create a list to hold all mutations.
 
     Put put1 = new Put(Bytes.toBytes("row1"));
-    put1.add(Bytes.toBytes("colfam1"), Bytes.toBytes("qual1"),
+    put1.addColumn(Bytes.toBytes("colfam1"), Bytes.toBytes("qual1"),
       Bytes.toBytes("val1"));
     mutations.add(put1); // co PutWriteBufferExample2-2-DoPut Add Put instance to list of mutations.
 
     Put put2 = new Put(Bytes.toBytes("row2"));
-    put2.add(Bytes.toBytes("colfam1"), Bytes.toBytes("qual1"),
+    put2.addColumn(Bytes.toBytes("colfam1"), Bytes.toBytes("qual1"),
       Bytes.toBytes("val2"));
     mutations.add(put2);
 
     Put put3 = new Put(Bytes.toBytes("row3"));
-    put3.add(Bytes.toBytes("colfam1"), Bytes.toBytes("qual1"),
+    put3.addColumn(Bytes.toBytes("colfam1"), Bytes.toBytes("qual1"),
       Bytes.toBytes("val3"));
     mutations.add(put3);
 
@@ -65,5 +65,6 @@ public class PutWriteBufferExample2 {
     mutator.close();
     table.close();
     connection.close();
+    helper.close();
   }
 }

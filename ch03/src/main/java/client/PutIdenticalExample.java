@@ -29,9 +29,9 @@ public class PutIdenticalExample {
 
     // vv PutIdenticalExample
     Put put = new Put(Bytes.toBytes("row1"));
-    put.add(Bytes.toBytes("colfam1"), Bytes.toBytes("qual1"),
+    put.addColumn(Bytes.toBytes("colfam1"), Bytes.toBytes("qual1"),
       Bytes.toBytes("val2"));
-    put.add(Bytes.toBytes("colfam1"), Bytes.toBytes("qual1"),
+    put.addColumn(Bytes.toBytes("colfam1"), Bytes.toBytes("qual1"),
       Bytes.toBytes("val1")); // co PutIdenticalExample-1-Add Add the same column with a different value. The last value is going to be used.
     table.put(put);
 

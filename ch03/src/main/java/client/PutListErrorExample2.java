@@ -31,15 +31,15 @@ public class PutListErrorExample2 {
 
     // vv PutListErrorExample2
     Put put1 = new Put(Bytes.toBytes("row1"));
-    put1.add(Bytes.toBytes("colfam1"), Bytes.toBytes("qual1"),
+    put1.addColumn(Bytes.toBytes("colfam1"), Bytes.toBytes("qual1"),
       Bytes.toBytes("val1"));
     puts.add(put1);
     Put put2 = new Put(Bytes.toBytes("row2"));
-    put2.add(Bytes.toBytes("BOGUS"), Bytes.toBytes("qual1"),
+    put2.addColumn(Bytes.toBytes("BOGUS"), Bytes.toBytes("qual1"),
       Bytes.toBytes("val2"));
     puts.add(put2);
     Put put3 = new Put(Bytes.toBytes("row2"));
-    put3.add(Bytes.toBytes("colfam1"), Bytes.toBytes("qual2"),
+    put3.addColumn(Bytes.toBytes("colfam1"), Bytes.toBytes("qual2"),
       Bytes.toBytes("val3"));
     puts.add(put3);
     /*[*/Put put4 = new Put(Bytes.toBytes("row2"));

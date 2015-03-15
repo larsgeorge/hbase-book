@@ -35,9 +35,9 @@ public class CRUDExample {
       Table table = connection.getTable(TableName.valueOf("testtable"));
     ) {
       Put put = new Put(Bytes.toBytes("row1"));
-      put.add(Bytes.toBytes("colfam1"), Bytes.toBytes("qual1"),
+      put.addColumn(Bytes.toBytes("colfam1"), Bytes.toBytes("qual1"),
         Bytes.toBytes("val1"));
-      put.add(Bytes.toBytes("colfam2"), Bytes.toBytes("qual2"),
+      put.addColumn(Bytes.toBytes("colfam2"), Bytes.toBytes("qual2"),
         Bytes.toBytes("val2"));
       table.put(put);
 

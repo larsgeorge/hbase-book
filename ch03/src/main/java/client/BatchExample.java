@@ -52,7 +52,7 @@ public class BatchExample {
     List<Row> batch = new ArrayList<Row>(); // co BatchExample-2-CreateList Create a list to hold all values.
 
     Put put = new Put(ROW2);
-    put.add(COLFAM2, QUAL1, Bytes.toBytes("val5")); // co BatchExample-3-AddPut Add a Put instance.
+    put.addColumn(COLFAM2, QUAL1, Bytes.toBytes("val5")); // co BatchExample-3-AddPut Add a Put instance.
     batch.add(put);
 
     Get get1 = new Get(ROW1);

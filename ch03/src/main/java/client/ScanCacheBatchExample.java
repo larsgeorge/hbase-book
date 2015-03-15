@@ -27,14 +27,13 @@ public class ScanCacheBatchExample {
     Scan scan = new Scan();
     scan.setCaching(caching);  // co ScanCacheBatchExample-1-Set Set caching and batch parameters.
     scan.setBatch(batch);
-    scan.setAttribute(Scan.SCAN_ATTRIBUTES_METRICS_ENABLE, Bytes.toBytes(true));
+    scan.setScanMetricsEnabled(true);
     ResultScanner scanner = table.getScanner(scan);
     for (Result result : scanner) {
       count++; // co ScanCacheBatchExample-2-Count Count the number of Results available.
     }
     scanner.close();
-    ScanMetrics metrics = ProtobufUtil.toScanMetrics(
-      scan.getAttribute(Scan.SCAN_ATTRIBUTES_METRICS_DATA));
+    ScanMetrics metrics = scan.getScanMetrics();
     System.out.println("Caching: " + caching + ", Batch: " + batch +
       ", Results: " + count + ", RPCs: " + metrics.countOfRPCcalls);
   }

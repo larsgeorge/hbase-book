@@ -41,7 +41,7 @@ public class BatchSameRowExample {
     List<Row> batch = new ArrayList<Row>();
 
     Put put = new Put(ROW1);
-    put.add(COLFAM1, QUAL1, 2L, Bytes.toBytes("val2"));
+    put.addColumn(COLFAM1, QUAL1, 2L, Bytes.toBytes("val2"));
     batch.add(put);
 
     Get get1 = new Get(ROW1);
