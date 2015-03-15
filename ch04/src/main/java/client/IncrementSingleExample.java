@@ -3,7 +3,10 @@ package client;
 // cc IncrementSingleExample Example using the single counter increment methods
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
-import org.apache.hadoop.hbase.client.HTable;
+import org.apache.hadoop.hbase.TableName;
+import org.apache.hadoop.hbase.client.Connection;
+import org.apache.hadoop.hbase.client.ConnectionFactory;
+import org.apache.hadoop.hbase.client.Table;
 import org.apache.hadoop.hbase.util.Bytes;
 import util.HBaseHelper;
 
@@ -15,10 +18,11 @@ public class IncrementSingleExample {
     Configuration conf = HBaseConfiguration.create();
 
     HBaseHelper helper = HBaseHelper.getHelper(conf);
-    helper.dropTable("counters");
-    helper.createTable("counters", "daily");
+    helper.dropTable("testtable");
+    helper.createTable("testtable", "daily");
     // vv IncrementSingleExample
-    HTable table = new HTable(conf, "counters");
+    Connection connection = ConnectionFactory.createConnection(conf);
+    Table table = connection.getTable(TableName.valueOf("testtable"));
 
     long cnt1 = table.incrementColumnValue(Bytes.toBytes("20110101"), // co IncrementSingleExample-1-Incr1 Increase counter by one.
       Bytes.toBytes("daily"), Bytes.toBytes("hits"), 1);
