@@ -1,6 +1,10 @@
 package client;
 
 // cc PutListErrorExample1 Example inserting a faulty column family into HBase
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.TableName;
@@ -9,11 +13,8 @@ import org.apache.hadoop.hbase.client.ConnectionFactory;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Table;
 import org.apache.hadoop.hbase.util.Bytes;
-import util.HBaseHelper;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import util.HBaseHelper;
 
 public class PutListErrorExample1 {
 

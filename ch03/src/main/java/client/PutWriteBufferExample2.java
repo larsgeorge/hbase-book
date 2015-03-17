@@ -1,6 +1,10 @@
 package client;
 
 // cc PutWriteBufferExample2 Example using the client-side write buffer
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.TableName;
@@ -13,11 +17,8 @@ import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.Table;
 import org.apache.hadoop.hbase.util.Bytes;
-import util.HBaseHelper;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import util.HBaseHelper;
 
 public class PutWriteBufferExample2 {
 

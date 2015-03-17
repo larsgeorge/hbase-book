@@ -1,6 +1,10 @@
 package client;
 
 // cc PutListErrorExample2 Example inserting an empty Put instance into HBase
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.TableName;
@@ -9,11 +13,8 @@ import org.apache.hadoop.hbase.client.ConnectionFactory;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Table;
 import org.apache.hadoop.hbase.util.Bytes;
-import util.HBaseHelper;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import util.HBaseHelper;
 
 public class PutListErrorExample2 {
 
@@ -49,7 +50,7 @@ public class PutListErrorExample2 {
       table.put(puts);
     /*[*/} catch (Exception e) {
       System.err.println("Error: " + e);
-      //table.flushCommits();
+      // table.flushCommits();
       // todo: FIX!
       /*]*/ // co PutListErrorExample2-2-Catch Catch local exception and commit queued updates.
     /*[*/}/*]*/
