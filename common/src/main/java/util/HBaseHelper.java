@@ -1,5 +1,11 @@
 package util;
 
+import java.io.Closeable;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.Cell;
 import org.apache.hadoop.hbase.HColumnDescriptor;
@@ -14,36 +20,37 @@ import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.Table;
 import org.apache.hadoop.hbase.util.Bytes;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
 
 /**
  * Used by the book examples to generate tables and fill them with test data.
  */
-public class HBaseHelper {
+public class HBaseHelper implements Closeable {
 
-  private Configuration conf = null;
+  private Configuration configuration = null;
   private Connection connection = null;
   private Admin admin = null;
 
-  protected HBaseHelper(Configuration conf) throws IOException {
-    this.conf = conf;
-    this.connection = ConnectionFactory.createConnection(conf);
+  protected HBaseHelper(Configuration configuration) throws IOException {
+    this.configuration = configuration;
+    this.connection = ConnectionFactory.createConnection(configuration);
     this.admin = connection.getAdmin();
   }
 
-  public static HBaseHelper getHelper(Configuration conf) throws IOException {
-    return new HBaseHelper(conf);
+  public static HBaseHelper getHelper(Configuration configuration) throws IOException {
+    return new HBaseHelper(configuration);
   }
 
+  @Override
   public void close() throws IOException {
     connection.close();
   }
 
   public Connection getConnection() {
     return connection;
+  }
+
+  public Configuration getConfiguration() {
+    return configuration;
   }
 
   public boolean existsTable(String table)
