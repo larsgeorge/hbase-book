@@ -1,6 +1,8 @@
 package client;
 
 // cc CheckAndPutExample Example application using the atomic compare-and-set operations
+import java.io.IOException;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.TableName;
@@ -9,9 +11,8 @@ import org.apache.hadoop.hbase.client.ConnectionFactory;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Table;
 import org.apache.hadoop.hbase.util.Bytes;
-import util.HBaseHelper;
 
-import java.io.IOException;
+import util.HBaseHelper;
 
 public class CheckAndPutExample {
 
@@ -32,11 +33,11 @@ public class CheckAndPutExample {
 
     boolean res1 = table.checkAndPut(Bytes.toBytes("row1"),
       Bytes.toBytes("colfam1"), Bytes.toBytes("qual1"), null, put1); // co CheckAndPutExample-2-CAS1 Check if column does not exist and perform optional put operation.
-    System.out.println("Put 1a applied: " + res1); // co CheckAndPutExample-3-SOUT1 Print out the result, should be "Put applied: true".
+    System.out.println("Put 1a applied: " + res1); // co CheckAndPutExample-3-SOUT1 Print out the result, should be "Put 1a applied: true".
 
     boolean res2 = table.checkAndPut(Bytes.toBytes("row1"),
       Bytes.toBytes("colfam1"), Bytes.toBytes("qual1"), null, put1); // co CheckAndPutExample-4-CAS2 Attempt to store same cell again.
-    System.out.println("Put 1b applied: " + res2); // co CheckAndPutExample-5-SOUT2 Print out the result, should be "Put applied: false" as the column now already exists.
+    System.out.println("Put 1b applied: " + res2); // co CheckAndPutExample-5-SOUT2 Print out the result, should be "Put 1b applied: false" as the column now already exists.
 
     Put put2 = new Put(Bytes.toBytes("row1"));
     put2.addColumn(Bytes.toBytes("colfam1"), Bytes.toBytes("qual2"),
@@ -45,7 +46,7 @@ public class CheckAndPutExample {
     boolean res3 = table.checkAndPut(Bytes.toBytes("row1"),
       Bytes.toBytes("colfam1"), Bytes.toBytes("qual1"), // co CheckAndPutExample-7-CAS3 Store new data only if the previous data has been saved.
       Bytes.toBytes("val1"), put2);
-    System.out.println("Put 2 applied: " + res3); // co CheckAndPutExample-8-SOUT3 Print out the result, should be "Put applied: true" as the checked column exists.
+    System.out.println("Put 2 applied: " + res3); // co CheckAndPutExample-8-SOUT3 Print out the result, should be "Put 2 applied: true" as the checked column exists.
 
     Put put3 = new Put(Bytes.toBytes("row2"));
     put3.addColumn(Bytes.toBytes("colfam1"), Bytes.toBytes("qual1"),
