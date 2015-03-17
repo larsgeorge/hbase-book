@@ -65,24 +65,36 @@ public class HBaseHelper implements Closeable {
 
   public void createTable(String table, String... colfams)
   throws IOException {
-    createTable(TableName.valueOf(table), null, colfams);
+    createTable(TableName.valueOf(table), 1, null, colfams);
   }
 
   public void createTable(TableName table, String... colfams)
   throws IOException {
-    createTable(table, null, colfams);
+    createTable(table, 1, null, colfams);
+  }
+
+  public void createTable(String table, int maxVersions, String... colfams)
+  throws IOException {
+    createTable(TableName.valueOf(table), maxVersions, null, colfams);
+  }
+
+  public void createTable(TableName table, int maxVersions, String... colfams)
+  throws IOException {
+    createTable(table, maxVersions, null, colfams);
   }
 
   public void createTable(String table, byte[][] splitKeys, String... colfams)
   throws IOException {
-    createTable(TableName.valueOf(table), splitKeys, colfams);
+    createTable(TableName.valueOf(table), 1, splitKeys, colfams);
   }
 
-  public void createTable(TableName table, byte[][] splitKeys, String... colfams)
+  public void createTable(TableName table, int maxVersions, byte[][] splitKeys,
+    String... colfams)
   throws IOException {
     HTableDescriptor desc = new HTableDescriptor(table);
     for (String cf : colfams) {
       HColumnDescriptor coldef = new HColumnDescriptor(cf);
+      coldef.setMaxVersions(maxVersions);
       desc.addFamily(coldef);
     }
     if (splitKeys != null) {
