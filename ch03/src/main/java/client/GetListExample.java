@@ -1,6 +1,10 @@
 package client;
 
 // cc GetListExample Example of retrieving data from HBase using lists of Get instances
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.Cell;
 import org.apache.hadoop.hbase.CellUtil;
@@ -12,11 +16,8 @@ import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.Table;
 import org.apache.hadoop.hbase.util.Bytes;
-import util.HBaseHelper;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import util.HBaseHelper;
 
 public class GetListExample {
 
@@ -77,6 +78,11 @@ public class GetListExample {
             cell.getRowArray(), cell.getRowOffset(), cell.getRowLength()) + // co GetListExample-7-GetValue2 Two different ways to access the cell data.
           " Value: " + Bytes.toString(CellUtil.cloneValue(cell)));
       }
+    }
+
+    System.out.println("Third iteration...");
+    for (Result result : results) {
+      System.out.println(result);
     }
     // ^^ GetListExample
     table.close();
