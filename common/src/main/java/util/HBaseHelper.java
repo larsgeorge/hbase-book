@@ -20,7 +20,6 @@ import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.Table;
 import org.apache.hadoop.hbase.util.Bytes;
 
-
 /**
  * Used by the book examples to generate tables and fill them with test data.
  */
@@ -185,10 +184,10 @@ public class HBaseHelper implements Closeable {
             Integer.toString(rnd.nextInt(numCols)) :
             padNum(row, pad) + "." + padNum(col, pad));
           if (setTimestamp) {
-            put.add(Bytes.toBytes(cf), Bytes.toBytes(colName),
-              col, Bytes.toBytes(val));
+            put.addColumn(Bytes.toBytes(cf), Bytes.toBytes(colName), col,
+              Bytes.toBytes(val));
           } else {
-            put.add(Bytes.toBytes(cf), Bytes.toBytes(colName),
+            put.addColumn(Bytes.toBytes(cf), Bytes.toBytes(colName),
               Bytes.toBytes(val));
           }
         }
@@ -217,7 +216,7 @@ public class HBaseHelper implements Closeable {
                   String val) throws IOException {
     Table tbl = connection.getTable(table);
     Put put = new Put(Bytes.toBytes(row));
-    put.add(Bytes.toBytes(fam), Bytes.toBytes(qual), Bytes.toBytes(val));
+    put.addColumn(Bytes.toBytes(fam), Bytes.toBytes(qual), Bytes.toBytes(val));
     tbl.put(put);
     tbl.close();
   }
@@ -231,8 +230,8 @@ public class HBaseHelper implements Closeable {
                   String val) throws IOException {
     Table tbl = connection.getTable(table);
     Put put = new Put(Bytes.toBytes(row));
-    put.add(Bytes.toBytes(fam), Bytes.toBytes(qual), ts,
-            Bytes.toBytes(val));
+    put.addColumn(Bytes.toBytes(fam), Bytes.toBytes(qual), ts,
+      Bytes.toBytes(val));
     tbl.put(put);
     tbl.close();
   }
@@ -252,8 +251,9 @@ public class HBaseHelper implements Closeable {
         for (String qual : quals) {
           String val = vals[v < vals.length ? v : vals.length - 1];
           long t = ts[v < ts.length ? v : ts.length - 1];
-          System.out.println("Adding: " + fam + " " + qual + " " + t + " " + val);
-          put.add(Bytes.toBytes(fam), Bytes.toBytes(qual), t,
+          System.out.println("Adding: " + row + " " + fam + " " + qual +
+            " " + t + " " + val);
+          put.addColumn(Bytes.toBytes(fam), Bytes.toBytes(qual), t,
             Bytes.toBytes(val));
           v++;
         }
