@@ -1,6 +1,12 @@
 package client;
 
 // cc DeleteListErrorExample Example deleting faulty data from HBase
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.TableName;
@@ -9,20 +15,18 @@ import org.apache.hadoop.hbase.client.ConnectionFactory;
 import org.apache.hadoop.hbase.client.Delete;
 import org.apache.hadoop.hbase.client.Table;
 import org.apache.hadoop.hbase.util.Bytes;
-import util.HBaseHelper;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import util.HBaseHelper;
 
 public class DeleteListErrorExample {
 
   public static void main(String[] args) throws IOException {
+    Logger.getLogger("org.apache.zookeeper").setLevel(Level.OFF);
     Configuration conf = HBaseConfiguration.create();
 
     HBaseHelper helper = HBaseHelper.getHelper(conf);
     helper.dropTable("testtable");
-    helper.createTable("testtable", "colfam1", "colfam2");
+    helper.createTable("testtable", 100, "colfam1", "colfam2");
     helper.put("testtable",
       new String[] { "row1" },
       new String[] { "colfam1", "colfam2" },

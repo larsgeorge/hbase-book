@@ -1,6 +1,8 @@
 package client;
 
 // cc CheckAndDeleteExample Example application using the atomic compare-and-set operations
+import java.io.IOException;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.TableName;
@@ -9,9 +11,8 @@ import org.apache.hadoop.hbase.client.ConnectionFactory;
 import org.apache.hadoop.hbase.client.Delete;
 import org.apache.hadoop.hbase.client.Table;
 import org.apache.hadoop.hbase.util.Bytes;
-import util.HBaseHelper;
 
-import java.io.IOException;
+import util.HBaseHelper;
 
 public class CheckAndDeleteExample {
 
@@ -20,7 +21,7 @@ public class CheckAndDeleteExample {
 
     HBaseHelper helper = HBaseHelper.getHelper(conf);
     helper.dropTable("testtable");
-    helper.createTable("testtable", "colfam1", "colfam2");
+    helper.createTable("testtable", 100, "colfam1", "colfam2");
     helper.put("testtable",
       new String[] { "row1" },
       new String[] { "colfam1", "colfam2" },
