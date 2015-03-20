@@ -1,6 +1,10 @@
 package client;
 
 // cc BatchSameRowExample Example application using batch operations, modifying the same row
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.TableName;
@@ -12,11 +16,8 @@ import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Row;
 import org.apache.hadoop.hbase.client.Table;
 import org.apache.hadoop.hbase.util.Bytes;
-import util.HBaseHelper;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import util.HBaseHelper;
 
 public class BatchSameRowExample {
 
