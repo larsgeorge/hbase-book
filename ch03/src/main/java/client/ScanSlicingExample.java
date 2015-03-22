@@ -11,6 +11,7 @@ import org.apache.hadoop.hbase.client.ConnectionFactory;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.Scan;
+import org.apache.hadoop.hbase.client.metrics.ScanMetrics;
 import org.apache.hadoop.hbase.client.Table;
 
 import util.HBaseHelper;
@@ -28,13 +29,19 @@ public class ScanSlicingExample {
       .setBatch(batch)
       .setRowOffsetPerColumnFamily(offset)
       .setMaxResultsPerColumnFamily(maxResults)
-      .setMaxResultSize(maxResultSize);
+      .setMaxResultSize(maxResultSize)
+      .setScanMetricsEnabled(true);
     ResultScanner scanner = table.getScanner(scan);
     System.out.println("Scan #" + num + " running...");
     for (Result result : scanner) {
       System.out.println("Result [" + count++ + "]:" + result);
     }
     scanner.close();
+    ScanMetrics metrics = scan.getScanMetrics();
+    System.out.println("Caching: " + caching + ", Batch: " + batch +
+      ", Offset: " + offset + ", maxResults: " + maxResults +
+      ", maxSize: " + maxResultSize + ", Results: " + count +
+      ", RPCs: " + metrics.countOfRPCcalls);
   }
 
   public static void main(String[] args) throws IOException {
@@ -54,7 +61,7 @@ public class ScanSlicingExample {
     scan(1, 100, 0, 0, 2, -1);
     scan(2, 100, 0, 4, 2, -1);
     scan(3, 100, 2, 0, 5, -1);
-    scan(4, 1, 0, 0, -1, 50);
+    scan(4, 1000, -1, -1, -1, 1);
     /*...*/
     // ^^ ScanSlicingExample
     table.close();
