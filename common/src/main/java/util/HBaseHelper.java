@@ -176,7 +176,7 @@ public class HBaseHelper implements Closeable {
     Table tbl = connection.getTable(table);
     Random rnd = new Random();
     for (int row = startRow; row <= endRow; row++) {
-      for (int col = 0; col < numCols; col++) {
+      for (int col = 1; col <= numCols; col++) {
         Put put = new Put(Bytes.toBytes("row-" + padNum(row, pad)));
         for (String cf : colfams) {
           String colName = "col-" + padNum(col, pad);
