@@ -22,8 +22,8 @@ public class ScanSlicingExample {
 
   // vv ScanSlicingExample
   private static void scan(int num, int caching, int batch, int offset,
-    int maxResults, int maxResultSize) throws IOException {
-    int count = 1;
+    int maxResults, int maxResultSize, boolean dump) throws IOException {
+    int count = 0;
     Scan scan = new Scan()
       .setCaching(caching)
       .setBatch(batch)
@@ -34,7 +34,8 @@ public class ScanSlicingExample {
     ResultScanner scanner = table.getScanner(scan);
     System.out.println("Scan #" + num + " running...");
     for (Result result : scanner) {
-      System.out.println("Result [" + count++ + "]:" + result);
+      count++;
+      if (dump) System.out.println("Result [" + count + "]:" + result);
     }
     scanner.close();
     ScanMetrics metrics = scan.getScanMetrics();
@@ -58,10 +59,12 @@ public class ScanSlicingExample {
 
     // vv ScanSlicingExample
     /*...*/
-    scan(1, 100, 0, 0, 2, -1);
-    scan(2, 100, 0, 4, 2, -1);
-    scan(3, 100, 2, 0, 5, -1);
-    scan(4, 1000, -1, -1, -1, 1);
+    scan(1, 11, 0, 0, 2, -1, true);
+    scan(2, 11, 0, 4, 2, -1, true);
+    scan(3, 5, 0, 0, 2, -1, false);
+    scan(4, 11, 2, 0, 5, -1, true);
+    scan(5, 11, -1, -1, -1, 1, false);
+    scan(6, 11, -1, -1, -1, 10000, false);
     /*...*/
     // ^^ ScanSlicingExample
     table.close();
