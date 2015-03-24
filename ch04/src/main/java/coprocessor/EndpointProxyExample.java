@@ -29,24 +29,24 @@ public class EndpointProxyExample {
       new String[]{"row1", "row2", "row3", "row4", "row5"},
       null, null);
     HBaseAdmin admin = new HBaseAdmin(conf);
-    try {
-      admin.split("testtable", "row3");
-    } catch (InterruptedException e) {
-      e.printStackTrace();
-    }
+//    try {
+//      admin.split("testtable", "row3");
+//    } catch (InterruptedException e) {
+//      e.printStackTrace();
+//    }
     HTable table = new HTable(conf, "testtable");
     // wait for the split to be done
-    while (table.getRegionsInfo().size() < 2)
-      try {
-        Thread.sleep(1000);
-      } catch (InterruptedException e) {
-      }
+//    while (table.getRegionsInfo().size() < 2)
+//      try {
+//        Thread.sleep(1000);
+//      } catch (InterruptedException e) {
+//      }
     try {
       //vv EndpointProxyExample
-      RowCountProtocol protocol = table.coprocessorProxy(
-        RowCountProtocol.class, Bytes.toBytes("row4"));
-      long rowsInRegion = protocol.getRowCount();
-      System.out.println("Region Row Count: " + rowsInRegion);
+//      RowCountProtocol protocol = table.coprocessorProxy(
+//        RowCountProtocol.class, Bytes.toBytes("row4"));
+//      long rowsInRegion = protocol.getRowCount();
+//      System.out.println("Region Row Count: " + rowsInRegion);
       // ^^ EndpointProxyExample
     } catch (Throwable throwable) {
       throwable.printStackTrace();

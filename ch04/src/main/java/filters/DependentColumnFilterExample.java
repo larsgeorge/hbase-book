@@ -10,11 +10,11 @@ import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.filter.BinaryPrefixComparator;
+import org.apache.hadoop.hbase.filter.ByteArrayComparable;
 import org.apache.hadoop.hbase.filter.CompareFilter;
 import org.apache.hadoop.hbase.filter.DependentColumnFilter;
 import org.apache.hadoop.hbase.filter.Filter;
 import org.apache.hadoop.hbase.filter.RegexStringComparator;
-import org.apache.hadoop.hbase.filter.WritableByteArrayComparable;
 import org.apache.hadoop.hbase.util.Bytes;
 import util.HBaseHelper;
 
@@ -27,7 +27,7 @@ public class DependentColumnFilterExample {
   // vv DependentColumnFilterExample
   private static void filter(boolean drop,
       CompareFilter.CompareOp operator,
-      WritableByteArrayComparable comparator)
+      ByteArrayComparable comparator)
   throws IOException {
     Filter filter;
     if (comparator != null) {

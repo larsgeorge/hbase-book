@@ -18,7 +18,7 @@ public class RegionObserverWithBypassExample extends BaseRegionObserver {
   public static final Log LOG = LogFactory.getLog(HRegion.class);
   public static final byte[] FIXED_ROW = Bytes.toBytes("@@@GETTIME@@@");
 
-  @Override
+//  @Override
   public void preGet(final ObserverContext<RegionCoprocessorEnvironment> e,
       final Get get, final List<KeyValue> results) throws IOException {
     LOG.debug("Got preGet for row: " + Bytes.toStringBinary(get.getRow()));

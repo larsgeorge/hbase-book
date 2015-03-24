@@ -21,7 +21,7 @@ public class RegionObserverExample extends BaseRegionObserver {
   // vv RegionObserverExample
   public static final byte[] FIXED_ROW = Bytes.toBytes("@@@GETTIME@@@");
 
-  @Override
+//  @Override
   public void preGet(final ObserverContext<RegionCoprocessorEnvironment> e,
       final Get get, final List<KeyValue> results) throws IOException {
     // ^^ RegionObserverExample

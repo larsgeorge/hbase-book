@@ -3,11 +3,11 @@ package coprocessor;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.hbase.Coprocessor;
 import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.HColumnDescriptor;
 import org.apache.hadoop.hbase.HTableDescriptor;
 import org.apache.hadoop.hbase.client.HBaseAdmin;
-import org.apache.hadoop.hbase.coprocessor.Coprocessor;
 import org.apache.hadoop.hbase.util.Bytes;
 import util.HBaseHelper;
 
@@ -31,7 +31,7 @@ public class LoadWithTableDescriptorExample {
     htd.addFamily(new HColumnDescriptor("colfam1"));
     htd.setValue("COPROCESSOR$1", path.toString() +
       "|" + RegionObserverExample.class.getCanonicalName() + // co LoadWithTableDescriptorExample-3-AddCP Add the coprocessor definition to the descriptor.
-      "|" + Coprocessor.Priority.USER);
+      "|" + Coprocessor.PRIORITY_USER);
 
     HBaseAdmin admin = new HBaseAdmin(conf); // co LoadWithTableDescriptorExample-4-Admin Instantiate an administrative API to the cluster and add the table.
     admin.createTable(htd);

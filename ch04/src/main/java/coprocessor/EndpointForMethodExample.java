@@ -30,32 +30,32 @@ public class EndpointForMethodExample {
       new String[]{"row1", "row2", "row3", "row4", "row5"},
       null, null);
     HBaseAdmin admin = new HBaseAdmin(conf);
-    try {
-      admin.split("testtable", "row3");
-    } catch (InterruptedException e) {
-      e.printStackTrace();
-    }
+//    try {
+//      admin.split("testtable", "row3");
+//    } catch (InterruptedException e) {
+//      e.printStackTrace();
+//    }
     HTable table = new HTable(conf, "testtable");
-    while (table.getRegionsInfo().size() < 2)
-      try {
-        Thread.sleep(1000);
-      } catch (InterruptedException e) {
-      }
+//    while (table.getRegionsInfo().size() < 2)
+//      try {
+//        Thread.sleep(1000);
+//      } catch (InterruptedException e) {
+//      }
     try {
       //vv EndpointForMethodExample
       /*[*/
-      Batch.Call call = Batch.forMethod(RowCountProtocol.class,
-        "getKeyValueCount");/*]*/
-      Map<byte[], Long> results = table.coprocessorExec(
-        RowCountProtocol.class, null, null, call);
-      // ^^ EndpointForMethodExample
+//      Batch.Call call = Batch.forMethod(RowCountProtocol.class,
+//        "getKeyValueCount");/*]*/
+//      Map<byte[], Long> results = table.coprocessorExec(
+//        RowCountProtocol.class, null, null, call);
+//      // ^^ EndpointForMethodExample
 
       long total = 0;
-      for (Map.Entry<byte[], Long> entry : results.entrySet()) {
-        total += entry.getValue().longValue();
-        System.out.println("Region: " + Bytes.toString(entry.getKey()) +
-          ", Count: " + entry.getValue());
-      }
+//      for (Map.Entry<byte[], Long> entry : results.entrySet()) {
+//        total += entry.getValue().longValue();
+//        System.out.println("Region: " + Bytes.toString(entry.getKey()) +
+//          ", Count: " + entry.getValue());
+//      }
       System.out.println("Total Count: " + total);
     } catch (Throwable throwable) {
       throwable.printStackTrace();
