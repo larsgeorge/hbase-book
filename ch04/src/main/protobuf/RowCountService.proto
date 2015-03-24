@@ -1,0 +1,28 @@
+option java_package = "coprocessor.generated";
+option java_outer_classname = "RowCounterProtos";
+option java_generic_services = true;
+option java_generate_equals_and_hash = true;
+option optimize_for = SPEED;
+
+message CountRequest {
+}
+
+message CountResponse {
+  required int64 count = 1 [default = 0];
+}
+
+service RowCountService {
+  rpc getRowCount(CountRequest)
+    returns (CountResponse);
+  rpc getCellCount(CountRequest)
+    returns (CountResponse);
+}
+
+
+/*
+public interface RowCountProtocol extends CoprocessorProtocol {
+  long getRowCount() throws IOException;
+  long getRowCount(Filter filter) throws IOException;
+  long getKeyValueCount() throws IOException;
+}
+*/
