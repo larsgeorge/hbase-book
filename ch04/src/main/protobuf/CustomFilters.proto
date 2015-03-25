@@ -1,0 +1,9 @@
+option java_package = "filters.generated";
+option java_outer_classname = "FilterProtos";
+option java_generic_services = true;
+option java_generate_equals_and_hash = true;
+option optimize_for = SPEED;
+
+message CustomFilter {
+  required bytes value = 1;
+}

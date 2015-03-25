@@ -1,17 +1,21 @@
 package filters;
 
 // cc ColumnPaginationFilterExample Example paginating through columns in a row
+import java.io.IOException;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
-import org.apache.hadoop.hbase.client.HTable;
+import org.apache.hadoop.hbase.TableName;
+import org.apache.hadoop.hbase.client.Connection;
+import org.apache.hadoop.hbase.client.ConnectionFactory;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.Scan;
+import org.apache.hadoop.hbase.client.Table;
 import org.apache.hadoop.hbase.filter.ColumnPaginationFilter;
 import org.apache.hadoop.hbase.filter.Filter;
-import util.HBaseHelper;
 
-import java.io.IOException;
+import util.HBaseHelper;
 
 public class ColumnPaginationFilterExample {
 
@@ -24,8 +28,8 @@ public class ColumnPaginationFilterExample {
     System.out.println("Adding rows to table...");
     helper.fillTable("testtable", 1, 10, 30, 2, true, "colfam1");
 
-    HTable table = new HTable(conf, "testtable");
-
+    Connection connection = ConnectionFactory.createConnection(conf);
+    Table table = connection.getTable(TableName.valueOf("testtable"));
     // vv ColumnPaginationFilterExample
     Filter filter = new ColumnPaginationFilter(5, 15);
 

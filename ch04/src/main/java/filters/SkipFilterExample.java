@@ -1,22 +1,26 @@
 package filters;
 
 // cc SkipFilterExample Example of using a filter to skip entire rows based on another filter's results
+import java.io.IOException;
+
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.hbase.Cell;
 import org.apache.hadoop.hbase.HBaseConfiguration;
-import org.apache.hadoop.hbase.KeyValue;
-import org.apache.hadoop.hbase.client.HTable;
+import org.apache.hadoop.hbase.TableName;
+import org.apache.hadoop.hbase.client.Connection;
+import org.apache.hadoop.hbase.client.ConnectionFactory;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.Scan;
+import org.apache.hadoop.hbase.client.Table;
 import org.apache.hadoop.hbase.filter.BinaryComparator;
 import org.apache.hadoop.hbase.filter.CompareFilter;
 import org.apache.hadoop.hbase.filter.Filter;
 import org.apache.hadoop.hbase.filter.SkipFilter;
 import org.apache.hadoop.hbase.filter.ValueFilter;
 import org.apache.hadoop.hbase.util.Bytes;
-import util.HBaseHelper;
 
-import java.io.IOException;
+import util.HBaseHelper;
 
 public class SkipFilterExample {
 
@@ -29,8 +33,8 @@ public class SkipFilterExample {
     System.out.println("Adding rows to table...");
     helper.fillTable("testtable", 1, 30, 5, 2, true, true, "colfam1");
 
-    HTable table = new HTable(conf, "testtable");
-
+    Connection connection = ConnectionFactory.createConnection(conf);
+    Table table = connection.getTable(TableName.valueOf("testtable"));
     // vv SkipFilterExample
     Filter filter1 = new ValueFilter(CompareFilter.CompareOp.NOT_EQUAL,
       new BinaryComparator(Bytes.toBytes("val-0")));
@@ -43,9 +47,10 @@ public class SkipFilterExample {
     int n = 0;
     // vv SkipFilterExample
     for (Result result : scanner1) {
-      for (KeyValue kv : result.raw()) {
-        System.out.println("KV: " + kv + ", Value: " +
-          Bytes.toString(kv.getValue()));
+      for (Cell cell : result.rawCells()) {
+        System.out.println("Cell: " + cell + ", Value: " +
+          Bytes.toString(cell.getValueArray(), cell.getValueOffset(),
+            cell.getValueLength()));
         // ^^ SkipFilterExample
         n++;
         // vv SkipFilterExample
@@ -58,14 +63,15 @@ public class SkipFilterExample {
     scan.setFilter(filter2); // co SkipFilterExample-2-AddFilter2 Add the decorating skip filter for the second scan.
     ResultScanner scanner2 = table.getScanner(scan);
     // ^^ SkipFilterExample
-    System.out.println("Total KeyValue count for scan #1: " + n);
+    System.out.println("Total cell count for scan #1: " + n);
     n = 0;
     System.out.println("Results of scan #2:");
     // vv SkipFilterExample
     for (Result result : scanner2) {
-      for (KeyValue kv : result.raw()) {
-        System.out.println("KV: " + kv + ", Value: " +
-          Bytes.toString(kv.getValue()));
+      for (Cell cell : result.rawCells()) {
+        System.out.println("Cell: " + cell + ", Value: " +
+          Bytes.toString(cell.getValueArray(), cell.getValueOffset(),
+            cell.getValueLength()));
         // ^^ SkipFilterExample
         n++;
         // vv SkipFilterExample
@@ -73,6 +79,6 @@ public class SkipFilterExample {
     }
     scanner2.close();
     // ^^ SkipFilterExample
-    System.out.println("Total KeyValue count for scan #2: " + n);
+    System.out.println("Total cell count for scan #2: " + n);
   }
 }

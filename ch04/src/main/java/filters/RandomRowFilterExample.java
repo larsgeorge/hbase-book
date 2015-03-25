@@ -1,6 +1,6 @@
 package filters;
 
-// cc InclusiveStopFilterExample Example using a filter to include a stop row
+// cc RandomRowFilterExample Example filtering rows randomly
 import java.io.IOException;
 
 import org.apache.hadoop.conf.Configuration;
@@ -13,12 +13,12 @@ import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.client.Table;
 import org.apache.hadoop.hbase.filter.Filter;
-import org.apache.hadoop.hbase.filter.InclusiveStopFilter;
+import org.apache.hadoop.hbase.filter.RandomRowFilter;
 import org.apache.hadoop.hbase.util.Bytes;
 
 import util.HBaseHelper;
 
-public class InclusiveStopFilterExample {
+public class RandomRowFilterExample {
 
   public static void main(String[] args) throws IOException {
     Configuration conf = HBaseConfiguration.create();
@@ -27,24 +27,25 @@ public class InclusiveStopFilterExample {
     helper.dropTable("testtable");
     helper.createTable("testtable", "colfam1");
     System.out.println("Adding rows to table...");
-    helper.fillTable("testtable", 1, 100, 1, "colfam1");
+    helper.fillTable("testtable", 1, 10, 30, 0, true, "colfam1");
 
     Connection connection = ConnectionFactory.createConnection(conf);
     Table table = connection.getTable(TableName.valueOf("testtable"));
-    // vv InclusiveStopFilterExample
-    Filter filter = new InclusiveStopFilter(Bytes.toBytes("row-5"));
+    // vv RandomRowFilterExample
+    Filter filter = new RandomRowFilter(0.5f);
 
-    Scan scan = new Scan();
-    scan.setStartRow(Bytes.toBytes("row-3"));
-    scan.setFilter(filter);
-    ResultScanner scanner = table.getScanner(scan);
-    // ^^ InclusiveStopFilterExample
-    System.out.println("Results of scan:");
-    // vv InclusiveStopFilterExample
-    for (Result result : scanner) {
-      System.out.println(result);
+    for (int loop = 1; loop <= 3; loop++) {
+      Scan scan = new Scan();
+      scan.setFilter(filter);
+      ResultScanner scanner = table.getScanner(scan);
+      // ^^ RandomRowFilterExample
+      System.out.println("Results of scan for loop: " + loop);
+      // vv RandomRowFilterExample
+      for (Result result : scanner) {
+        System.out.println(Bytes.toString(result.getRow()));
+      }
+      scanner.close();
     }
-    scanner.close();
-    // ^^ InclusiveStopFilterExample
+    // ^^ RandomRowFilterExample
   }
 }

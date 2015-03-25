@@ -1,15 +1,14 @@
 package filters;
 
 // cc CustomFilter Implements a filter that lets certain rows pass
+import com.google.protobuf.InvalidProtocolBufferException;
+
+import filters.generated.FilterProtos;
 import org.apache.hadoop.hbase.Cell;
 import org.apache.hadoop.hbase.CellUtil;
-import org.apache.hadoop.hbase.KeyValue;
+import org.apache.hadoop.hbase.exceptions.DeserializationException;
 import org.apache.hadoop.hbase.filter.FilterBase;
-import org.apache.hadoop.hbase.util.Bytes;
-
-import java.io.DataInput;
-import java.io.DataOutput;
-import java.io.IOException;
+import org.apache.hadoop.hbase.util.ByteStringer;
 
 /**
  * Implements a custom filter for HBase. It takes a value and compares
@@ -17,7 +16,7 @@ import java.io.IOException;
  * the entire row is passed, otherwise filtered out.
  */
 // vv CustomFilter
-public class CustomFilter extends FilterBase{
+public class CustomFilter extends FilterBase {
 
   private byte[] value = null;
   private boolean filterRow = true;
@@ -48,14 +47,24 @@ public class CustomFilter extends FilterBase{
     return filterRow; // co CustomFilter-5-FilterRow Here the actual decision is taking place, based on the flag status.
   }
 
-//  @Override
-//  public void write(DataOutput dataOutput) throws IOException {
-//    Bytes.writeByteArray(dataOutput, this.value); // co CustomFilter-6-Write Writes the given value out so it can be send to the servers.
-//  }
-//
-//  @Override
-//  public void readFields(DataInput dataInput) throws IOException {
-//    this.value = Bytes.readByteArray(dataInput); // co CustomFilter-7-Read Used by the servers to establish the filter instance with the correct values.
-//  }
+  @Override
+  public byte [] toByteArray() {
+    FilterProtos.CustomFilter.Builder builder =
+      FilterProtos.CustomFilter.newBuilder();
+    if (value != null) builder.setValue(ByteStringer.wrap(value)); // co CustomFilter-6-Write Writes the given value out so it can be send to the servers.
+    return builder.build().toByteArray();
+  }
+
+  //@Override
+  public static CustomFilter parseFrom(final byte[] pbBytes)
+  throws DeserializationException {
+    FilterProtos.CustomFilter proto;
+    try {
+      proto = FilterProtos.CustomFilter.parseFrom(pbBytes); // co CustomFilter-7-Read Used by the servers to establish the filter instance with the correct values.
+    } catch (InvalidProtocolBufferException e) {
+      throw new DeserializationException(e);
+    }
+    return new CustomFilter(proto.getValue().toByteArray());
+  }
 }
 // ^^ CustomFilter

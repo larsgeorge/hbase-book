@@ -5,10 +5,13 @@ import java.io.IOException;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
-import org.apache.hadoop.hbase.client.HTable;
+import org.apache.hadoop.hbase.TableName;
+import org.apache.hadoop.hbase.client.Connection;
+import org.apache.hadoop.hbase.client.ConnectionFactory;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.Scan;
+import org.apache.hadoop.hbase.client.Table;
 import org.apache.hadoop.hbase.filter.BinaryComparator;
 import org.apache.hadoop.hbase.filter.CompareFilter;
 import org.apache.hadoop.hbase.filter.Filter;
@@ -30,11 +33,11 @@ public class RowFilterExample {
     System.out.println("Adding rows to table...");
     helper.fillTable("testtable", 1, 100, 100, "colfam1", "colfam2");
 
-    HTable table = new HTable(conf, "testtable");
-
+    Connection connection = ConnectionFactory.createConnection(conf);
+    Table table = connection.getTable(TableName.valueOf("testtable"));
     // vv RowFilterExample
     Scan scan = new Scan();
-    scan.addColumn(Bytes.toBytes("colfam1"), Bytes.toBytes("col-0"));
+    scan.addColumn(Bytes.toBytes("colfam1"), Bytes.toBytes("col-1"));
 
     Filter filter1 = new RowFilter(CompareFilter.CompareOp.LESS_OR_EQUAL, // co RowFilterExample-1-Filter1 Create filter, while specifying the comparison operator and comparator. Here an exact match is needed.
       new BinaryComparator(Bytes.toBytes("row-22")));

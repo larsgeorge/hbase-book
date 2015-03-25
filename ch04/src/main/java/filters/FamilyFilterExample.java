@@ -1,21 +1,25 @@
 package filters;
 
 // cc FamilyFilterExample Example using a filter to include only specific column families
+import java.io.IOException;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
+import org.apache.hadoop.hbase.TableName;
+import org.apache.hadoop.hbase.client.Connection;
+import org.apache.hadoop.hbase.client.ConnectionFactory;
 import org.apache.hadoop.hbase.client.Get;
-import org.apache.hadoop.hbase.client.HTable;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.Scan;
+import org.apache.hadoop.hbase.client.Table;
 import org.apache.hadoop.hbase.filter.BinaryComparator;
 import org.apache.hadoop.hbase.filter.CompareFilter;
 import org.apache.hadoop.hbase.filter.FamilyFilter;
 import org.apache.hadoop.hbase.filter.Filter;
 import org.apache.hadoop.hbase.util.Bytes;
-import util.HBaseHelper;
 
-import java.io.IOException;
+import util.HBaseHelper;
 
 public class FamilyFilterExample {
 
@@ -28,8 +32,8 @@ public class FamilyFilterExample {
     System.out.println("Adding rows to table...");
     helper.fillTable("testtable", 1, 10, 2, "colfam1", "colfam2", "colfam3", "colfam4");
 
-    HTable table = new HTable(conf, "testtable");
-
+    Connection connection = ConnectionFactory.createConnection(conf);
+    Table table = connection.getTable(TableName.valueOf("testtable"));
     // vv FamilyFilterExample
     Filter filter1 = new FamilyFilter(CompareFilter.CompareOp.LESS, // co FamilyFilterExample-1-Filter Create filter, while specifying the comparison operator and comparator.
       new BinaryComparator(Bytes.toBytes("colfam3")));

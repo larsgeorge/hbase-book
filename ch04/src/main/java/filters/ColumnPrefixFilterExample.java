@@ -1,6 +1,6 @@
 package filters;
 
-// cc InclusiveStopFilterExample Example using a filter to include a stop row
+// cc ColumnPrefixFilterExample Example filtering by column prefix
 import java.io.IOException;
 
 import org.apache.hadoop.conf.Configuration;
@@ -12,13 +12,13 @@ import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.client.Table;
+import org.apache.hadoop.hbase.filter.ColumnPrefixFilter;
 import org.apache.hadoop.hbase.filter.Filter;
-import org.apache.hadoop.hbase.filter.InclusiveStopFilter;
-import org.apache.hadoop.hbase.util.Bytes;
 
+import org.apache.hadoop.hbase.util.Bytes;
 import util.HBaseHelper;
 
-public class InclusiveStopFilterExample {
+public class ColumnPrefixFilterExample {
 
   public static void main(String[] args) throws IOException {
     Configuration conf = HBaseConfiguration.create();
@@ -27,24 +27,23 @@ public class InclusiveStopFilterExample {
     helper.dropTable("testtable");
     helper.createTable("testtable", "colfam1");
     System.out.println("Adding rows to table...");
-    helper.fillTable("testtable", 1, 100, 1, "colfam1");
+    helper.fillTable("testtable", 1, 10, 30, 0, true, "colfam1");
 
     Connection connection = ConnectionFactory.createConnection(conf);
     Table table = connection.getTable(TableName.valueOf("testtable"));
-    // vv InclusiveStopFilterExample
-    Filter filter = new InclusiveStopFilter(Bytes.toBytes("row-5"));
+    // vv ColumnPrefixFilterExample
+    Filter filter = new ColumnPrefixFilter(Bytes.toBytes("col-1"));
 
     Scan scan = new Scan();
-    scan.setStartRow(Bytes.toBytes("row-3"));
     scan.setFilter(filter);
     ResultScanner scanner = table.getScanner(scan);
-    // ^^ InclusiveStopFilterExample
+    // ^^ ColumnPrefixFilterExample
     System.out.println("Results of scan:");
-    // vv InclusiveStopFilterExample
+    // vv ColumnPrefixFilterExample
     for (Result result : scanner) {
       System.out.println(result);
     }
     scanner.close();
-    // ^^ InclusiveStopFilterExample
+    // ^^ ColumnPrefixFilterExample
   }
 }

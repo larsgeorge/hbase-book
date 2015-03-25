@@ -1,21 +1,25 @@
 package filters;
 
 // cc SingleColumnValueFilterExample Example using a filter to return only rows with a given value in a given column
+import java.io.IOException;
+
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.hbase.Cell;
 import org.apache.hadoop.hbase.HBaseConfiguration;
-import org.apache.hadoop.hbase.KeyValue;
+import org.apache.hadoop.hbase.TableName;
+import org.apache.hadoop.hbase.client.Connection;
+import org.apache.hadoop.hbase.client.ConnectionFactory;
 import org.apache.hadoop.hbase.client.Get;
-import org.apache.hadoop.hbase.client.HTable;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.Scan;
+import org.apache.hadoop.hbase.client.Table;
 import org.apache.hadoop.hbase.filter.CompareFilter;
 import org.apache.hadoop.hbase.filter.SingleColumnValueFilter;
 import org.apache.hadoop.hbase.filter.SubstringComparator;
 import org.apache.hadoop.hbase.util.Bytes;
-import util.HBaseHelper;
 
-import java.io.IOException;
+import util.HBaseHelper;
 
 public class SingleColumnValueFilterExample {
 
@@ -28,8 +32,8 @@ public class SingleColumnValueFilterExample {
     System.out.println("Adding rows to table...");
     helper.fillTable("testtable", 1, 10, 10, "colfam1", "colfam2");
 
-    HTable table = new HTable(conf, "testtable");
-
+    Connection connection = ConnectionFactory.createConnection(conf);
+    Table table = connection.getTable(TableName.valueOf("testtable"));
     // vv SingleColumnValueFilterExample
     SingleColumnValueFilter filter = new SingleColumnValueFilter(
       Bytes.toBytes("colfam1"),
@@ -45,9 +49,10 @@ public class SingleColumnValueFilterExample {
     System.out.println("Results of scan:");
     // vv SingleColumnValueFilterExample
     for (Result result : scanner) {
-      for (KeyValue kv : result.raw()) {
-        System.out.println("KV: " + kv + ", Value: " +
-          Bytes.toString(kv.getValue()));
+      for (Cell cell : result.rawCells()) {
+        System.out.println("Cell: " + cell + ", Value: " +
+          Bytes.toString(cell.getValueArray(), cell.getValueOffset(),
+            cell.getValueLength()));
       }
     }
     scanner.close();
@@ -56,9 +61,10 @@ public class SingleColumnValueFilterExample {
     get.setFilter(filter);
     Result result = table.get(get);
     System.out.println("Result of get: ");
-    for (KeyValue kv : result.raw()) {
-      System.out.println("KV: " + kv + ", Value: " +
-        Bytes.toString(kv.getValue()));
+    for (Cell cell : result.rawCells()) {
+      System.out.println("Cell: " + cell + ", Value: " +
+        Bytes.toString(cell.getValueArray(), cell.getValueOffset(),
+          cell.getValueLength()));
     }
     // ^^ SingleColumnValueFilterExample
   }

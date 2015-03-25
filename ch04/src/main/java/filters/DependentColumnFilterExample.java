@@ -1,14 +1,19 @@
 package filters;
 
 // cc DependentColumnFilterExample Example using a filter to include only specific column families
+import java.io.IOException;
+
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.hbase.Cell;
 import org.apache.hadoop.hbase.HBaseConfiguration;
-import org.apache.hadoop.hbase.KeyValue;
+import org.apache.hadoop.hbase.TableName;
+import org.apache.hadoop.hbase.client.Connection;
+import org.apache.hadoop.hbase.client.ConnectionFactory;
 import org.apache.hadoop.hbase.client.Get;
-import org.apache.hadoop.hbase.client.HTable;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.Scan;
+import org.apache.hadoop.hbase.client.Table;
 import org.apache.hadoop.hbase.filter.BinaryPrefixComparator;
 import org.apache.hadoop.hbase.filter.ByteArrayComparable;
 import org.apache.hadoop.hbase.filter.CompareFilter;
@@ -16,13 +21,12 @@ import org.apache.hadoop.hbase.filter.DependentColumnFilter;
 import org.apache.hadoop.hbase.filter.Filter;
 import org.apache.hadoop.hbase.filter.RegexStringComparator;
 import org.apache.hadoop.hbase.util.Bytes;
-import util.HBaseHelper;
 
-import java.io.IOException;
+import util.HBaseHelper;
 
 public class DependentColumnFilterExample {
 
-  private static HTable table = null;
+  private static Table table = null;
 
   // vv DependentColumnFilterExample
   private static void filter(boolean drop,
@@ -36,19 +40,20 @@ public class DependentColumnFilterExample {
     } else {
       filter = new DependentColumnFilter(Bytes.toBytes("colfam1"),
         Bytes.toBytes("col-5"), drop);
-
     }
 
     Scan scan = new Scan();
     scan.setFilter(filter);
+    // scan.setBatch(4); // cause an error
     ResultScanner scanner = table.getScanner(scan);
     // ^^ DependentColumnFilterExample
     System.out.println("Results of scan:");
     // vv DependentColumnFilterExample
     for (Result result : scanner) {
-      for (KeyValue kv : result.raw()) {
-        System.out.println("KV: " + kv + ", Value: " +
-          Bytes.toString(kv.getValue()));
+      for (Cell cell : result.rawCells()) {
+        System.out.println("Cell: " + cell + ", Value: " +
+          Bytes.toString(cell.getValueArray(), cell.getValueOffset(),
+            cell.getValueLength()));
       }
     }
     scanner.close();
@@ -59,9 +64,10 @@ public class DependentColumnFilterExample {
     // ^^ DependentColumnFilterExample
     System.out.println("Result of get: ");
     // vv DependentColumnFilterExample
-    for (KeyValue kv : result.raw()) {
-      System.out.println("KV: " + kv + ", Value: " +
-        Bytes.toString(kv.getValue()));
+    for (Cell cell : result.rawCells()) {
+      System.out.println("Cell: " + cell + ", Value: " +
+        Bytes.toString(cell.getValueArray(), cell.getValueOffset(),
+          cell.getValueLength()));
     }
     // ^^ DependentColumnFilterExample
     System.out.println("");
@@ -78,7 +84,8 @@ public class DependentColumnFilterExample {
     System.out.println("Adding rows to table...");
     helper.fillTable("testtable", 1, 10, 10, true, "colfam1", "colfam2");
 
-    table = new HTable(conf, "testtable");
+    Connection connection = ConnectionFactory.createConnection(conf);
+    table = connection.getTable(TableName.valueOf("testtable"));
 
     // vv DependentColumnFilterExample
     filter(true, CompareFilter.CompareOp.NO_OP, null);

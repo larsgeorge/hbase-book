@@ -10,8 +10,17 @@
 set -e
 
 PROTO_BASE_DIR="ch04/src/main/protobuf"
+
 PROTO_ROWCOUNT="$PROTO_BASE_DIR/RowCountService.proto"
-PATH_GENERATED="ch04/src/main/java/coprocessor/generated"
+PROTO_FILTERS="$PROTO_BASE_DIR/CustomFilters.proto"
+
+PROTOS="$PROTO_ROWCOUNT $PROTO_FILTERS"
+
+PATH_GENERATED_BASE="ch04/src/main/java"
+PATH_GENERATED_COPROS="$PATH_GENERATED_BASE/coprocessor/generated"
+PATH_GENERATED_FILTERS="$PATH_GENERATED_BASE/filters/generated"
+
+PATHS="$PATH_GENERATED_COPROS $PATH_GENERATED_FILTERS"
 
 # check all is well
 if [ ! -d "$PROTO_BASE_DIR" ]; then
@@ -20,15 +29,19 @@ if [ ! -d "$PROTO_BASE_DIR" ]; then
 fi
 
 # check if output directory exists, if not create it
-if [ ! -d "$PATH_GENERATED" ]; then
-  echo "creating directory: $PATH_GENERATED"
-  mkdir "$PATH_GENERATED"
-fi
+for loc in $PATHS; do
+  if [ ! -d "$loc" ]; then
+    echo "creating directory: $loc"
+    mkdir "$loc"
+  fi
+done
 
 # run protocol buffer compiler
-if [ -f "$PROTO_ROWCOUNT" ]; then
-  echo "compiling row count protocol..."
-  protoc -I$PROTO_BASE_DIR --java_out=$PATH_GENERATED $PROTO_ROWCOUNT
-fi
+for proto in $PROTOS; do
+  if [ -f "$proto" ]; then
+    echo "compiling protocol: $proto"
+    protoc -I$PROTO_BASE_DIR --java_out=$PATH_GENERATED_BASE $proto
+  fi
+done
 
 echo "done."

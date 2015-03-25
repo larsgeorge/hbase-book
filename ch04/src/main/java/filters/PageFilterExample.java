@@ -1,22 +1,28 @@
 package filters;
 
 // cc PageFilterExample Example using a filter to paginate through rows
+import java.io.IOException;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
-import org.apache.hadoop.hbase.client.HTable;
+import org.apache.hadoop.hbase.TableName;
+import org.apache.hadoop.hbase.client.Connection;
+import org.apache.hadoop.hbase.client.ConnectionFactory;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.Scan;
+import org.apache.hadoop.hbase.client.Table;
 import org.apache.hadoop.hbase.filter.Filter;
 import org.apache.hadoop.hbase.filter.PageFilter;
 import org.apache.hadoop.hbase.util.Bytes;
-import util.HBaseHelper;
 
-import java.io.IOException;
+import util.HBaseHelper;
 
 public class PageFilterExample {
 
+  // vv PageFilterExample
   private static final byte[] POSTFIX = new byte[] { 0x00 };
+  // ^^ PageFilterExample
 
   public static void main(String[] args) throws IOException {
     Configuration conf = HBaseConfiguration.create();
@@ -27,7 +33,8 @@ public class PageFilterExample {
     System.out.println("Adding rows to table...");
     helper.fillTable("testtable", 1, 1000, 10, "colfam1");
 
-    HTable table = new HTable(conf, "testtable");
+    Connection connection = ConnectionFactory.createConnection(conf);
+    Table table = connection.getTable(TableName.valueOf("testtable"));
 
     // vv PageFilterExample
     Filter filter = new PageFilter(15);
