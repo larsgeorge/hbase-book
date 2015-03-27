@@ -1,6 +1,6 @@
 package filters;
 
-// cc FirstKeyValueMatchingQualifiersFilter Returns all columns, or up to the first found reference qualifier, for each row
+// cc FirstKeyValueMatchingQualifiersFilterExample Returns all columns, or up to the first found reference qualifier, for each row
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
@@ -35,7 +35,7 @@ public class FirstKeyValueMatchingQualifiersFilterExample {
 
     Connection connection = ConnectionFactory.createConnection(conf);
     Table table = connection.getTable(TableName.valueOf("testtable"));
-    // vv FirstKeyValueMatchingQualifiersFilter
+    // vv FirstKeyValueMatchingQualifiersFilterExample
     Set<byte[]> quals = new HashSet<byte[]>();
     quals.add(Bytes.toBytes("col-2"));
     quals.add(Bytes.toBytes("col-4"));
@@ -46,9 +46,9 @@ public class FirstKeyValueMatchingQualifiersFilterExample {
     Scan scan = new Scan();
     scan.setFilter(filter);
     ResultScanner scanner = table.getScanner(scan);
-    // ^^ FirstKeyValueMatchingQualifiersFilter
+    // ^^ FirstKeyValueMatchingQualifiersFilterExample
     System.out.println("Results of scan:");
-    // vv FirstKeyValueMatchingQualifiersFilter
+    // vv FirstKeyValueMatchingQualifiersFilterExample
     int rowCount = 0;
     for (Result result : scanner) {
       for (Cell cell : result.rawCells()) {
@@ -60,6 +60,6 @@ public class FirstKeyValueMatchingQualifiersFilterExample {
     }
     System.out.println("Total num of rows: " + rowCount);
     scanner.close();
-    // ^^ FirstKeyValueMatchingQualifiersFilter
+    // ^^ FirstKeyValueMatchingQualifiersFilterExample
   }
 }
