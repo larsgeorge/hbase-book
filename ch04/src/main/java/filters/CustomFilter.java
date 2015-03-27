@@ -7,6 +7,7 @@ import filters.generated.FilterProtos;
 import org.apache.hadoop.hbase.Cell;
 import org.apache.hadoop.hbase.CellUtil;
 import org.apache.hadoop.hbase.exceptions.DeserializationException;
+import org.apache.hadoop.hbase.filter.Filter;
 import org.apache.hadoop.hbase.filter.FilterBase;
 import org.apache.hadoop.hbase.util.ByteStringer;
 
@@ -56,7 +57,7 @@ public class CustomFilter extends FilterBase {
   }
 
   //@Override
-  public static CustomFilter parseFrom(final byte[] pbBytes)
+  public static Filter parseFrom(final byte[] pbBytes)
   throws DeserializationException {
     FilterProtos.CustomFilter proto;
     try {

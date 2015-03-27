@@ -86,7 +86,6 @@ public class DependentColumnFilterExample {
 
     Connection connection = ConnectionFactory.createConnection(conf);
     table = connection.getTable(TableName.valueOf("testtable"));
-
     // vv DependentColumnFilterExample
     filter(true, CompareFilter.CompareOp.NO_OP, null);
     filter(false, CompareFilter.CompareOp.NO_OP, null); // co DependentColumnFilterExample-2-Filter Call filter method with various options.
