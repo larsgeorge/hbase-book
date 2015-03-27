@@ -197,6 +197,49 @@ public class HBaseHelper implements Closeable {
     tbl.close();
   }
 
+  public void fillTableRandom(String table,
+      int minRow, int maxRow, int padRow,
+      int minCol, int maxCol, int padCol,
+      int minVal, int maxVal, int padVal,
+      boolean setTimestamp, String... colfams)
+    throws IOException {
+    fillTableRandom(TableName.valueOf(table), minRow, maxRow, padRow,
+      minCol, maxCol, padCol, minVal, maxVal, padVal, setTimestamp, colfams);
+  }
+
+  public void fillTableRandom(TableName table,
+    int minRow, int maxRow, int padRow,
+    int minCol, int maxCol, int padCol,
+    int minVal, int maxVal, int padVal,
+    boolean setTimestamp, String... colfams)
+  throws IOException {
+    Table tbl = connection.getTable(table);
+    Random rnd = new Random();
+    int maxRows = minRow + rnd.nextInt(maxRow - minRow);
+    for (int row = 0; row < maxRows; row++) {
+      int maxCols = minCol + rnd.nextInt(maxCol - minCol);
+      for (int col = 0; col < maxCols; col++) {
+        int rowNum = rnd.nextInt(maxRow - minRow + 1);
+        Put put = new Put(Bytes.toBytes("row-" + padNum(rowNum, padRow)));
+        for (String cf : colfams) {
+          int colNum = rnd.nextInt(maxCol - minCol + 1);
+          String colName = "col-" + padNum(colNum, padCol);
+          int valNum = rnd.nextInt(maxVal - minVal + 1);
+          String val = "val-" +  padNum(valNum, padCol);
+          if (setTimestamp) {
+            put.addColumn(Bytes.toBytes(cf), Bytes.toBytes(colName), col,
+              Bytes.toBytes(val));
+          } else {
+            put.addColumn(Bytes.toBytes(cf), Bytes.toBytes(colName),
+              Bytes.toBytes(val));
+          }
+        }
+        tbl.put(put);
+      }
+    }
+    tbl.close();
+  }
+
   public String padNum(int num, int pad) {
     String res = Integer.toString(num);
     if (pad > 0) {
