@@ -36,7 +36,7 @@ public class IncrementMultipleExample {
     increment1.addColumn(Bytes.toBytes("daily"), Bytes.toBytes("hits"), 1); // co IncrementMultipleExample-1-Incr1 Increment the counters with various values.
     increment1.addColumn(Bytes.toBytes("weekly"), Bytes.toBytes("clicks"), 10);
     increment1.addColumn(Bytes.toBytes("weekly"), Bytes.toBytes("hits"), 10);
-    // vv IncrementMultipleExample
+    // ^^ IncrementMultipleExample
     Map<byte[], NavigableMap<byte[], Long>> longs =
       increment1.getFamilyMapOfLongs();
     for (byte[] family : longs.keySet()) {
@@ -47,7 +47,7 @@ public class IncrementMultipleExample {
         System.out.println(" - value: " + longcols.get(column));
       }
     }
-    // ^^ IncrementMultipleExample
+    // vv IncrementMultipleExample
 
     Result result1 = table.increment(increment1); // co IncrementMultipleExample-2-Incr2 Call the actual increment method with the above counter updates and receive the results.
 
