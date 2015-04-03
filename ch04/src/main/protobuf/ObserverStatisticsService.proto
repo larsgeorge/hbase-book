@@ -1,0 +1,23 @@
+option java_package = "coprocessor.generated";
+option java_outer_classname = "ObserverStatisticsProtos";
+option java_generic_services = true;
+option java_generate_equals_and_hash = true;
+option optimize_for = SPEED;
+
+message NameInt32Pair {
+  optional string name = 1;
+  optional int32 value = 2;
+}
+
+message StatisticsRequest {
+  optional bool clear = 1 [default = false];
+}
+
+message StatisticsResponse {
+  repeated NameInt32Pair attribute = 1;
+}
+
+service ObserverStatisticsService {
+  rpc getStatistics(StatisticsRequest)
+    returns (StatisticsResponse);
+}
