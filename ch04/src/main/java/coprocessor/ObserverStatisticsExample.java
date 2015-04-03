@@ -69,6 +69,7 @@ public class ObserverStatisticsExample {
           System.out.println("  " + call.getKey() + ": " + call.getValue());
         }
       }
+      System.out.println();
     }
   }
 
@@ -123,13 +124,27 @@ public class ObserverStatisticsExample {
         .setStartRow(Bytes.toBytes("row10"))
         .setStopRow(Bytes.toBytes("row11"));
       ResultScanner scanner = table.getScanner(scan);
-      System.out.println("  - after getScanner()...");
+      System.out.println("  -> after getScanner()...");
       printStatistics(true, true);
       Result result = scanner.next();
-      System.out.println("  - after next()...");
+      System.out.println("  -> after next()...");
       printStatistics(true, true);
       scanner.close();
-      System.out.println("  - after close()...");
+      System.out.println("  -> after close()...");
+      printStatistics(true, true);
+
+      System.out.println("Scan multiple rows...");
+      scan = new Scan();
+      scanner = table.getScanner(scan);
+      System.out.println("  -> after getScanner()...");
+      printStatistics(true, true);
+      result = scanner.next();
+      System.out.println("  -> after next()...");
+      printStatistics(true, true);
+      result = scanner.next();
+      printStatistics(false, true);
+      scanner.close();
+      System.out.println("  -> after close()...");
       printStatistics(true, true);
 
       System.out.println("Apply single put with mutateRow()...");
@@ -186,13 +201,13 @@ public class ObserverStatisticsExample {
         Bytes.toBytes("val17"));
       boolean cap = table.checkAndPut(Bytes.toBytes("row10"),
         Bytes.toBytes("colfam1"), Bytes.toBytes("qual15"), null, put);
-      System.out.println("  - success: " + cap);
+      System.out.println("  -> success: " + cap);
       printStatistics(true, true);
 
       System.out.println("Apply checkAndPut (succeeding)...");
       cap = table.checkAndPut(Bytes.toBytes("row10"),
         Bytes.toBytes("colfam1"), Bytes.toBytes("qual16"), null, put);
-      System.out.println("  - success: " + cap);
+      System.out.println("  -> success: " + cap);
       printStatistics(true, true);
 
       System.out.println("Apply checkAndDelete (failing)...");
@@ -200,13 +215,13 @@ public class ObserverStatisticsExample {
       delete.addColumn(Bytes.toBytes("colfam1"), Bytes.toBytes("qual17"));
       cap = table.checkAndDelete(Bytes.toBytes("row10"),
         Bytes.toBytes("colfam1"), Bytes.toBytes("qual15"), null, delete);
-      System.out.println("  - success: " + cap);
+      System.out.println("  -> success: " + cap);
       printStatistics(true, true);
 
       System.out.println("Apply checkAndDelete (succeeding)...");
       cap = table.checkAndDelete(Bytes.toBytes("row10"),
         Bytes.toBytes("colfam1"), Bytes.toBytes("qual18"), null, delete);
-      System.out.println("  - success: " + cap);
+      System.out.println("  -> success: " + cap);
       printStatistics(true, true);
 
       System.out.println("Apply checkAndMutate (failing)...");
@@ -221,14 +236,14 @@ public class ObserverStatisticsExample {
       cap = table.checkAndMutate(Bytes.toBytes("row10"),
         Bytes.toBytes("colfam1"), Bytes.toBytes("qual10"),
         CompareFilter.CompareOp.GREATER, Bytes.toBytes("val10"), mutations);
-      System.out.println("  - success: " + cap);
+      System.out.println("  -> success: " + cap);
       printStatistics(true, true);
 
       System.out.println("Apply checkAndMutate (succeeding)...");
       cap = table.checkAndMutate(Bytes.toBytes("row10"),
         Bytes.toBytes("colfam1"), Bytes.toBytes("qual10"),
         CompareFilter.CompareOp.EQUAL, Bytes.toBytes("val10"), mutations);
-      System.out.println("  - success: " + cap);
+      System.out.println("  -> success: " + cap);
       printStatistics(true, true);
       // vv ObserverStatisticsExample
     } catch (Throwable throwable) {
