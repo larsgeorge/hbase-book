@@ -79,7 +79,7 @@ public class ObserverStatisticsExample {
     // vv ObserverStatisticsExample
     HBaseHelper helper = HBaseHelper.getHelper(conf);
     helper.dropTable("testtable");
-    helper.createTable("testtable", "colfam1", "colfam2");
+    helper.createTable("testtable", 3, "colfam1", "colfam2");
     helper.put("testtable",
       new String[]{"row1", "row2", "row3", "row4", "row5"},
       new String[]{"colfam1", "colfam2"}, new String[]{"qual1", "qual1"},
