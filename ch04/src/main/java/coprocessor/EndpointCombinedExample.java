@@ -1,5 +1,8 @@
 package coprocessor;
 
+import java.io.IOException;
+import java.util.Map;
+
 import coprocessor.generated.RowCounterProtos;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
@@ -13,10 +16,8 @@ import org.apache.hadoop.hbase.client.coprocessor.Batch;
 import org.apache.hadoop.hbase.ipc.BlockingRpcCallback;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.hadoop.hbase.util.Pair;
-import util.HBaseHelper;
 
-import java.io.IOException;
-import java.util.Map;
+import util.HBaseHelper;
 
 // cc EndpointCombinedExample Example extending the batch call to execute multiple endpoint calls
 public class EndpointCombinedExample {
@@ -92,7 +93,7 @@ public class EndpointCombinedExample {
           ", Count: " + entry.getValue());/*]*/
       }
       /*[*/System.out.println("Total Row Count: " + totalRows);
-      System.out.println("Total KeyValue Count: " + totalKeyValues);/*]*/
+      System.out.println("Total Cell Count: " + totalKeyValues);/*]*/
       // ^^ EndpointCombinedExample
     } catch (Throwable throwable) {
       throwable.printStackTrace();
