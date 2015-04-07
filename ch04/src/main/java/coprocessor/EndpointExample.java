@@ -3,7 +3,6 @@ package coprocessor;
 import java.io.IOException;
 import java.util.Map;
 
-import coprocessor.generated.RowCounterProtos;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.TableName;
@@ -14,6 +13,8 @@ import org.apache.hadoop.hbase.client.Table;
 import org.apache.hadoop.hbase.client.coprocessor.Batch;
 import org.apache.hadoop.hbase.ipc.BlockingRpcCallback;
 import org.apache.hadoop.hbase.util.Bytes;
+
+import coprocessor.generated.RowCounterProtos;
 
 import util.HBaseHelper;
 
