@@ -5,8 +5,13 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.HColumnDescriptor;
 import org.apache.hadoop.hbase.HTableDescriptor;
+import org.apache.hadoop.hbase.TableName;
+import org.apache.hadoop.hbase.client.Admin;
+import org.apache.hadoop.hbase.client.Connection;
+import org.apache.hadoop.hbase.client.ConnectionFactory;
 import org.apache.hadoop.hbase.client.HBaseAdmin;
-import org.apache.hadoop.hbase.client.HTable;
+import org.apache.hadoop.hbase.client.RegionLocator;
+import org.apache.hadoop.hbase.client.Table;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.hadoop.hbase.util.Pair;
 import util.HBaseHelper;
@@ -16,10 +21,15 @@ import java.io.IOException;
 public class CreateTableWithRegionsExample {
 
   // vv CreateTableWithRegionsExample
+  private static Configuration conf = null;
+  private static Connection connection = null;
+
   private static void printTableRegions(String tableName) throws IOException { // co CreateTableWithRegionsExample-1-PrintTable Helper method to print the regions of a table.
     System.out.println("Printing regions of table: " + tableName);
-    HTable table = new HTable(Bytes.toBytes(tableName));
-    Pair<byte[][], byte[][]> pair = table.getStartEndKeys(); // co CreateTableWithRegionsExample-2-GetKeys Retrieve the start and end keys from the newly created table.
+    TableName tn = TableName.valueOf(tableName);
+    Table table = connection.getTable(tn);
+    RegionLocator locator = connection.getRegionLocator(tn);
+    Pair<byte[][], byte[][]> pair = locator.getStartEndKeys(); // co CreateTableWithRegionsExample-2-GetKeys Retrieve the start and end keys from the newly created table.
     for (int n = 0; n < pair.getFirst().length; n++) {
       byte[] sk = pair.getFirst()[n];
       byte[] ek = pair.getSecond()[n];
@@ -34,15 +44,14 @@ public class CreateTableWithRegionsExample {
 
   // vv CreateTableWithRegionsExample
   public static void main(String[] args) throws IOException, InterruptedException {
-    Configuration conf = HBaseConfiguration.create();
+    conf = HBaseConfiguration.create();
+    connection = ConnectionFactory.createConnection(conf);
     // ^^ CreateTableWithRegionsExample
-
     HBaseHelper helper = HBaseHelper.getHelper(conf);
     helper.dropTable("testtable1");
     helper.dropTable("testtable2");
-
     // vv CreateTableWithRegionsExample
-    HBaseAdmin admin = new HBaseAdmin(conf);
+    Admin admin = connection.getAdmin();
 
     HTableDescriptor desc = new HTableDescriptor(
       Bytes.toBytes("testtable1"));
