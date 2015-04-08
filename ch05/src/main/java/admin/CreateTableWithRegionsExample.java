@@ -1,6 +1,7 @@
 package admin;
 
-// cc CreateTableWithRegionsExample Example using the administrative API to create a table with predefined regions
+import java.io.IOException;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.HColumnDescriptor;
@@ -9,15 +10,14 @@ import org.apache.hadoop.hbase.TableName;
 import org.apache.hadoop.hbase.client.Admin;
 import org.apache.hadoop.hbase.client.Connection;
 import org.apache.hadoop.hbase.client.ConnectionFactory;
-import org.apache.hadoop.hbase.client.HBaseAdmin;
 import org.apache.hadoop.hbase.client.RegionLocator;
 import org.apache.hadoop.hbase.client.Table;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.hadoop.hbase.util.Pair;
+
 import util.HBaseHelper;
 
-import java.io.IOException;
-
+// cc CreateTableWithRegionsExample Example using the administrative API to create a table with predefined regions
 public class CreateTableWithRegionsExample {
 
   // vv CreateTableWithRegionsExample
@@ -54,7 +54,7 @@ public class CreateTableWithRegionsExample {
     Admin admin = connection.getAdmin();
 
     HTableDescriptor desc = new HTableDescriptor(
-      Bytes.toBytes("testtable1"));
+      TableName.valueOf("testtable1"));
     HColumnDescriptor coldef = new HColumnDescriptor(
       Bytes.toBytes("colfam1"));
     desc.addFamily(coldef);
@@ -70,8 +70,10 @@ public class CreateTableWithRegionsExample {
       Bytes.toBytes("O"),
       Bytes.toBytes("T")
     };
-    desc.setName(Bytes.toBytes("testtable2"));
-    admin.createTable(desc, regions); // co CreateTableWithRegionsExample-6-CreateTable2 Call the crateTable() method again, with a new table name and the list of region split keys.
+    HTableDescriptor desc2 = new HTableDescriptor( // TODO: FIX
+      TableName.valueOf("testtable2"));
+    desc2.addFamily(coldef);
+    admin.createTable(desc2, regions); // co CreateTableWithRegionsExample-6-CreateTable2 Call the crateTable() method again, with a new table name and the list of region split keys.
     printTableRegions("testtable2");
   }
   // ^^ CreateTableWithRegionsExample

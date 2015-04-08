@@ -1,15 +1,18 @@
 package admin;
 
-// cc ListTablesExample Example listing the existing tables and their descriptors
+import java.io.IOException;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.HTableDescriptor;
-import org.apache.hadoop.hbase.client.HBaseAdmin;
-import org.apache.hadoop.hbase.util.Bytes;
+import org.apache.hadoop.hbase.TableName;
+import org.apache.hadoop.hbase.client.Admin;
+import org.apache.hadoop.hbase.client.Connection;
+import org.apache.hadoop.hbase.client.ConnectionFactory;
+
 import util.HBaseHelper;
 
-import java.io.IOException;
-
+// cc ListTablesExample Example listing the existing tables and their descriptors
 public class ListTablesExample {
 
   public static void main(String[] args) throws IOException, InterruptedException {
@@ -24,7 +27,9 @@ public class ListTablesExample {
     helper.createTable("testtable3", "colfam1", "colfam2", "colfam3");
 
     // vv ListTablesExample
-    HBaseAdmin admin = new HBaseAdmin(conf);
+    Connection connection = ConnectionFactory.createConnection(conf);
+    Admin admin = connection.getAdmin();
+    TableName tableName = TableName.valueOf("testtable");
 
     HTableDescriptor[] htds = admin.listTables();
     // ^^ ListTablesExample
@@ -35,14 +40,14 @@ public class ListTablesExample {
     }
 
     HTableDescriptor htd1 = admin.getTableDescriptor(
-      Bytes.toBytes("testtable1"));
+      TableName.valueOf("testtable1"));
     // ^^ ListTablesExample
     System.out.println("Printing testtable1...");
     // vv ListTablesExample
     System.out.println(htd1);
 
     HTableDescriptor htd2 = admin.getTableDescriptor(
-      Bytes.toBytes("testtable10"));
+      TableName.valueOf("testtable10"));
     // ^^ ListTablesExample
     System.out.println("Printing testtable10...");
     // vv ListTablesExample
