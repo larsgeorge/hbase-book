@@ -11,7 +11,6 @@ import org.apache.hadoop.hbase.client.Admin;
 import org.apache.hadoop.hbase.client.Connection;
 import org.apache.hadoop.hbase.client.ConnectionFactory;
 import org.apache.hadoop.hbase.client.RegionLocator;
-import org.apache.hadoop.hbase.client.Table;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.hadoop.hbase.util.Pair;
 
@@ -27,7 +26,6 @@ public class CreateTableWithRegionsExample {
   private static void printTableRegions(String tableName) throws IOException { // co CreateTableWithRegionsExample-1-PrintTable Helper method to print the regions of a table.
     System.out.println("Printing regions of table: " + tableName);
     TableName tn = TableName.valueOf(tableName);
-    Table table = connection.getTable(tn);
     RegionLocator locator = connection.getRegionLocator(tn);
     Pair<byte[][], byte[][]> pair = locator.getStartEndKeys(); // co CreateTableWithRegionsExample-2-GetKeys Retrieve the start and end keys from the newly created table.
     for (int n = 0; n < pair.getFirst().length; n++) {
@@ -39,6 +37,7 @@ public class CreateTableWithRegionsExample {
         ", end key: " +
         (ek.length == 8 ? Bytes.toLong(ek) : Bytes.toStringBinary(ek)));
     }
+    locator.close();
   }
   // ^^ CreateTableWithRegionsExample
 
@@ -70,7 +69,7 @@ public class CreateTableWithRegionsExample {
       Bytes.toBytes("O"),
       Bytes.toBytes("T")
     };
-    HTableDescriptor desc2 = new HTableDescriptor( // TODO: FIX
+    HTableDescriptor desc2 = new HTableDescriptor(
       TableName.valueOf("testtable2"));
     desc2.addFamily(coldef);
     admin.createTable(desc2, regions); // co CreateTableWithRegionsExample-6-CreateTable2 Call the crateTable() method again, with a new table name and the list of region split keys.
