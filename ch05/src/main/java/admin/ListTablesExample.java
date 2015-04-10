@@ -29,7 +29,6 @@ public class ListTablesExample {
     // vv ListTablesExample
     Connection connection = ConnectionFactory.createConnection(conf);
     Admin admin = connection.getAdmin();
-    TableName tableName = TableName.valueOf("testtable");
 
     HTableDescriptor[] htds = admin.listTables();
     // ^^ ListTablesExample

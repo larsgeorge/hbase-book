@@ -10,6 +10,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.Cell;
 import org.apache.hadoop.hbase.HColumnDescriptor;
 import org.apache.hadoop.hbase.HTableDescriptor;
+import org.apache.hadoop.hbase.NamespaceDescriptor;
 import org.apache.hadoop.hbase.TableName;
 import org.apache.hadoop.hbase.client.Admin;
 import org.apache.hadoop.hbase.client.Connection;
@@ -50,6 +51,34 @@ public class HBaseHelper implements Closeable {
 
   public Configuration getConfiguration() {
     return configuration;
+  }
+
+  public void createNamespace(String namespace) {
+    try {
+      NamespaceDescriptor nd = NamespaceDescriptor.create(namespace).build();
+      admin.createNamespace(nd);
+    } catch (Exception e) {
+      System.err.println("Error: " + e.getMessage());
+    }
+  }
+
+  public void dropNamespace(String namespace, boolean force) {
+    try {
+      if (force) {
+        TableName[] tableNames = admin.listTableNamesByNamespace(namespace);
+        for (TableName name : tableNames) {
+          admin.disableTable(name);
+          admin.deleteTable(name);
+        }
+      }
+    } catch (Exception e) {
+      // ignore
+    }
+    try {
+      admin.deleteNamespace(namespace);
+    } catch (IOException e) {
+      System.err.println("Error: " + e.getMessage());
+    }
   }
 
   public boolean existsTable(String table)
@@ -117,7 +146,7 @@ public class HBaseHelper implements Closeable {
 
   public void dropTable(TableName table) throws IOException {
     if (existsTable(table)) {
-      disableTable(table);
+      if (admin.isTableEnabled(table)) disableTable(table);
       admin.deleteTable(table);
     }
   }
