@@ -45,6 +45,7 @@ public class ClusterOperationExample {
     HBaseHelper helper = HBaseHelper.getHelper(conf);
     helper.dropTable("testtable");
 
+    // vv ClusterOperationExample
     Connection connection = ConnectionFactory.createConnection(conf);
     Admin admin = connection.getAdmin();
 
@@ -73,7 +74,6 @@ public class ClusterOperationExample {
         }
     mutator.close();
 
-    // vv ClusterOperationExample
     List<HRegionInfo> list = admin.getTableRegions(tableName);
     int numRegions = list.size();
     HRegionInfo info = list.get(numRegions - 1);
@@ -153,7 +153,7 @@ public class ClusterOperationExample {
     HRegionInfo m1 = online.get(0);
     HRegionInfo m2 = online.get(1);
     System.out.println("Regions: " + m1 + " with " + m2);
-    admin.mergeRegions(m1.getEncodedNameAsBytes(), 
+    admin.mergeRegions(m1.getEncodedNameAsBytes(),
       m2.getEncodedNameAsBytes(), false);
     revs = 0;
     do {
