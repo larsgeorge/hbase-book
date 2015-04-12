@@ -31,12 +31,11 @@ public class ModifyTableExample {
     HColumnDescriptor coldef1 = new HColumnDescriptor("colfam1");
     HTableDescriptor desc = new HTableDescriptor(tableName)
       .addFamily(coldef1)
-      .addCoprocessor(DelayRegionCloseObserver.class.getCanonicalName())
       .setValue("Description", "Chapter 5 - ModifyTableExample: Original Table");
 
     admin.createTable(desc, Bytes.toBytes(1L), Bytes.toBytes(10000L), 50); // co ModifyTableExample-1-CreateTable Create the table with the original structure and 50 regions.
 
-    HTableDescriptor htd1 = admin.getTableDescriptor(tableName); // co ModifyTableExample-2-SchemaUpdate Get schema, update by adding a new family and changing the maximum file size property. We delay the region opening artificially by setting a special "test" observer.
+    HTableDescriptor htd1 = admin.getTableDescriptor(tableName); // co ModifyTableExample-2-SchemaUpdate Get schema, update by adding a new family and changing the maximum file size property.
     HColumnDescriptor coldef2 = new HColumnDescriptor("colfam2");
     htd1
       .addFamily(coldef2)
