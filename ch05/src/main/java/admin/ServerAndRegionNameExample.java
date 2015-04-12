@@ -44,9 +44,9 @@ public class ServerAndRegionNameExample {
     HRegionInfo info = location.getRegionInfo();
     System.out.println("Region Name: " + info.getRegionNameAsString());
     System.out.println("Server Name: " + location.getServerName());
-
-    locator.close();
-    connection.close();
     // ^^ ServerAndRegionNameExample
+    locator.close();
+    admin.close();
+    connection.close();
   }
 }
