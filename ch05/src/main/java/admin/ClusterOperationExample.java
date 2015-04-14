@@ -58,14 +58,14 @@ public class ClusterOperationExample {
       Bytes.toBytes("DEF"), Bytes.toBytes("GHI"), Bytes.toBytes("KLM"),
       Bytes.toBytes("OPQ"), Bytes.toBytes("TUV")
     };
-    admin.createTable(desc, regions);
+    admin.createTable(desc, regions); // co ClusterOperationExample-01-Create Create a table with seven regions, and one column family.
 
     BufferedMutator mutator = connection.getBufferedMutator(tableName);
     for (int a = 'A'; a <= 'Z'; a++)
       for (int b = 'A'; b <= 'Z'; b++)
         for (int c = 'A'; c <= 'Z'; c++) {
           String row = Character.toString((char) a) +
-            Character.toString((char) b) + Character.toString((char) c);
+            Character.toString((char) b) + Character.toString((char) c); // co ClusterOperationExample-02-Put Insert many rows starting from "AAA" to "ZZZ". These will be spread across the regions.
           Put put = new Put(Bytes.toBytes(row));
           put.addColumn(Bytes.toBytes("colfam1"), Bytes.toBytes("col1"),
             Bytes.toBytes("val1"));
@@ -77,17 +77,17 @@ public class ClusterOperationExample {
     List<HRegionInfo> list = admin.getTableRegions(tableName);
     int numRegions = list.size();
     HRegionInfo info = list.get(numRegions - 1);
-    System.out.println("Number of regions: " + numRegions);
+    System.out.println("Number of regions: " + numRegions); // co ClusterOperationExample-03-List List details about the regions.
     System.out.println("Regions: ");
     printRegionInfo(list);
 
     System.out.println("Splitting region: " + info.getRegionNameAsString());
-    admin.splitRegion(info.getRegionName());
+    admin.splitRegion(info.getRegionName()); // co ClusterOperationExample-04-Split Split the last region this table has, starting at row key "TUV". Adds a new region starting with key "WEI".
     do {
       list = admin.getTableRegions(tableName);
       Thread.sleep(1 * 1000L);
       System.out.print(".");
-    } while (list.size() <= numRegions);
+    } while (list.size() <= numRegions); // co ClusterOperationExample-05-Wait Loop and check until the operation has taken effect.
     numRegions = list.size();
     System.out.println();
     System.out.println("Number of regions: " + numRegions);
@@ -97,7 +97,7 @@ public class ClusterOperationExample {
     System.out.println("Retrieving region with row ZZZ...");
     RegionLocator locator = connection.getRegionLocator(tableName);
     HRegionLocation location =
-      locator.getRegionLocation(Bytes.toBytes("ZZZ"));
+      locator.getRegionLocation(Bytes.toBytes("ZZZ")); // co ClusterOperationExample-06-Cache Retrieve region infos cached and refreshed to show the difference.
     System.out.println("Found cached region: " +
       location.getRegionInfo().getRegionNameAsString());
     location = locator.getRegionLocation(Bytes.toBytes("ZZZ"), true);
@@ -114,7 +114,7 @@ public class ClusterOperationExample {
 
     HRegionInfo offline = online.get(online.size() - 1);
     System.out.println("Offlining region: " + offline.getRegionNameAsString());
-    admin.offline(offline.getRegionName());
+    admin.offline(offline.getRegionName()); // co ClusterOperationExample-07-Offline Offline a region and print the list of all regions.
     int revs = 0;
     do {
       online = admin.getOnlineRegions(location.getServerName());
@@ -129,12 +129,12 @@ public class ClusterOperationExample {
     System.out.println("Online Regions: ");
     printRegionInfo(online);
 
-    HRegionInfo split = online.get(0);
+    HRegionInfo split = online.get(0); // co ClusterOperationExample-08-Wrong Attempt to split a region with a split key that does not fall into boundaries. Triggers log message.
     System.out.println("Splitting region with wrong key: " + split.getRegionNameAsString());
     admin.splitRegion(split.getRegionName(), Bytes.toBytes("ZZZ")); // triggers log message
 
     System.out.println("Assigning region: " + offline.getRegionNameAsString());
-    admin.assign(offline.getRegionName());
+    admin.assign(offline.getRegionName()); // co ClusterOperationExample-09-Reassign Reassign the offlined region.
     revs = 0;
     do {
       online = admin.getOnlineRegions(location.getServerName());
@@ -153,7 +153,7 @@ public class ClusterOperationExample {
     HRegionInfo m1 = online.get(0);
     HRegionInfo m2 = online.get(1);
     System.out.println("Regions: " + m1 + " with " + m2);
-    admin.mergeRegions(m1.getEncodedNameAsBytes(),
+    admin.mergeRegions(m1.getEncodedNameAsBytes(), // co ClusterOperationExample-10-Merge Merge the first two regions. Print out result of operation.
       m2.getEncodedNameAsBytes(), false);
     revs = 0;
     do {
