@@ -54,13 +54,13 @@ public class SnapshotExample {
     admin.deleteSnapshots("snapshot.*");
 
     // vv SnapshotExample
-    admin.snapshot("snapshot1", tableName);
+    admin.snapshot("snapshot1", tableName); // co SnapshotExample-1-Snap1 Create a snapshot of the initial table, then list all available snapshots next.
 
     List<HBaseProtos.SnapshotDescription> snaps = admin.listSnapshots();
     System.out.println("Snapshots after snapshot 1: " + snaps);
 
     Delete delete = new Delete(Bytes.toBytes("row1"));
-    delete.addColumn(Bytes.toBytes("colfam1"), Bytes.toBytes("qual1"));
+    delete.addColumn(Bytes.toBytes("colfam1"), Bytes.toBytes("qual1")); // co SnapshotExample-2-Delete Remove one column and do two more snapshots, one without first flushing, then another with a preceding flush.
     table.delete(delete);
 
     admin.snapshot("snapshot2", tableName,
@@ -73,6 +73,7 @@ public class SnapshotExample {
 
     Put put = new Put(Bytes.toBytes("row2"))
       .addColumn(Bytes.toBytes("colfam1"), Bytes.toBytes("qual10"),
+        // co SnapshotExample-3-Put Add a new row to the table and take yet another snapshot.
         Bytes.toBytes("val10"));
     table.put(put);
 
@@ -87,7 +88,7 @@ public class SnapshotExample {
     System.out.println("Snapshots before waiting: " + snaps);
 
     System.out.println("Waiting...");
-    while (!admin.isSnapshotFinished(snapshotDescription)) {
+    while (!admin.isSnapshotFinished(snapshotDescription)) { // co SnapshotExample-4-Wait Wait for the asynchronous snapshot to complete. List the snapshots before and after the waiting.
       Thread.sleep(1 * 1000);
       System.out.print(".");
     }
@@ -99,7 +100,7 @@ public class SnapshotExample {
     System.out.println("Table before restoring snapshot 1");
     helper.dump("testtable", new String[]{"row1", "row2"}, null, null);
 
-    // vv SnapshotExample
+    // ^^ SnapshotExample
     /*
     If the table is not disabled you will receive this error:
     Exception in thread "main" org.apache.hadoop.hbase.TableNotDisabledException: testtable
@@ -109,22 +110,22 @@ public class SnapshotExample {
       ...
     	at com.intellij.rt.execution.application.AppMain.main(AppMain.java:140)
      */
-    // ^^ SnapshotExample
+    // vv SnapshotExample
     admin.disableTable(tableName);
-    admin.restoreSnapshot("snapshot1");
+    admin.restoreSnapshot("snapshot1"); // co SnapshotExample-5-Restore Restore the first snapshot, recreating the initial table. This needs to be done on a disabled table.
     admin.enableTable(tableName);
 
     System.out.println("Table after restoring snapshot 1");
     helper.dump("testtable", new String[]{"row1", "row2"}, null, null);
 
-    admin.deleteSnapshot("snapshot1");
+    admin.deleteSnapshot("snapshot1"); // co SnapshotExample-6-DelSnap1 Remove the first snapshot, and list the available ones again.
     snaps = admin.listSnapshots();
     System.out.println("Snapshots after deletion: " + snaps);
 
     admin.cloneSnapshot("snapshot2", TableName.valueOf("testtable2"));
     System.out.println("New table after cloning snapshot 2");
     helper.dump("testtable2", new String[]{"row1", "row2"}, null, null);
-    admin.cloneSnapshot("snapshot3", TableName.valueOf("testtable3"));
+    admin.cloneSnapshot("snapshot3", TableName.valueOf("testtable3")); // co SnapshotExample-7-Clone Clone the second and third snapshot into a new table, dump the content to show the difference between the "skipflush" and "flush" types.
     System.out.println("New table after cloning snapshot 3");
     helper.dump("testtable3", new String[]{"row1", "row2"}, null, null);
 
