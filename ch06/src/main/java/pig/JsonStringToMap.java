@@ -3,14 +3,14 @@ package pig;
 import java.io.IOException;
 import java.util.Map;
 
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
 import org.apache.pig.EvalFunc;
 import org.apache.pig.backend.executionengine.ExecException;
 import org.apache.pig.data.Tuple;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Maps;
 
@@ -24,7 +24,8 @@ import com.google.common.collect.Maps;
  */
 @SuppressWarnings("rawtypes")
 public class JsonStringToMap extends EvalFunc<Map> {
-  private static final Logger LOG = LogManager.getLogger(JsonStringToMap.class);
+  private static final Logger LOG = LoggerFactory.getLogger(
+    JsonStringToMap.class);
   private final JSONParser jsonParser = new JSONParser();
 
   @Override

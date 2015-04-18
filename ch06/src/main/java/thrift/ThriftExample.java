@@ -1,7 +1,7 @@
 package thrift;
 
 // cc ThriftExample Example using the Thrift generated client API
-import org.apache.hadoop.hbase.thrift.generated.*;
+//import org.apache.hadoop.hbase.thrift.generated.*;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.thrift.protocol.TBinaryProtocol;
 import org.apache.thrift.protocol.TProtocol;
@@ -28,33 +28,33 @@ public class ThriftExample {
     try {
       TTransport transport = new TSocket("0.0.0.0", 9090, 20000);
       TProtocol protocol = new TBinaryProtocol(transport, true, true);
-      Hbase.Client client = new Hbase.Client(protocol);
-      transport.open();
-
-      ArrayList<ColumnDescriptor> columns = new
-        ArrayList<ColumnDescriptor>();
-      ColumnDescriptor cd = new ColumnDescriptor();
-      cd.name = ByteBuffer.wrap(FAMILY1);
-      columns.add(cd);
-      cd = new ColumnDescriptor();
-      cd.name = ByteBuffer.wrap(FAMILY2);
-      columns.add(cd);
-
-      client.createTable(ByteBuffer.wrap(TABLE), columns);
-
-      ArrayList<Mutation> mutations = new ArrayList<Mutation>();
-      mutations.add(new Mutation(false, ByteBuffer.wrap(COLUMN),
-        ByteBuffer.wrap(VALUE)));
-      client.mutateRow(ByteBuffer.wrap(TABLE), ByteBuffer.wrap(ROW),
-        mutations);
-
-      ArrayList<byte[]> columnNames = new ArrayList<byte[]>();
-      columnNames.add(FAMILY2);
-      int scannerId = client.scannerOpen(ByteBuffer.wrap(TABLE), null,
-        null);
-      while (client.scannerGet(scannerId) != null)
-        ;
-      client.scannerClose(scannerId);
+//      Hbase.Client client = new Hbase.Client(protocol);
+//      transport.open();
+//
+//      ArrayList<ColumnDescriptor> columns = new
+//        ArrayList<ColumnDescriptor>();
+//      ColumnDescriptor cd = new ColumnDescriptor();
+//      cd.name = ByteBuffer.wrap(FAMILY1);
+//      columns.add(cd);
+//      cd = new ColumnDescriptor();
+//      cd.name = ByteBuffer.wrap(FAMILY2);
+//      columns.add(cd);
+//
+//      client.createTable(ByteBuffer.wrap(TABLE), columns);
+//
+//      ArrayList<Mutation> mutations = new ArrayList<Mutation>();
+//      mutations.add(new Mutation(false, ByteBuffer.wrap(COLUMN),
+//        ByteBuffer.wrap(VALUE)));
+//      client.mutateRow(ByteBuffer.wrap(TABLE), ByteBuffer.wrap(ROW),
+//        mutations);
+//
+//      ArrayList<byte[]> columnNames = new ArrayList<byte[]>();
+//      columnNames.add(FAMILY2);
+//      int scannerId = client.scannerOpen(ByteBuffer.wrap(TABLE), null,
+//        null);
+//      while (client.scannerGet(scannerId) != null)
+//        ;
+//      client.scannerClose(scannerId);
       System.out.println("Done.");
     } catch (Exception e) {
       e.printStackTrace();

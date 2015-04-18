@@ -1,6 +1,7 @@
 package rest;
 
-// cc RestExample Example of using the REST client classes
+import java.io.IOException;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.client.Get;
@@ -11,10 +12,10 @@ import org.apache.hadoop.hbase.rest.client.Client;
 import org.apache.hadoop.hbase.rest.client.Cluster;
 import org.apache.hadoop.hbase.rest.client.RemoteHTable;
 import org.apache.hadoop.hbase.util.Bytes;
+
 import util.HBaseHelper;
 
-import java.io.IOException;
-
+// cc RestExample Example of using the REST client classes
 public class RestExample {
 
   public static void main(String[] args) throws IOException {
