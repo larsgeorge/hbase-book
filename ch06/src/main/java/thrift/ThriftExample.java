@@ -3,13 +3,17 @@ package thrift;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Map;
 
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.thrift.generated.*;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.thrift.protocol.TBinaryProtocol;
 import org.apache.thrift.protocol.TProtocol;
 import org.apache.thrift.transport.TSocket;
 import org.apache.thrift.transport.TTransport;
+import util.HBaseHelper;
 
 // cc ThriftExample Example using the Thrift generated client API
 public class ThriftExample {
@@ -22,46 +26,56 @@ public class ThriftExample {
   private static final byte[] QUALIFIER = Bytes.toBytes
     ("testQualifier");
   private static final byte[] COLUMN = Bytes.toBytes(
-    "testQualifier:testColumn");
+    "testFamily1:testColumn");
   private static final byte[] VALUE = Bytes.toBytes("testValue");
 
-  public static void main(String[] args) throws IOException {
-    try {
-      TTransport transport = new TSocket("0.0.0.0", 9090, 20000);
-      TProtocol protocol = new TBinaryProtocol(transport, true, true);
-      Hbase.Client client = new Hbase.Client(protocol);
-      transport.open();
+  public static void main(String[] args) throws Exception {
+    // ^^ ThriftExample
+    Configuration conf = HBaseConfiguration.create();
+    HBaseHelper helper = HBaseHelper.getHelper(conf);
+    helper.dropTable("testtable");
 
-      ArrayList<ColumnDescriptor> columns = new
-        ArrayList<ColumnDescriptor>();
-      ColumnDescriptor cd = new ColumnDescriptor();
-      cd.name = ByteBuffer.wrap(FAMILY1);
-      columns.add(cd);
-      cd = new ColumnDescriptor();
-      cd.name = ByteBuffer.wrap(FAMILY2);
-      columns.add(cd);
+    // vv ThriftExample
+    TTransport transport = new TSocket("0.0.0.0", 9090, 20000);
+    TProtocol protocol = new TBinaryProtocol(transport, true, true);
+    Hbase.Client client = new Hbase.Client(protocol);
+    transport.open();
 
-      client.createTable(ByteBuffer.wrap(TABLE), columns);
+    ArrayList<ColumnDescriptor> columns = new
+      ArrayList<ColumnDescriptor>();
+    ColumnDescriptor cd = new ColumnDescriptor();
+    cd.name = ByteBuffer.wrap(FAMILY1);
+    columns.add(cd);
+    cd = new ColumnDescriptor();
+    cd.name = ByteBuffer.wrap(FAMILY2);
+    columns.add(cd);
 
-      ArrayList<Mutation> mutations = new ArrayList<Mutation>();
-      mutations.add(new Mutation(false, ByteBuffer.wrap(COLUMN),
-        ByteBuffer.wrap(VALUE), true));
-      client.mutateRow(ByteBuffer.wrap(TABLE), ByteBuffer.wrap(ROW),
-        mutations, null);
+    client.createTable(ByteBuffer.wrap(TABLE), columns);
 
-      ArrayList<byte[]> columnNames = new ArrayList<byte[]>();
-      columnNames.add(FAMILY2);
-      int scannerId = client.scannerOpen(ByteBuffer.wrap(TABLE), null,
-        null, null);
-      for (TRowResult result : client.scannerGet(scannerId)) {
-        System.out.println("Result: " + result);
+    ArrayList<Mutation> mutations = new ArrayList<Mutation>();
+    mutations.add(new Mutation(false, ByteBuffer.wrap(COLUMN),
+      ByteBuffer.wrap(VALUE), true));
+    client.mutateRow(ByteBuffer.wrap(TABLE), ByteBuffer.wrap(ROW),
+      mutations, null);
+
+    ArrayList<byte[]> columnNames = new ArrayList<byte[]>();
+    columnNames.add(FAMILY2);
+    TScan scan = new TScan();
+    int scannerId = client.scannerOpenWithScan(ByteBuffer.wrap(TABLE),
+      scan, null);
+    for (TRowResult result : client.scannerGet(scannerId)) {
+      System.out.println("No. columns: " + result.getColumnsSize());
+      for (Map.Entry<ByteBuffer, TCell> column :
+        result.getColumns().entrySet()) {
+        System.out.println("Column name: " + Bytes.toString(
+          column.getKey().array()));
+        System.out.println("Column value: " + Bytes.toString(
+          column.getValue().getValue()));
       }
-      client.scannerClose(scannerId);
-      System.out.println("Done.");
-      transport.close();
-    } catch (Exception e) {
-      e.printStackTrace();
     }
+    client.scannerClose(scannerId);
+    System.out.println("Done.");
+    transport.close();
   }
   // ^^ ThriftExample
 }
