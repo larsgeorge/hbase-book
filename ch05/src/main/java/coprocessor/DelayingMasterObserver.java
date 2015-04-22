@@ -10,11 +10,11 @@ import org.apache.hadoop.hbase.HRegionInfo;
 import org.apache.hadoop.hbase.ServerName;
 import org.apache.hadoop.hbase.coprocessor.BaseMasterObserver;
 import org.apache.hadoop.hbase.coprocessor.MasterCoprocessorEnvironment;
-import org.apache.hadoop.hbase.coprocessor.ObserverContext;
 import org.apache.hadoop.hbase.master.AssignmentListener;
 import org.apache.hadoop.hbase.regionserver.HRegion;
 
 // cc DelayingMasterObserver Special master observer that delays region asignments
+// vv DelayingMasterObserver
 public class DelayingMasterObserver extends BaseMasterObserver
   implements AssignmentListener {
   public static final Log LOG = LogFactory.getLog(HRegion.class);
