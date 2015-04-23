@@ -1,6 +1,7 @@
 package mapreduce;
 
-// cc AnalyzeData MapReduce job that reads the imported data and analyzes it.
+import java.io.IOException;
+
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.HelpFormatter;
@@ -12,6 +13,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.hbase.Cell;
 import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.KeyValue;
 import org.apache.hadoop.hbase.client.Result;
@@ -31,9 +33,7 @@ import org.apache.log4j.Logger;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
-import java.io.IOException;
-
-
+// cc AnalyzeData MapReduce job that reads the imported data and analyzes it.
 public class AnalyzeData {
 
   private static final Log LOG = LogFactory.getLog(AnalyzeData.class);
@@ -67,9 +67,10 @@ public class AnalyzeData {
       context.getCounter(Counters.ROWS).increment(1);
       String value = null;
       try {
-        for (KeyValue kv : columns.list()) {
+        for (Cell cell : columns.listCells()) {
           context.getCounter(Counters.COLS).increment(1);
-          value = Bytes.toStringBinary(kv.getValue());
+          value = Bytes.toStringBinary(cell.getValueArray(),
+            cell.getValueOffset(), cell.getValueLength());
           JSONObject json = (JSONObject) parser.parse(value);
           String author = (String) json.get("author"); // co AnalyzeData-2-Parse Parse the JSON data, extract the author and count the occurrence.
           // ^^ AnalyzeData

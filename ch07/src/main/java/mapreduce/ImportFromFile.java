@@ -15,6 +15,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.KeyValue;
+import org.apache.hadoop.hbase.client.Mutation;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.io.ImmutableBytesWritable;
 import org.apache.hadoop.hbase.mapreduce.TableOutputFormat;
@@ -47,7 +48,7 @@ public class ImportFromFile {
    */
   // vv ImportFromFile
   static class ImportMapper
-  extends Mapper<LongWritable, Text, ImmutableBytesWritable, Writable> { // co ImportFromFile-2-Mapper Define the mapper class, extending the provided Hadoop class.
+  extends Mapper<LongWritable, Text, ImmutableBytesWritable, Mutation> { // co ImportFromFile-2-Mapper Define the mapper class, extending the provided Hadoop class.
 
     private byte[] family = null;
     private byte[] qualifier = null;
@@ -89,7 +90,7 @@ public class ImportFromFile {
         String lineString = line.toString();
         byte[] rowkey = DigestUtils.md5(lineString); // co ImportFromFile-4-RowKey The row key is the MD5 hash of the line to generate a random key.
         Put put = new Put(rowkey);
-        put.add(family, qualifier, Bytes.toBytes(lineString)); // co ImportFromFile-5-Put Store the original data in a column in the given table.
+        put.addColumn(family, qualifier, Bytes.toBytes(lineString)); // co ImportFromFile-5-Put Store the original data in a column in the given table.
         context.write(new ImmutableBytesWritable(rowkey), put);
         context.getCounter(Counters.LINES).increment(1);
       } catch (Exception e) {

@@ -1,6 +1,7 @@
 package mapreduce;
 
-// cc ImportJsonFromFile Example job that reads from a file and writes into a table.
+import java.io.IOException;
+
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.HelpFormatter;
@@ -14,6 +15,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hbase.HBaseConfiguration;
+import org.apache.hadoop.hbase.client.Mutation;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.io.ImmutableBytesWritable;
 import org.apache.hadoop.hbase.mapreduce.TableOutputFormat;
@@ -30,8 +32,7 @@ import org.apache.log4j.Logger;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
-import java.io.IOException;
-
+// cc ImportJsonFromFile Example job that reads from a file and writes into a table.
 // vv ImportJsonFromFile
 public class ImportJsonFromFile {
   private static final Log LOG = LogFactory.getLog(ImportJsonFromFile.class);
@@ -43,7 +44,7 @@ public class ImportJsonFromFile {
    * and outputs <code>Put</code> instances.
    */
   static class ImportMapper
-  extends Mapper<LongWritable, Text, ImmutableBytesWritable, Writable> {
+  extends Mapper<LongWritable, Text, ImmutableBytesWritable, Mutation> {
 
     private JSONParser parser = new JSONParser();
 
@@ -92,7 +93,8 @@ public class ImportJsonFromFile {
         String link = (String) json.get("link");
         byte[] md5Url = DigestUtils.md5(link);
         Put put = new Put(md5Url);
-        put.add(Bytes.toBytes("data"), Bytes.toBytes("link"), Bytes.toBytes(link));
+        put.addColumn(Bytes.toBytes("data"), Bytes.toBytes("link"),
+          Bytes.toBytes(link));
         context.write(new ImmutableBytesWritable(md5Url), put);
       } catch (Exception e) {
         e.printStackTrace();

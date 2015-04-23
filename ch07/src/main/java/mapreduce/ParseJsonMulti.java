@@ -1,6 +1,7 @@
 package mapreduce;
 
-// cc ParseJsonMulti MapReduce job that parses the raw data into separate tables.
+import java.io.IOException;
+
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.HelpFormatter;
@@ -11,9 +12,13 @@ import org.apache.commons.cli.PosixParser;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.hbase.Cell;
 import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.KeyValue;
-import org.apache.hadoop.hbase.client.HTable;
+import org.apache.hadoop.hbase.TableName;
+import org.apache.hadoop.hbase.client.BufferedMutator;
+import org.apache.hadoop.hbase.client.Connection;
+import org.apache.hadoop.hbase.client.ConnectionFactory;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.Scan;
@@ -30,8 +35,7 @@ import org.apache.log4j.Logger;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
-import java.io.IOException;
-
+// cc ParseJsonMulti MapReduce job that parses the raw data into separate tables.
 public class ParseJsonMulti {
 
   private static final Log LOG = LogFactory.getLog(ParseJsonMulti.class);
@@ -47,20 +51,21 @@ public class ParseJsonMulti {
   static class ParseMapper
   extends TableMapper<ImmutableBytesWritable, Writable> {
 
-    private HTable infoTable = null;
-    private HTable linkTable = null;
+    private Connection connection = null;
+    private BufferedMutator infoTable = null;
+    private BufferedMutator linkTable = null;
     private JSONParser parser = new JSONParser();
     private byte[] columnFamily = null;
 
     @Override
     protected void setup(Context context)
     throws IOException, InterruptedException {
-      infoTable = new HTable(context.getConfiguration(),
-        context.getConfiguration().get("conf.infotable")); // co ParseJsonMulti-1-Setup Create and configure both target tables in the setup() method.
-      infoTable.setAutoFlush(false);
-      linkTable = new HTable(context.getConfiguration(),
-        context.getConfiguration().get("conf.linktable"));
-      linkTable.setAutoFlush(false);
+      connection = ConnectionFactory.createConnection(
+        context.getConfiguration());
+      infoTable = connection.getBufferedMutator(TableName.valueOf(
+        context.getConfiguration().get("conf.infotable"))); // co ParseJsonMulti-1-Setup Create and configure both target tables in the setup() method.
+      linkTable = connection.getBufferedMutator(TableName.valueOf(
+        context.getConfiguration().get("conf.linktable")));
       columnFamily = Bytes.toBytes(
         context.getConfiguration().get("conf.columnfamily"));
     }
@@ -68,8 +73,8 @@ public class ParseJsonMulti {
     @Override
     protected void cleanup(Context context)
     throws IOException, InterruptedException {
-      infoTable.flushCommits();
-      linkTable.flushCommits(); // co ParseJsonMulti-2-Cleanup Flush all pending commits when the task is complete.
+      infoTable.flush();
+      linkTable.flush(); // co ParseJsonMulti-2-Cleanup Flush all pending commits when the task is complete.
     }
 
     // ^^ ParseJsonMulti
@@ -90,23 +95,24 @@ public class ParseJsonMulti {
       try {
         Put infoPut = new Put(row.get());
         Put linkPut = new Put(row.get());
-        for (KeyValue kv : columns.list()) {
+        for (Cell cell : columns.listCells()) {
           context.getCounter(Counters.COLS).increment(1);
-          value = Bytes.toStringBinary(kv.getValue());
+          value = Bytes.toStringBinary(cell.getValueArray(),
+            cell.getValueOffset(), cell.getValueLength());
           JSONObject json = (JSONObject) parser.parse(value);
           for (Object key : json.keySet()) {
             Object val = json.get(key);
             if ("link".equals(key)) {
-              linkPut.add(columnFamily, Bytes.toBytes(key.toString()),
+              linkPut.addColumn(columnFamily, Bytes.toBytes(key.toString()),
                 Bytes.toBytes(val.toString()));
             } else {
-              infoPut.add(columnFamily, Bytes.toBytes(key.toString()),
+              infoPut.addColumn(columnFamily, Bytes.toBytes(key.toString()),
                 Bytes.toBytes(val.toString()));
             }
           }
         }
-        infoTable.put(infoPut); // co ParseJsonMulti-3-TwoTbls Save parsed values into two separate tables.
-        linkTable.put(linkPut);
+        infoTable.mutate(infoPut); // co ParseJsonMulti-3-TwoTbls Save parsed values into two separate tables.
+        linkTable.mutate(linkPut);
         context.getCounter(Counters.VALID).increment(1);
       } catch (Exception e) {
         e.printStackTrace();

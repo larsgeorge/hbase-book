@@ -11,8 +11,10 @@ import org.apache.commons.cli.PosixParser;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.hbase.Cell;
 import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.KeyValue;
+import org.apache.hadoop.hbase.client.Mutation;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.Scan;
@@ -44,7 +46,7 @@ public class ParseJson {
    */
   // vv ParseJson
   static class ParseMapper
-  extends TableMapper<ImmutableBytesWritable, Writable> {
+  extends TableMapper<ImmutableBytesWritable, Mutation> {
 
     private JSONParser parser = new JSONParser();
     private byte[] columnFamily = null;
@@ -73,13 +75,15 @@ public class ParseJson {
       String value = null;
       try {
         Put put = new Put(row.get());
-        for (KeyValue kv : columns.list()) {
+        for (Cell cell : columns.listCells()) {
           context.getCounter(Counters.COLS).increment(1);
-          value = Bytes.toStringBinary(kv.getValue());
+          value = Bytes.toStringBinary(cell.getValueArray(),
+            cell.getValueOffset(), cell.getValueLength());
           JSONObject json = (JSONObject) parser.parse(value);
           for (Object key : json.keySet()) {
             Object val = json.get(key);
-            put.add(columnFamily, Bytes.toBytes(key.toString()), // co ParseJson-1-Put Store the top-level JSON keys as columns, with their value set as the column value.
+            put.addColumn(columnFamily, Bytes.toBytes(key.toString()),
+              // co ParseJson-1-Put Store the top-level JSON keys as columns, with their value set as the column value.
               Bytes.toBytes(val.toString()));
           }
         }

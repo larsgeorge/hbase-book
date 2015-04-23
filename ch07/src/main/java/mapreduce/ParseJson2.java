@@ -1,6 +1,7 @@
 package mapreduce;
 
-// cc ParseJson2 MapReduce job that parses the raw data into separate columns (map phase only).
+import java.io.IOException;
+
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.HelpFormatter;
@@ -11,8 +12,10 @@ import org.apache.commons.cli.PosixParser;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.hbase.Cell;
 import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.KeyValue;
+import org.apache.hadoop.hbase.client.Mutation;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.Scan;
@@ -29,8 +32,7 @@ import org.apache.log4j.Logger;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
-import java.io.IOException;
-
+// cc ParseJson2 MapReduce job that parses the raw data into separate columns (map phase only).
 public class ParseJson2 {
 
   private static final Log LOG = LogFactory.getLog(ParseJson2.class);
@@ -43,7 +45,7 @@ public class ParseJson2 {
    * required information.
    */
   static class ParseMapper
-  extends TableMapper<ImmutableBytesWritable, Writable> {
+  extends TableMapper<ImmutableBytesWritable, Mutation> {
 
     private JSONParser parser = new JSONParser();
     private byte[] columnFamily = null;
@@ -70,13 +72,14 @@ public class ParseJson2 {
       String value = null;
       try {
         Put put = new Put(row.get());
-        for (KeyValue kv : columns.list()) {
+        for (Cell cell : columns.listCells()) {
           context.getCounter(Counters.COLS).increment(1);
-          value = Bytes.toStringBinary(kv.getValue());
+          value = Bytes.toStringBinary(cell.getValueArray(),
+            cell.getValueOffset(), cell.getValueLength());
           JSONObject json = (JSONObject) parser.parse(value);
           for (Object key : json.keySet()) {
             Object val = json.get(key);
-            put.add(columnFamily, Bytes.toBytes(key.toString()),
+            put.addColumn(columnFamily, Bytes.toBytes(key.toString()),
               Bytes.toBytes(val.toString()));
           }
         }
