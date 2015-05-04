@@ -1,17 +1,21 @@
 package client;
 
-// cc DeleteTimestampExample Example application deleting with explicit timestamps
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.hbase.HBaseConfiguration;
-import org.apache.hadoop.hbase.client.Delete;
-import org.apache.hadoop.hbase.client.HBaseAdmin;
-import org.apache.hadoop.hbase.client.HTable;
-import org.apache.hadoop.hbase.client.Put;
-import org.apache.hadoop.hbase.util.Bytes;
-import util.HBaseHelper;
-
 import java.io.IOException;
 
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.hbase.HBaseConfiguration;
+import org.apache.hadoop.hbase.TableName;
+import org.apache.hadoop.hbase.client.Admin;
+import org.apache.hadoop.hbase.client.Connection;
+import org.apache.hadoop.hbase.client.ConnectionFactory;
+import org.apache.hadoop.hbase.client.Delete;
+import org.apache.hadoop.hbase.client.Put;
+import org.apache.hadoop.hbase.client.Table;
+import org.apache.hadoop.hbase.util.Bytes;
+
+import util.HBaseHelper;
+
+// cc DeleteTimestampExample Example application deleting with explicit timestamps
 public class DeleteTimestampExample {
 
   private final static byte[] ROW1 = Bytes.toBytes("row1");
@@ -25,13 +29,15 @@ public class DeleteTimestampExample {
     helper.dropTable("testtable");
     helper.createTable("testtable", "colfam1");
 
-    HTable table = new HTable(conf, "testtable");
-    HBaseAdmin admin = new HBaseAdmin(conf);
+    Connection connection = ConnectionFactory.createConnection(conf);
+
+    Table table = connection.getTable(TableName.valueOf("testtable"));
+    Admin admin = connection.getAdmin();
 
     // vv DeleteTimestampExample
     for (int count = 1; count <= 6; count++) { // co DeleteTimestampExample-1-Put Store the same column six times.
       Put put = new Put(ROW1);
-      put.add(COLFAM1, QUAL1, count, Bytes.toBytes("val-" + count)); // co DeleteTimestampExample-2-Add The version is set to a specific value, using the loop variable.
+      put.addColumn(COLFAM1, QUAL1, count, Bytes.toBytes("val-" + count)); // co DeleteTimestampExample-2-Add The version is set to a specific value, using the loop variable.
       table.put(put);
     }
     // ^^ DeleteTimestampExample
@@ -44,8 +50,8 @@ public class DeleteTimestampExample {
     // vv DeleteTimestampExample
 
     Delete delete = new Delete(ROW1); // co DeleteTimestampExample-3-Delete Delete the newest two versions.
-    delete.deleteColumn(COLFAM1, QUAL1, 5);
-    delete.deleteColumn(COLFAM1, QUAL1, 6);
+    delete.addColumn(COLFAM1, QUAL1, 5);
+    delete.addColumn(COLFAM1, QUAL1, 6);
     table.delete(delete);
     // ^^ DeleteTimestampExample
 

@@ -1,5 +1,14 @@
 package bulkimport;
 
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Random;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -12,8 +21,6 @@ import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.io.ImmutableBytesWritable;
 import org.apache.hadoop.hbase.mapreduce.HFileOutputFormat;
 import org.apache.hadoop.hbase.mapreduce.PutSortReducer;
-import org.apache.hadoop.hbase.mapreduce.hadoopbackport.InputSampler;
-import org.apache.hadoop.hbase.mapreduce.hadoopbackport.TotalOrderPartitioner;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.RawComparator;
@@ -32,19 +39,13 @@ import org.apache.hadoop.mapreduce.TaskAttemptID;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.LineRecordReader;
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
+import org.apache.hadoop.mapreduce.lib.partition.InputSampler;
+import org.apache.hadoop.mapreduce.lib.partition.TotalOrderPartitioner;
+import org.apache.hadoop.mapreduce.task.TaskAttemptContextImpl;
 import org.apache.hadoop.util.ReflectionUtils;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
-
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Random;
 
 public class BulkImportJobExample {
 
@@ -79,7 +80,7 @@ public class BulkImportJobExample {
      * @throws InterruptedException
      */
     @SuppressWarnings("unchecked")
-    public static <K, V> void writePartitionFile(Job job, Sampler<K, V> sampler)
+    public static <K, V> void writePartitionFile(Job job, InputSampler.Sampler<K, V> sampler)
       throws IOException, ClassNotFoundException, InterruptedException {
       LinkedList<K> splits = new LinkedList<K>();
       Configuration conf = job.getConfiguration();
@@ -180,7 +181,7 @@ public class BulkImportJobExample {
         // but we accept the possibility of sampling additional splits to hit
         // the target sample keyset
         for (int i = 0; i < splitsToSample || (i < splits.size() && samples.size() < numSamples); ++i) {
-          TaskAttemptContext samplingContext = new TaskAttemptContext(
+          TaskAttemptContext samplingContext = new TaskAttemptContextImpl(
             job.getConfiguration(), new TaskAttemptID());
           RecordReader<K, V> reader = inf.createRecordReader(splits.get(i), samplingContext);
           reader.initialize(splits.get(i), samplingContext);
