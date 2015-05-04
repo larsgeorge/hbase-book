@@ -65,6 +65,7 @@
           <target>${jdkLevel}</target>
           <showDeprecation>true</showDeprecation>
           <showWarnings>true</showWarnings>
+          <compilerArgument>-Xlint:unchecked</compilerArgument>
         </configuration>
       </plugin>
     </plugins>

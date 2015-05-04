@@ -79,7 +79,7 @@ public class EndpointCombinedExample {
             Long cellCount = cellResponse.hasCount() ?
               cellResponse.getCount() : 0;
 
-            return new Pair(rowCount, cellCount);/*]*/
+            return new Pair<Long, Long>(rowCount, cellCount);/*]*/
           }
         }
       );
