@@ -196,8 +196,8 @@ public class ParseJson2 {
 
     // vv ParseJson2
     /*...*/
-    Job job = new Job(conf, "Parse data in " + input + ", write to " + output +
-      "(map only)");
+    Job job = Job.getInstance(conf, "Parse data in " + input +
+      ", write to " + output + "(map only)");
     job.setJarByClass(ParseJson2.class);
     TableMapReduceUtil.initTableMapperJob(input, scan, ParseMapper.class,
       ImmutableBytesWritable.class, Put.class, job);

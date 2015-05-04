@@ -53,7 +53,7 @@ public class UrlManager {
     try {
       Put put = new Put(HushTable.GLOBAL_ROW_KEY);
       byte[] value = Bytes.toBytes(HushUtil.hushDecode("0337"));
-      put.add(HushTable.COUNTERS_FAMILY, HushTable.SHORT_ID, value);
+      put.addColumn(HushTable.COUNTERS_FAMILY, HushTable.SHORT_ID, value);
       boolean hasPut = table.checkAndPut(HushTable.GLOBAL_ROW_KEY,
         HushTable.COUNTERS_FAMILY, HushTable.SHORT_ID, null, put);
       if (hasPut) {
@@ -133,7 +133,7 @@ public class UrlManager {
     Table table = rm.getTable(LongUrlTable.NAME);
     byte[] md5Url = DigestUtils.md5(url);
     Put put = new Put(md5Url);
-    put.add(LongUrlTable.DATA_FAMILY, LongUrlTable.URL,
+    put.addColumn(LongUrlTable.DATA_FAMILY, LongUrlTable.URL,
       Bytes.toBytes(url));
     boolean hasPut = table.checkAndPut(md5Url, LongUrlTable.DATA_FAMILY,
       LongUrlTable.URL, null, put);
@@ -142,7 +142,7 @@ public class UrlManager {
     if (hasPut) {
       shortId = generateShortId();
       createShortUrl(new ShortUrl(shortId, domain, url, null, username));
-      put.add(LongUrlTable.DATA_FAMILY, LongUrlTable.SHORT_ID,
+      put.addColumn(LongUrlTable.DATA_FAMILY, LongUrlTable.SHORT_ID,
         Bytes.toBytes(shortId));
       table.put(put);
     }
@@ -159,17 +159,17 @@ public class UrlManager {
   private void createShortUrl(ShortUrl shortUrl) throws IOException {
     Table table = rm.getTable(ShortUrlTable.NAME);
     Put put = new Put(Bytes.toBytes(shortUrl.getId()));
-    put.add(ShortUrlTable.DATA_FAMILY, ShortUrlTable.URL,
+    put.addColumn(ShortUrlTable.DATA_FAMILY, ShortUrlTable.URL,
       Bytes.toBytes(shortUrl.getLongUrl()));
-    put.add(ShortUrlTable.DATA_FAMILY, ShortUrlTable.SHORT_DOMAIN,
+    put.addColumn(ShortUrlTable.DATA_FAMILY, ShortUrlTable.SHORT_DOMAIN,
       Bytes.toBytes(shortUrl.getDomain()));
-    put.add(ShortUrlTable.DATA_FAMILY, ShortUrlTable.USER_ID,
+    put.addColumn(ShortUrlTable.DATA_FAMILY, ShortUrlTable.USER_ID,
       Bytes.toBytes(shortUrl.getUser()));
     if (shortUrl.getRefShortId() != null) {
-      put.add(ShortUrlTable.DATA_FAMILY, ShortUrlTable.REF_SHORT_ID,
+      put.addColumn(ShortUrlTable.DATA_FAMILY, ShortUrlTable.REF_SHORT_ID,
         Bytes.toBytes(shortUrl.getRefShortId()));
     }
-    put.add(ShortUrlTable.DATA_FAMILY, ShortUrlTable.CLICKS,
+    put.addColumn(ShortUrlTable.DATA_FAMILY, ShortUrlTable.CLICKS,
       Bytes.toBytes(shortUrl.getClicks()));
 
     table.put(put);
@@ -189,7 +189,7 @@ public class UrlManager {
     byte[] rowKey = Bytes.add(Bytes.toBytes(username), ResourceManager.ZERO,
       Bytes.toBytes(shortId));
     Put put = new Put(rowKey);
-    put.add(UserShortUrlTable.DATA_FAMILY, UserShortUrlTable.TIMESTAMP,
+    put.addColumn(UserShortUrlTable.DATA_FAMILY, UserShortUrlTable.TIMESTAMP,
       Bytes.toBytes(System.currentTimeMillis()));
     table.put(put);
     rm.putTable(table);

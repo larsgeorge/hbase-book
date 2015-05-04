@@ -1,6 +1,7 @@
 package client;
 
-// cc CRUDExamplePreV1API Example application using all of the basic access methods (before v1.0)
+import java.io.IOException;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.client.Delete;
@@ -13,8 +14,8 @@ import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.util.Bytes;
 import util.HBaseHelper;
 
-import java.io.IOException;
-
+// cc CRUDExamplePreV1API Example application using all of the basic access methods (before v1.0)
+@SuppressWarnings("deprecation") // because of old API usage
 public class CRUDExamplePreV1API {
 
   public static void main(String[] args) throws IOException {

@@ -103,14 +103,14 @@ public class DomainManager {
 
       // first add to sdom
       Put shortPut = new Put(shortBytes);
-      shortPut.add(ShortDomainTable.DOMAINS_FAMILY, longBytes, Bytes.toBytes(
-        System.currentTimeMillis()));
+      shortPut.addColumn(ShortDomainTable.DOMAINS_FAMILY, longBytes,
+        Bytes.toBytes(System.currentTimeMillis()));
       shortTable.put(shortPut);
 
       // then add to ldom
       Put longPut = new Put(longBytes);
-      longPut.add(LongDomainTable.DATA_FAMILY, LongDomainTable.SHORT_DOMAIN,
-        shortBytes);
+      longPut.addColumn(LongDomainTable.DATA_FAMILY,
+        LongDomainTable.SHORT_DOMAIN, shortBytes);
       longTable.put(longPut);
     } finally {
       rm.putTable(shortTable);

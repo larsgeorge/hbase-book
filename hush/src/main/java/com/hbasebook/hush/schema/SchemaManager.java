@@ -90,6 +90,7 @@ public class SchemaManager {
     readTableSchemas();
   }
 
+  @SuppressWarnings("deprecation") // because of API usage, temporary
   private void readTableSchemas() throws IOException {
     int maxTables = config.getMaxIndex("schema.table");
     // parse all tables

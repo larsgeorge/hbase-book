@@ -168,7 +168,8 @@ public class ImportFromFile {
     String column = cmd.getOptionValue("c");
     conf.set("conf.column", column);
 
-    Job job = new Job(conf, "Import from file " + input + " into table " + table); // co ImportFromFile-8-JobDef Define the job with the required classes.
+    Job job = Job.getInstance(conf, "Import from file " + input +
+      " into table " + table); // co ImportFromFile-8-JobDef Define the job with the required classes.
     job.setJarByClass(ImportFromFile.class);
     job.setMapperClass(ImportMapper.class);
     job.setOutputFormatClass(TableOutputFormat.class);

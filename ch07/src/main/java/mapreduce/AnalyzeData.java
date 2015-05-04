@@ -226,7 +226,7 @@ public class AnalyzeData {
       }
     }
 
-    Job job = new Job(conf, "Analyze data in " + table);
+    Job job = Job.getInstance(conf, "Analyze data in " + table);
     job.setJarByClass(AnalyzeData.class);
     TableMapReduceUtil.initTableMapperJob(table, scan, AnalyzeMapper.class,
       Text.class, IntWritable.class, job); // co AnalyzeData-6-Util Set up the table mapper phase using the supplied utility.

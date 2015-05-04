@@ -154,7 +154,8 @@ public class ImportJsonFromFile {
     String table = cmd.getOptionValue("t");
     String input = cmd.getOptionValue("i");
     // create job and set classes etc.
-    Job job = new Job(conf, "Import from file " + input + " into table " + table);
+    Job job = Job.getInstance(conf, "Import from file " + input +
+      " into table " + table);
     job.setJarByClass(ImportJsonFromFile.class);
     job.setMapperClass(ImportMapper.class);
     job.setOutputFormatClass(TableOutputFormat.class);

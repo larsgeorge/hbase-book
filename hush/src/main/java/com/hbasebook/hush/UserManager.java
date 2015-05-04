@@ -64,10 +64,12 @@ public class UserManager {
     Table table = rm.getTable(UserTable.NAME);
     try {
       Put put = new Put(ADMIN_LOGIN);
-      put.add(UserTable.DATA_FAMILY, UserTable.CREDENTIALS, ADMIN_PASSWORD);
-      put.add(UserTable.DATA_FAMILY, UserTable.ROLES, UserTable.ADMIN_ROLES);
-      boolean hasPut = table.checkAndPut(ADMIN_LOGIN, UserTable.DATA_FAMILY,
-        UserTable.ROLES, null, put);
+      put.addColumn(UserTable.DATA_FAMILY, UserTable.CREDENTIALS,
+        ADMIN_PASSWORD);
+      put.addColumn(UserTable.DATA_FAMILY, UserTable.ROLES,
+        UserTable.ADMIN_ROLES);
+      boolean hasPut = table.checkAndPut(ADMIN_LOGIN,
+        UserTable.DATA_FAMILY, UserTable.ROLES, null, put);
       if (hasPut) {
         LOG.info("Admin user initialized.");
       }
@@ -88,7 +90,7 @@ public class UserManager {
     Table table = rm.getTable(HushTable.NAME);
     try {
       Put put = new Put(HushTable.GLOBAL_ROW_KEY);
-      put.add(HushTable.COUNTERS_FAMILY, HushTable.ANONYMOUS_USER_ID,
+      put.addColumn(HushTable.COUNTERS_FAMILY, HushTable.ANONYMOUS_USER_ID,
         Bytes.toBytes(HushUtil.hushDecode("0")));
       boolean hasPut = table.checkAndPut(HushTable.GLOBAL_ROW_KEY,
         HushTable.COUNTERS_FAMILY, HushTable.SHORT_ID, null, put);
@@ -116,7 +118,7 @@ public class UserManager {
     ShortUrl shortUrl = rm.getUrlManager().shorten(
       new URL("http://hbasebook.com"), "admin", info);
     Calendar startDate = Calendar.getInstance();
-    startDate.set(2011, 1, 1);
+    startDate.set(2011, Calendar.JANUARY, 1);
     Calendar endDate = Calendar.getInstance();
     endDate.setTime(new Date());
     while (startDate.before(endDate)) {
@@ -170,7 +172,7 @@ public class UserManager {
    * idea is to not get roughly the same amount of hits per country but get
    * some more popular to those that have barely any hits. Clear, Eh?
    *
-   * @return
+   * @return A randomly generated IP observing locality.
    */
   private String getRandomIp() {
     return String.format("%s.%d",
@@ -196,13 +198,16 @@ public class UserManager {
     String email, String password, String roles) throws IOException {
     /*[*/Table table = rm.getTable(UserTable.NAME);/*]*/
     Put put = new Put(Bytes.toBytes(username));
-    put.add(UserTable.DATA_FAMILY, UserTable.FIRSTNAME,
+    put.addColumn(UserTable.DATA_FAMILY, UserTable.FIRSTNAME,
       Bytes.toBytes(firstName));
-    put.add(UserTable.DATA_FAMILY, UserTable.LASTNAME, Bytes.toBytes(lastName));
-    put.add(UserTable.DATA_FAMILY, UserTable.EMAIL, Bytes.toBytes(email));
-    put.add(UserTable.DATA_FAMILY, UserTable.CREDENTIALS,
+    put.addColumn(UserTable.DATA_FAMILY, UserTable.LASTNAME,
+      Bytes.toBytes(lastName));
+    put.addColumn(UserTable.DATA_FAMILY, UserTable.EMAIL,
+      Bytes.toBytes(email));
+    put.addColumn(UserTable.DATA_FAMILY, UserTable.CREDENTIALS,
       Bytes.toBytes(password));
-    put.add(UserTable.DATA_FAMILY, UserTable.ROLES, Bytes.toBytes(roles));
+    put.addColumn(UserTable.DATA_FAMILY, UserTable.ROLES,
+      Bytes.toBytes(roles));
     table.put(put);
     /*[*/rm.putTable(table);/*]*/
   }
@@ -221,10 +226,12 @@ public class UserManager {
     String email) throws IOException {
     Table table = rm.getTable(UserTable.NAME);
     Put put = new Put(Bytes.toBytes(username));
-    put.add(UserTable.DATA_FAMILY, UserTable.FIRSTNAME,
+    put.addColumn(UserTable.DATA_FAMILY, UserTable.FIRSTNAME,
       Bytes.toBytes(firstName));
-    put.add(UserTable.DATA_FAMILY, UserTable.LASTNAME, Bytes.toBytes(lastName));
-    put.add(UserTable.DATA_FAMILY, UserTable.EMAIL, Bytes.toBytes(email));
+    put.addColumn(UserTable.DATA_FAMILY, UserTable.LASTNAME,
+      Bytes.toBytes(lastName));
+    put.addColumn(UserTable.DATA_FAMILY, UserTable.EMAIL,
+      Bytes.toBytes(email));
     table.put(put);
     rm.putTable(table);
   }
@@ -233,11 +240,11 @@ public class UserManager {
     String newPassword) throws IOException {
     Table table = rm.getTable(UserTable.NAME);
     Put put = new Put(Bytes.toBytes(username));
-    put.add(UserTable.DATA_FAMILY, UserTable.CREDENTIALS,
+    put.addColumn(UserTable.DATA_FAMILY, UserTable.CREDENTIALS,
       Bytes.toBytes(newPassword));
     boolean check = table.checkAndPut(Bytes.toBytes(username),
-      UserTable.DATA_FAMILY, UserTable.CREDENTIALS, Bytes.toBytes(oldPassword),
-      put);
+      UserTable.DATA_FAMILY, UserTable.CREDENTIALS,
+      Bytes.toBytes(oldPassword), put);
     rm.putTable(table);
     return check;
   }
@@ -246,7 +253,7 @@ public class UserManager {
     throws IOException {
     Table table = rm.getTable(UserTable.NAME);
     Put put = new Put(Bytes.toBytes(username));
-    put.add(UserTable.DATA_FAMILY, UserTable.CREDENTIALS,
+    put.addColumn(UserTable.DATA_FAMILY, UserTable.CREDENTIALS,
       Bytes.toBytes(newPassword));
     table.put(put);
     rm.putTable(table);

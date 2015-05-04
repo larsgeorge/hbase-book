@@ -401,7 +401,8 @@ public class BulkImportJobExample {
     Path outputDir = new Path(args[1]);
     boolean createPartitionFile = Boolean.parseBoolean(args[2]);
 
-    Job job = new Job(conf, "Import delicious RSS feed into Hush tables.");
+    Job job = Job.getInstance(conf,
+      "Import delicious RSS feed into Hush tables.");
     job.setJarByClass(BulkImportJobExample.class);
 
     job.setInputFormatClass(TextInputFormat.class);

@@ -238,7 +238,8 @@ public class ParseJsonMulti {
       }
     }
     // vv ParseJsonMulti
-    Job job = new Job(conf, "Parse data in " + input + ", into two tables");
+    Job job = Job.getInstance(conf, "Parse data in " + input +
+      ", into two tables");
     job.setJarByClass(ParseJsonMulti.class);
     TableMapReduceUtil.initTableMapperJob(input, scan, ParseMapper.class,
       ImmutableBytesWritable.class, Put.class, job);

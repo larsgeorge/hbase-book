@@ -205,7 +205,8 @@ public class ParseJson {
       }
     }
 
-    Job job = new Job(conf, "Parse data in " + input + ", write to " + output);
+    Job job = Job.getInstance(conf, "Parse data in " + input +
+      ", write to " + output);
     job.setJarByClass(ParseJson.class);
     TableMapReduceUtil.initTableMapperJob(input, scan, ParseMapper.class, // co ParseJson-3-SetMap Setup map phase details using the utility method.
       ImmutableBytesWritable.class, Put.class, job);

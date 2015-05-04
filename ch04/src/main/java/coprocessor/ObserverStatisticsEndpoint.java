@@ -56,6 +56,7 @@ import coprocessor.generated.ObserverStatisticsProtos;
 
 // cc ObserverStatisticsEndpoint Observer collecting invocation statistics.
 // vv ObserverStatisticsEndpoint
+@SuppressWarnings("deprecation") // because of API usage
 public class ObserverStatisticsEndpoint
   extends ObserverStatisticsProtos.ObserverStatisticsService
   implements Coprocessor, CoprocessorService, RegionObserver {
