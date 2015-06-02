@@ -5,8 +5,12 @@
   <zookeeper_quorum>localhost</zookeeper_quorum>
   <zookeeper_client_port>2181</zookeeper_client_port>
   <schema>
+    <namespace>
+      <name>hush</name>
+    </namespace>
     <table>
       <name>surl</name>
+      <namespace>hush</namespace>
       <description>The Short ID to URLs mapping table, keyed by
         shortId.
       </description>
@@ -41,6 +45,7 @@
     </table>
     <table>
       <name>url</name>
+      <namespace>hush</namespace>
       <description>Stores the URLs, keyed by the MD5 of the URL.</description>
       <column_family>
         <name>data</name>
@@ -52,6 +57,7 @@
     </table>
     <table>
       <name>user</name>
+      <namespace>hush</namespace>
       <description>The user table, keyed by username.</description>
       <column_family>
         <name>data</name>
@@ -61,6 +67,7 @@
     </table>
     <table>
       <name>sdom</name>
+      <namespace>hush</namespace>
       <description>The short (vanity) domain table, keyed by shortDomain.
       </description>
       <column_family>
@@ -71,6 +78,7 @@
     </table>
     <table>
       <name>ldom</name>
+      <namespace>hush</namespace>
       <description>The domain table, keyed by long domain. (Reverse index of sdom table.)
       </description>
       <column_family>
@@ -81,6 +89,7 @@
     </table>
     <table>
       <name>user-surl</name>
+      <namespace>hush</namespace>
       <description>The mapping of user.userId to surl.shortId, keeps the
         usage statistics.
       </description>
@@ -94,6 +103,7 @@
     </table>
     <table>
       <name>hush</name>
+      <namespace>hush</namespace>
       <description>The system table, holding central configuration
         details.
       </description>

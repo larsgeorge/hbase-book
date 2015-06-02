@@ -14,6 +14,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HColumnDescriptor;
 import org.apache.hadoop.hbase.HTableDescriptor;
+import org.apache.hadoop.hbase.NamespaceDescriptor;
 import org.apache.hadoop.hbase.TableName;
 import org.apache.hadoop.hbase.client.Admin;
 import org.apache.hadoop.hbase.client.Connection;
@@ -31,8 +32,10 @@ public class SchemaManager {
 
   // possible XML tag names, first the shared ones
   private static final String KEY_NAME = "name";
+  private static final String KEY_NAMESPACE = "namespace";
   private static final String KEY_DESCRIPTION = "description";
-  private static final String KEY_KEY_VALUE = "key_value"; // for setValue()
+  private static final String KEY_CONF_KEY_VALUE = "conf_key_value";
+  private static final String KEY_KEY_VALUE = "key_value";
   // table related keys
   private static final String KEY_MEMSTORE_FLUSH_SIZE = "memstore_flush_size";
   private static final String KEY_SPLIT_POLICY = "split_policy";
@@ -72,7 +75,9 @@ public class SchemaManager {
   private Connection connection = null;
   private Admin admin = null;
   private XMLConfiguration config = null;
+  private ArrayList<NamespaceDescriptor> namespaces = null;
   private ArrayList<HTableDescriptor> schemas = null;
+  private NamespaceDescriptor[] remoteNamespaces = null;
   private HTableDescriptor[] remoteTables = null;
 
   public SchemaManager(Configuration conf, String schemaName)
@@ -86,8 +91,35 @@ public class SchemaManager {
     URL schemaUrl = Thread.currentThread().getContextClassLoader().
       getResource(schemaName);
     config = new XMLConfiguration(schemaUrl);
+    namespaces = new ArrayList<NamespaceDescriptor>();
     schemas = new ArrayList<HTableDescriptor>();
+    readNamespaces();
     readTableSchemas();
+  }
+
+  @SuppressWarnings("deprecation") // because of API usage, temporary
+  private void readNamespaces() throws IOException {
+    int maxNamespaces = config.getMaxIndex("schema.namespace");
+    // parse all tables
+    for (int n = 0; n <= maxNamespaces; n++) {
+      // first the table descriptor
+      String base = "schema.namespace(" + n + ").";
+      String name = config.getString(base + KEY_NAME);
+      NamespaceDescriptor.Builder ndb = NamespaceDescriptor.create(name);
+
+      // read all generic key/value pairs into the table definition
+      int idx = 0;
+      while (true) {
+        String kvKey = base + KEY_CONF_KEY_VALUE + (idx++ == 0 ? "" : idx);
+        if (config.containsKey(kvKey)) {
+          String[] kv = config.getString(kvKey).split("=", 2);
+          ndb.addConfiguration(kv[0], kv.length > 1 ? kv[1] : null);
+        } else {
+          break;
+        }
+      }
+      namespaces.add(ndb.build());
+    }
   }
 
   @SuppressWarnings("deprecation") // because of API usage, temporary
@@ -97,7 +129,8 @@ public class SchemaManager {
     for (int t = 0; t <= maxTables; t++) {
       // first the table descriptor
       String base = "schema.table(" + t + ").";
-      TableName name = TableName.valueOf(config.getString(base + KEY_NAME));
+      TableName name = TableName.valueOf(config.getString(base + KEY_NAMESPACE),
+        config.getString(base + KEY_NAME));
       HTableDescriptor htd = new HTableDescriptor(name);
       if (config.containsKey(base + KEY_DESCRIPTION)) {
         htd.setValue(KEY_DESCRIPTION, config.getString(base + "description"));
@@ -209,8 +242,30 @@ public class SchemaManager {
   public void process() throws IOException {
     connection = ConnectionFactory.createConnection(conf);
     admin = connection.getAdmin();
+    for (final NamespaceDescriptor descriptor : namespaces) {
+      createOrChangeNamespace(descriptor);
+    }
     for (final HTableDescriptor schema : schemas) {
       createOrChangeTable(schema);
+    }
+  }
+
+  private void createOrChangeNamespace(final NamespaceDescriptor descriptor)
+  throws IOException {
+    NamespaceDescriptor desc = null;
+    if (namespaceExists(descriptor.getName(), false)) {
+      desc = getNamespace(descriptor.getName(), false);
+      LOG.info("Checking namespace " + desc.getName() + "...");
+      if (!desc.equals(descriptor)) {
+        admin.modifyNamespace(descriptor);
+        LOG.info("Namespace changed");
+      } else {
+        LOG.info("No changes detected!");
+      }
+    } else {
+      LOG.info("Creating namespace " + descriptor.getName() + "...");
+      admin.createNamespace(descriptor);
+      LOG.info("Namespace created");
     }
   }
 
@@ -281,6 +336,28 @@ public class SchemaManager {
       desc1.getMaxFileSize() == desc2.getMaxFileSize() &&
       desc1.getMemStoreFlushSize() == desc2.getMemStoreFlushSize() &&
       desc1.isReadOnly() == desc2.isReadOnly();
+  }
+
+  private synchronized NamespaceDescriptor getNamespace(String name,
+    final boolean force) throws IOException {
+    getNamespaces(force);
+    for (NamespaceDescriptor d : remoteNamespaces) {
+      if (d.getName().equals(name)) {
+        return d;
+      }
+    }
+    return null;
+  }
+
+  private boolean namespaceExists(String name, final boolean force)
+  throws IOException {
+    return getNamespace(name, force) != null ? true : false;
+  }
+
+  private void getNamespaces(final boolean force) throws IOException {
+    if (remoteNamespaces == null || force) {
+      remoteNamespaces = admin.listNamespaceDescriptors();
+    }
   }
 
   private synchronized HTableDescriptor getTable(final TableName name,
