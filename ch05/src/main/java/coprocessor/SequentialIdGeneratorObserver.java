@@ -63,7 +63,7 @@ public class SequentialIdGeneratorObserver extends BaseRegionObserver {
   @Override
   public void prePut(ObserverContext<RegionCoprocessorEnvironment> e, Put put,
     WALEdit edit, Durability durability) throws IOException {
-    RegionCoprocessorEnvironment env = (RegionCoprocessorEnvironment) e;
+    RegionCoprocessorEnvironment env = e.getEnvironment();
     AtomicInteger id = (AtomicInteger) env.getSharedData().get(KEY_ID);
     put.addColumn(family, qualifier, Bytes.toBytes(regionName + "-" + // co-SequentialIdGeneratorObserver-5-SetId Set the shared ID for this instance of put.
       id.incrementAndGet()));
