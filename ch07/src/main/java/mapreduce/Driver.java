@@ -17,6 +17,8 @@ public class Driver {
     ProgramDriver pgd = new ProgramDriver();
     pgd.addClass(ImportFromFile.NAME, ImportFromFile.class,
       "Import from file");
+    pgd.addClass(ImportFromFile2.NAME, ImportFromFile2.class,
+      "Import from file (with dependencies)");
     pgd.addClass(AnalyzeData.NAME, AnalyzeData.class,
       "Analyze imported JSON");
     pgd.addClass(ParseJson.NAME, ParseJson.class,
