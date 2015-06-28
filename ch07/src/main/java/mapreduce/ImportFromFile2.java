@@ -163,7 +163,7 @@ public class ImportFromFile2 {
     job.setOutputValueClass(Writable.class);
     job.setNumReduceTasks(0);
     FileInputFormat.addInputPath(job, new Path(input));
-    TableMapReduceUtil.addDependencyJars(job);  // co ImportFromFile2-1-AddDeps Add dependencies to the configuration.
+    /*[*/TableMapReduceUtil.addDependencyJars(job);/*]*/ // co ImportFromFile2-1-AddDeps Add dependencies to the configuration.
 
     // ^^ ImportFromFile2
     System.exit(job.waitForCompletion(true) ? 0 : 1);
