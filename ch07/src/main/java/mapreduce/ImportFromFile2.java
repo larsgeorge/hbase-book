@@ -1,6 +1,7 @@
 package mapreduce;
 
-// cc ImportFromFile MapReduce job that reads from a file and writes into a table.
+import java.io.IOException;
+
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.HelpFormatter;
@@ -31,8 +32,7 @@ import org.apache.hadoop.util.GenericOptionsParser;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 
-import java.io.IOException;
-
+// cc ImportFromFile2 MapReduce job that reads from a file and writes into a table.
 public class ImportFromFile2 {
   private static final Log LOG = LogFactory.getLog(ImportFromFile2.class);
 
