@@ -21,6 +21,8 @@ public class Driver {
       "Import from file (with dependencies)");
     pgd.addClass(AnalyzeData.NAME, AnalyzeData.class,
       "Analyze imported JSON");
+    pgd.addClass(AnalyzeSnapshotData.NAME, AnalyzeSnapshotData.class,
+      "Analyze imported JSON from snapshot");
     pgd.addClass(ParseJson.NAME, ParseJson.class,
       "Parse JSON into columns");
     pgd.addClass(ParseJson2.NAME, ParseJson2.class,

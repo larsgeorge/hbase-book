@@ -1,7 +1,5 @@
 package mapreduce;
 
-import java.io.IOException;
-
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.HelpFormatter;
@@ -16,6 +14,10 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hbase.Cell;
 import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.KeyValue;
+import org.apache.hadoop.hbase.TableName;
+import org.apache.hadoop.hbase.client.Admin;
+import org.apache.hadoop.hbase.client.Connection;
+import org.apache.hadoop.hbase.client.ConnectionFactory;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.io.ImmutableBytesWritable;
@@ -33,25 +35,25 @@ import org.apache.log4j.Logger;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
-// cc AnalyzeData MapReduce job that reads the imported data and analyzes it.
+import java.io.IOException;
+
+// cc AnalyzeSnapshotData MapReduce job that reads the data from a snapshot and analyzes it.
 public class AnalyzeSnapshotData {
 
   private static final Log LOG = LogFactory.getLog(AnalyzeSnapshotData.class);
 
-  public static final String NAME = "AnalyzeData";
+  public static final String NAME = "AnalyzeSnapshotData";
   public enum Counters { ROWS, COLS, ERROR, VALID }
 
   /**
    * Implements the <code>Mapper</code> that reads the data and extracts the
    * required information.
    */
-  // vv AnalyzeData
-  static class AnalyzeMapper extends TableMapper<Text, IntWritable> { // co AnalyzeData-1-Mapper Extend the supplied TableMapper class, setting your own output key and value types.
+  static class AnalyzeMapper extends TableMapper<Text, IntWritable> {
 
     private JSONParser parser = new JSONParser();
     private IntWritable ONE = new IntWritable(1);
 
-    // ^^ AnalyzeData
     /**
      * Maps the input.
      *
@@ -60,7 +62,6 @@ public class AnalyzeSnapshotData {
      * @param context The task context.
      * @throws IOException When mapping the input fails.
      */
-    // vv AnalyzeData
     @Override
     public void map(ImmutableBytesWritable row, Result columns, Context context)
     throws IOException {
@@ -72,11 +73,9 @@ public class AnalyzeSnapshotData {
           value = Bytes.toStringBinary(cell.getValueArray(),
             cell.getValueOffset(), cell.getValueLength());
           JSONObject json = (JSONObject) parser.parse(value);
-          String author = (String) json.get("author"); // co AnalyzeData-2-Parse Parse the JSON data, extract the author and count the occurrence.
-          // ^^ AnalyzeData
+          String author = (String) json.get("author");
           if (context.getConfiguration().get("conf.debug") != null)
             System.out.println("Author: " + author);
-          // vv AnalyzeData
           context.write(new Text(author), ONE);
           context.getCounter(Counters.VALID).increment(1);
         }
@@ -87,7 +86,6 @@ public class AnalyzeSnapshotData {
         context.getCounter(Counters.ERROR).increment(1);
       }
     }
-    // ^^ AnalyzeData
     /*
        {
          "updated": "Mon, 14 Sep 2009 17:09:02 +0000",
@@ -116,18 +114,14 @@ public class AnalyzeSnapshotData {
              e104984ea5f37cf8ae70451a619c9ac0#outernationalist"
        }
     */
-    // vv AnalyzeData
   }
 
-  // ^^ AnalyzeData
   /**
    * Implements the <code>Reducer</code> part of the process.
    */
-  // vv AnalyzeData
   static class AnalyzeReducer
-  extends Reducer<Text, IntWritable, Text, IntWritable> { // co AnalyzeData-3-Reducer Extend a Hadoop Reducer class, assigning the proper types.
+  extends Reducer<Text, IntWritable, Text, IntWritable> {
 
-    // ^^ AnalyzeData
     /**
      * Aggregates the counts.
      *
@@ -137,21 +131,17 @@ public class AnalyzeSnapshotData {
      * @throws IOException When reading or writing the data fails.
      * @throws InterruptedException When the task is aborted.
      */
-    // vv AnalyzeData
     @Override
     protected void reduce(Text key, Iterable<IntWritable> values,
       Context context) throws IOException, InterruptedException {
       int count = 0;
-      for (IntWritable one : values) count++; // co AnalyzeData-4-Count Count the occurrences and emit sum.
-      // ^^ AnalyzeData
+      for (IntWritable one : values) count++;
       if (context.getConfiguration().get("conf.debug") != null)
         System.out.println("Author: " + key.toString() + ", Count: " + count);
-      // vv AnalyzeData
       context.write(key, new IntWritable(count));
     }
   }
 
-  // ^^ AnalyzeData
   /**
    * Parse the command line parameters.
    *
@@ -162,16 +152,21 @@ public class AnalyzeSnapshotData {
   private static CommandLine parseArgs(String[] args) throws ParseException {
     Options options = new Options();
     Option o = new Option("t", "table", true,
-      "table to read from (must exist)");
+      "table to snapshot (must exist)");
     o.setArgName("table-name");
     o.setRequired(true);
+    options.addOption(o);
+    o = new Option("s", "snapshot", true, "name of the snapshot");
+    o.setArgName("snapshot-name");
+    options.addOption(o);
+    o = new Option("b", "restoredir", true, "name of restore directory");
+    o.setArgName("restoredir-name");
     options.addOption(o);
     o = new Option("c", "column", true,
       "column to read data from (must exist)");
     o.setArgName("family:qualifier");
     options.addOption(o);
-    o = new Option("o", "output", true,
-      "the directory to write to");
+    o = new Option("o", "output", true, "the directory to write to");
     o.setArgName("path-in-HDFS");
     o.setRequired(true);
     options.addOption(o);
@@ -200,10 +195,8 @@ public class AnalyzeSnapshotData {
    * @param args  The command line parameters.
    * @throws Exception When running the job fails.
    */
-  // vv AnalyzeData
   public static void main(String[] args) throws Exception {
-    /*...*/
-    // ^^ AnalyzeData
+    // vv AnalyzeSnapshotData
     Configuration conf = HBaseConfiguration.create();
     String[] otherArgs =
       new GenericOptionsParser(conf, args).getRemainingArgs();
@@ -211,12 +204,17 @@ public class AnalyzeSnapshotData {
     // check debug flag and other options
     if (cmd.hasOption("d")) conf.set("conf.debug", "true");
     // get details
+    long time = System.currentTimeMillis();
     String table = cmd.getOptionValue("t");
+    String tmpName = "snapshot-" + table + "_" + time; // co AnalyzeSnapshotData-1-TmpName Compute a name for the snapshot and restore directory, if not specified otherwise.
+    String snapshot = cmd.getOptionValue("s", tmpName);
+    Path restoreDir = new Path(cmd.getOptionValue("b", "/tmp/" + tmpName));
     String column = cmd.getOptionValue("c");
     String output = cmd.getOptionValue("o");
 
-    // vv AnalyzeData
-    Scan scan = new Scan(); // co AnalyzeData-5-Scan Create and configure a Scan instance.
+    /*...*/
+    // ^^ AnalyzeSnapshotData
+    Scan scan = new Scan();
     if (column != null) {
       byte[][] colkey = KeyValue.parseColumn(Bytes.toBytes(column));
       if (colkey.length > 1) {
@@ -226,17 +224,25 @@ public class AnalyzeSnapshotData {
       }
     }
 
-    Job job = Job.getInstance(conf, "Analyze data in " + table);
+    // vv AnalyzeSnapshotData
+    Connection connection = ConnectionFactory.createConnection(conf);
+    Admin admin = connection.getAdmin();
+    LOG.info("Performing snapshot of table " + table + " as " + snapshot);
+    admin.snapshot(snapshot, TableName.valueOf(table)); // co AnalyzeSnapshotData-
+
+    LOG.info("Setting up job");
+    Job job = Job.getInstance(conf, "Analyze data in snapshot" + table);
     job.setJarByClass(AnalyzeSnapshotData.class);
-    TableMapReduceUtil.initTableMapperJob(table, scan, AnalyzeMapper.class,
-      Text.class, IntWritable.class, job); // co AnalyzeData-6-Util Set up the table mapper phase using the supplied utility.
+    TableMapReduceUtil.initTableSnapshotMapperJob(snapshot, scan,
+      AnalyzeMapper.class, Text.class, IntWritable.class, job, true,
+      restoreDir); // co AnalyzeSnapshotData-1-Util Set up the snapshot mapper phase using the supplied utility.
     job.setReducerClass(AnalyzeReducer.class);
-    job.setOutputKeyClass(Text.class); // co AnalyzeData-7-Output Configure the reduce phase using the normal Hadoop syntax.
+    job.setOutputKeyClass(Text.class);
     job.setOutputValueClass(IntWritable.class);
     job.setNumReduceTasks(1);
     FileOutputFormat.setOutputPath(job, new Path(output));
 
     System.exit(job.waitForCompletion(true) ? 0 : 1);
+    // ^^ AnalyzeSnapshotData
   }
-  // ^^ AnalyzeData
 }
