@@ -237,7 +237,8 @@ public class AnalyzeSnapshotData {
     TableMapReduceUtil.initTableSnapshotMapperJob(snapshot, scan,
       AnalyzeMapper.class, Text.class, IntWritable.class, job, true,
       restoreDir); // co AnalyzeSnapshotData-2-Util Set up the snapshot mapper phase using the supplied utility.
-    TableMapReduceUtil.addDependencyJars(conf, JSONParser.class);
+    TableMapReduceUtil.addDependencyJars(job.getConfiguration(),
+      JSONParser.class);
     job.setReducerClass(AnalyzeReducer.class);
     job.setOutputKeyClass(Text.class);
     job.setOutputValueClass(IntWritable.class);
