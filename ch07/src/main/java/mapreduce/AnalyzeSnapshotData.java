@@ -247,6 +247,7 @@ public class AnalyzeSnapshotData {
     System.exit(job.waitForCompletion(true) ? 0 : 1);
 
     if (cleanup) {
+      LOG.info("Cleaning up snapshot and restore directory");
       admin.deleteSnapshot(snapshot); // co AnalyzeSnapshotData-3-Cleanup Optionally clean up after the job is complete.
       restoreDir.getFileSystem(conf).delete(restoreDir, true);
     }
