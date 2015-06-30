@@ -170,6 +170,8 @@ public class AnalyzeSnapshotData {
     o.setArgName("path-in-HDFS");
     o.setRequired(true);
     options.addOption(o);
+    options.addOption("x", "cleanup", false,
+      "remove snapshot after job completion");
     options.addOption("d", "debug", false, "switch on DEBUG log level");
     CommandLineParser parser = new PosixParser();
     CommandLine cmd = null;
@@ -201,16 +203,15 @@ public class AnalyzeSnapshotData {
     String[] otherArgs =
       new GenericOptionsParser(conf, args).getRemainingArgs();
     CommandLine cmd = parseArgs(otherArgs);
-    // check debug flag and other options
     if (cmd.hasOption("d")) conf.set("conf.debug", "true");
-    // get details
-    long time = System.currentTimeMillis();
     String table = cmd.getOptionValue("t");
+    long time = System.currentTimeMillis();
     String tmpName = "snapshot-" + table + "_" + time; // co AnalyzeSnapshotData-1-TmpName Compute a name for the snapshot and restore directory, if not specified otherwise.
     String snapshot = cmd.getOptionValue("s", tmpName);
     Path restoreDir = new Path(cmd.getOptionValue("b", "/tmp/" + tmpName));
     String column = cmd.getOptionValue("c");
     String output = cmd.getOptionValue("o");
+    boolean cleanup = Boolean.valueOf(cmd.getOptionValue("x", "true"));
 
     /*...*/
     // ^^ AnalyzeSnapshotData
@@ -228,14 +229,14 @@ public class AnalyzeSnapshotData {
     Connection connection = ConnectionFactory.createConnection(conf);
     Admin admin = connection.getAdmin();
     LOG.info("Performing snapshot of table " + table + " as " + snapshot);
-    admin.snapshot(snapshot, TableName.valueOf(table)); // co AnalyzeSnapshotData-
+    admin.snapshot(snapshot, TableName.valueOf(table)); // co AnalyzeSnapshotData-2-Snap Create a snapshot of the table.
 
     LOG.info("Setting up job");
     Job job = Job.getInstance(conf, "Analyze data in snapshot" + table);
     job.setJarByClass(AnalyzeSnapshotData.class);
     TableMapReduceUtil.initTableSnapshotMapperJob(snapshot, scan,
       AnalyzeMapper.class, Text.class, IntWritable.class, job, true,
-      restoreDir); // co AnalyzeSnapshotData-1-Util Set up the snapshot mapper phase using the supplied utility.
+      restoreDir); // co AnalyzeSnapshotData-2-Util Set up the snapshot mapper phase using the supplied utility.
     job.setReducerClass(AnalyzeReducer.class);
     job.setOutputKeyClass(Text.class);
     job.setOutputValueClass(IntWritable.class);
@@ -243,6 +244,12 @@ public class AnalyzeSnapshotData {
     FileOutputFormat.setOutputPath(job, new Path(output));
 
     System.exit(job.waitForCompletion(true) ? 0 : 1);
+
+    if (cleanup) {
+      admin.deleteSnapshot(snapshot); // co AnalyzeSnapshotData-3-Cleanup Optionally clean up after the job is complete.
+    }
+    admin.close();
+    connection.close();
     // ^^ AnalyzeSnapshotData
   }
 }
