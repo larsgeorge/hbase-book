@@ -232,7 +232,7 @@ public class AnalyzeSnapshotData {
     admin.snapshot(snapshot, TableName.valueOf(table)); // co AnalyzeSnapshotData-2-Snap Create a snapshot of the table.
 
     LOG.info("Setting up job");
-    Job job = Job.getInstance(conf, "Analyze data in snapshot" + table);
+    Job job = Job.getInstance(conf, "Analyze data in snapshot " + table);
     job.setJarByClass(AnalyzeSnapshotData.class);
     TableMapReduceUtil.initTableSnapshotMapperJob(snapshot, scan,
       AnalyzeMapper.class, Text.class, IntWritable.class, job, true,
