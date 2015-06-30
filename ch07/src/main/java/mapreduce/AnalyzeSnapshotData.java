@@ -206,12 +206,12 @@ public class AnalyzeSnapshotData {
     if (cmd.hasOption("d")) conf.set("conf.debug", "true");
     String table = cmd.getOptionValue("t");
     long time = System.currentTimeMillis();
-    String tmpName = "snapshot-" + table + "_" + time; // co AnalyzeSnapshotData-1-TmpName Compute a name for the snapshot and restore directory, if not specified otherwise.
+    String tmpName = "snapshot-" + table + "-" + time; // co AnalyzeSnapshotData-1-TmpName Compute a name for the snapshot and restore directory, if not specified otherwise.
     String snapshot = cmd.getOptionValue("s", tmpName);
     Path restoreDir = new Path(cmd.getOptionValue("b", "/tmp/" + tmpName));
     String column = cmd.getOptionValue("c");
     String output = cmd.getOptionValue("o");
-    boolean cleanup = Boolean.valueOf(cmd.getOptionValue("x", "true"));
+    boolean cleanup = Boolean.valueOf(cmd.getOptionValue("x"));
 
     /*...*/
     // ^^ AnalyzeSnapshotData
@@ -247,6 +247,7 @@ public class AnalyzeSnapshotData {
 
     if (cleanup) {
       admin.deleteSnapshot(snapshot); // co AnalyzeSnapshotData-3-Cleanup Optionally clean up after the job is complete.
+      restoreDir.getFileSystem(conf).delete(restoreDir, true);
     }
     admin.close();
     connection.close();
