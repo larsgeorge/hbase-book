@@ -1,0 +1,17 @@
+option java_package = "coprocessor.generated";
+option java_outer_classname = "ScanControlProtos";
+option java_generic_services = true;
+option java_generate_equals_and_hash = true;
+option optimize_for = SPEED;
+
+message ScanControlRequest {
+}
+
+message ScanControlResponse {
+}
+
+service ScanControlService {
+  rpc resumeScan(ScanControlRequest)
+    returns (ScanControlResponse);
+}
+

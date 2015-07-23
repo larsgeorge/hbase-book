@@ -18,6 +18,8 @@ import org.apache.hadoop.hbase.client.ConnectionFactory;
 import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Result;
+import org.apache.hadoop.hbase.client.ResultScanner;
+import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.client.Table;
 import org.apache.hadoop.hbase.util.Bytes;
 
@@ -232,8 +234,8 @@ public class HBaseHelper implements Closeable {
       int minVal, int maxVal, int padVal,
       boolean setTimestamp, String... colfams)
     throws IOException {
-    fillTableRandom(TableName.valueOf(table), minRow, maxRow, padRow,
-      minCol, maxCol, padCol, minVal, maxVal, padVal, setTimestamp, colfams);
+    fillTableRandom(TableName.valueOf(table), minRow, maxRow, padRow, minCol,
+      maxCol, padCol, minVal, maxVal, padVal, setTimestamp, colfams);
   }
 
   public void fillTableRandom(TableName table,
@@ -365,5 +367,28 @@ public class HBaseHelper implements Closeable {
       }
     }
     tbl.close();
+  }
+
+  public void dump(String table) throws IOException {
+    dump(TableName.valueOf(table));
+  }
+
+  public void dump(TableName table) throws IOException {
+    try (
+      Table t = connection.getTable(table);
+      ResultScanner scanner = t.getScanner(new Scan())
+    ) {
+      for (Result result : scanner) {
+        dumpResult(result);
+      }
+    }
+  }
+
+  public void dumpResult(Result result) {
+    for (Cell cell : result.rawCells()) {
+      System.out.println("Cell: " + cell +
+        ", Value: " + Bytes.toString(cell.getValueArray(),
+        cell.getValueOffset(), cell.getValueLength()));
+    }
   }
 }
