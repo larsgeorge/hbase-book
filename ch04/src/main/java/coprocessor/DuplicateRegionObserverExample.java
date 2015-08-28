@@ -27,9 +27,11 @@ import org.apache.hadoop.hbase.coprocessor.ObserverContext;
 import org.apache.hadoop.hbase.coprocessor.RegionCoprocessorEnvironment;
 import org.apache.hadoop.hbase.regionserver.HRegion;
 import org.apache.hadoop.hbase.util.Bytes;
+
 import util.HBaseHelper;
 
 // cc DuplicateRegionObserverExample Example of attempting to load the same observer multiple times
+// vv DuplicateRegionObserverExample
 public class DuplicateRegionObserverExample extends BaseRegionObserver {
   public static final Log LOG = LogFactory.getLog(HRegion.class);
 
@@ -57,9 +59,8 @@ public class DuplicateRegionObserverExample extends BaseRegionObserver {
 
   public static void main(String[] args) throws IOException {
     Configuration conf = HBaseConfiguration.create();
-    conf.set("hbase.rootdir</name>", "hdfs://master-1.internal.larsgeorge.com:9000/hbase");
-    conf.set("hbase.cluster.distributed", "true");
-    conf.set("hbase.zookeeper.quorum", "master-1.internal.larsgeorge.com,master-2.internal.larsgeorge.com,master-3.internal.larsgeorge.com");
+    conf.set("hbase.zookeeper.quorum", "master-1.internal.larsgeorge.com," +
+      "master-2.internal.larsgeorge.com,master-3.internal.larsgeorge.com");
     HBaseHelper helper = HBaseHelper.getHelper(conf);
     helper.dropTable("testtable");
 
@@ -73,6 +74,7 @@ public class DuplicateRegionObserverExample extends BaseRegionObserver {
       .addCoprocessor(DuplicateRegionObserverExample.class.getCanonicalName(),
         null, Coprocessor.PRIORITY_USER, null);
 
+    // ^^ DuplicateRegionObserverExample
     /* Does not work as expected! Will throw the following exception:
 
       Exception in thread "main" java.io.IOException: Coprocessor \
@@ -82,6 +84,7 @@ public class DuplicateRegionObserverExample extends BaseRegionObserver {
         ...
         at com.intellij.rt.execution.application.AppMain.main(AppMain.java:140)
 	  */
+    // vv DuplicateRegionObserverExample
 
     Admin admin = connection.getAdmin();
     admin.createTable(htd);
@@ -99,7 +102,9 @@ public class DuplicateRegionObserverExample extends BaseRegionObserver {
     table.close();
     admin.close();
     connection.close();
-  }}
+  }
+}
+// ^^ DuplicateRegionObserverExample
 
 /*
 Adding coprocessor using HBase shell uses its own table attribute insertion
