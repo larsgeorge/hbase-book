@@ -29,6 +29,7 @@ public class ScanConsistencyExample3 {
     // vv ScanConsistencyExample3
     /*[*/byte[][] regions = new byte[][] { Bytes.toBytes("row-5") };
     helper.createTable("testtable", regions, "colfam1");/*]*/
+
     // ^^ ScanConsistencyExample3
     System.out.println("Adding rows to table...");
     helper.fillTable("testtable", 1, 9, 1, "colfam1");
