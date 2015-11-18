@@ -63,7 +63,7 @@ public class ScanConsistencyExample2 {
     } catch (InterruptedException e) {
       e.printStackTrace();
     }
-    admin.split(tableName, Bytes.toBytes("row-3")); // co ScanConsistencyExample2-Split Split the table and wait until split operation has completed.
+    admin.split(tableName, Bytes.toBytes("row-3")); // co ScanConsistencyExample2-2-Split Split the table and wait until split operation has completed.
     while (admin.getTableRegions(tableName).size() == 1) {  }
 
     // ^^ ScanConsistencyExample2

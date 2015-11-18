@@ -29,33 +29,33 @@ public class CheckAndPutExample {
     // vv CheckAndPutExample
     Put put1 = new Put(Bytes.toBytes("row1"));
     put1.addColumn(Bytes.toBytes("colfam1"), Bytes.toBytes("qual1"),
-      Bytes.toBytes("val1")); // co CheckAndPutExample-1-Put1 Create a new Put instance.
+      Bytes.toBytes("val1")); // co CheckAndPutExample-01-Put1 Create a new Put instance.
 
     boolean res1 = table.checkAndPut(Bytes.toBytes("row1"),
-      Bytes.toBytes("colfam1"), Bytes.toBytes("qual1"), null, put1); // co CheckAndPutExample-2-CAS1 Check if column does not exist and perform optional put operation.
-    System.out.println("Put 1a applied: " + res1); // co CheckAndPutExample-3-SOUT1 Print out the result, should be "Put 1a applied: true".
+      Bytes.toBytes("colfam1"), Bytes.toBytes("qual1"), null, put1); // co CheckAndPutExample-02-CAS1 Check if column does not exist and perform optional put operation.
+    System.out.println("Put 1a applied: " + res1); // co CheckAndPutExample-03-SOUT1 Print out the result, should be "Put 1a applied: true".
 
     boolean res2 = table.checkAndPut(Bytes.toBytes("row1"),
-      Bytes.toBytes("colfam1"), Bytes.toBytes("qual1"), null, put1); // co CheckAndPutExample-4-CAS2 Attempt to store same cell again.
-    System.out.println("Put 1b applied: " + res2); // co CheckAndPutExample-5-SOUT2 Print out the result, should be "Put 1b applied: false" as the column now already exists.
+      Bytes.toBytes("colfam1"), Bytes.toBytes("qual1"), null, put1); // co CheckAndPutExample-04-CAS2 Attempt to store same cell again.
+    System.out.println("Put 1b applied: " + res2); // co CheckAndPutExample-05-SOUT2 Print out the result, should be "Put 1b applied: false" as the column now already exists.
 
     Put put2 = new Put(Bytes.toBytes("row1"));
     put2.addColumn(Bytes.toBytes("colfam1"), Bytes.toBytes("qual2"),
-      Bytes.toBytes("val2")); // co CheckAndPutExample-6-Put2 Create another Put instance, but using a different column qualifier.
+      Bytes.toBytes("val2")); // co CheckAndPutExample-06-Put2 Create another Put instance, but using a different column qualifier.
 
     boolean res3 = table.checkAndPut(Bytes.toBytes("row1"),
-      Bytes.toBytes("colfam1"), Bytes.toBytes("qual1"), // co CheckAndPutExample-7-CAS3 Store new data only if the previous data has been saved.
+      Bytes.toBytes("colfam1"), Bytes.toBytes("qual1"), // co CheckAndPutExample-07-CAS3 Store new data only if the previous data has been saved.
       Bytes.toBytes("val1"), put2);
-    System.out.println("Put 2 applied: " + res3); // co CheckAndPutExample-8-SOUT3 Print out the result, should be "Put 2 applied: true" as the checked column exists.
+    System.out.println("Put 2 applied: " + res3); // co CheckAndPutExample-08-SOUT3 Print out the result, should be "Put 2 applied: true" as the checked column exists.
 
     Put put3 = new Put(Bytes.toBytes("row2"));
     put3.addColumn(Bytes.toBytes("colfam1"), Bytes.toBytes("qual1"),
-      Bytes.toBytes("val3")); // co CheckAndPutExample-9-Put3 Create yet another Put instance, but using a different row.
+      Bytes.toBytes("val3")); // co CheckAndPutExample-09-Put3 Create yet another Put instance, but using a different row.
 
     boolean res4 = table.checkAndPut(Bytes.toBytes("row1"),
-      Bytes.toBytes("colfam1"), Bytes.toBytes("qual1"), // co CheckAndPutExample-a-CAS4 Store new data while checking a different row.
+      Bytes.toBytes("colfam1"), Bytes.toBytes("qual1"), // co CheckAndPutExample-10-CAS4 Store new data while checking a different row.
       Bytes.toBytes("val1"), put3);
-    System.out.println("Put 3 applied: " + res4); // co CheckAndPutExample-b-SOUT4 We will not get here as an exception is thrown beforehand!
+    System.out.println("Put 3 applied: " + res4); // co CheckAndPutExample-11-SOUT4 We will not get here as an exception is thrown beforehand!
     // ^^ CheckAndPutExample
     table.close();
     connection.close();
