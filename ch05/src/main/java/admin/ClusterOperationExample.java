@@ -130,8 +130,10 @@ public class ClusterOperationExample {
     printRegionInfo(online);
 
     HRegionInfo split = online.get(0); // co ClusterOperationExample-08-Wrong Attempt to split a region with a split key that does not fall into boundaries. Triggers log message.
-    System.out.println("Splitting region with wrong key: " + split.getRegionNameAsString());
-    admin.splitRegion(split.getRegionName(), Bytes.toBytes("ZZZ")); // triggers log message
+    System.out.println("Splitting region with wrong key: " +
+      split.getRegionNameAsString());
+    admin.splitRegion(split.getRegionName(),
+      Bytes.toBytes("ZZZ")); // triggers log message
 
     System.out.println("Assigning region: " + offline.getRegionNameAsString());
     admin.assign(offline.getRegionName()); // co ClusterOperationExample-09-Reassign Reassign the offlined region.

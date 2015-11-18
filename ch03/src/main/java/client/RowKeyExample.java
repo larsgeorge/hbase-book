@@ -17,7 +17,8 @@ public class RowKeyExample {
     byte[] username_bytes = username.getBytes(Charset.forName("UTF8"));
 
     System.arraycopy(username_bytes, 0, data, 45, username_bytes.length);
-    System.out.println("data length: " + data.length + ", data: " + Bytes.toString(data));
+    System.out.println("data length: " + data.length +
+      ", data: " + Bytes.toString(data));
 
     Put put = new Put(data, 45, username_bytes.length);
     System.out.println("Put: " + put);

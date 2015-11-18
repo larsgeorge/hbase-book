@@ -52,7 +52,8 @@ public class CRUDExample {
       get.addColumn(Bytes.toBytes("colfam1"), Bytes.toBytes("qual1"));
       Result result = table.get(get);
       System.out.println("Get result: " + result);
-      byte[] val = result.getValue(Bytes.toBytes("colfam1"), Bytes.toBytes("qual1"));
+      byte[] val = result.getValue(Bytes.toBytes("colfam1"),
+        Bytes.toBytes("qual1"));
       System.out.println("Value only: " + Bytes.toString(val));
 
       Delete delete = new Delete(Bytes.toBytes("row1"));
