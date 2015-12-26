@@ -48,12 +48,16 @@ if [ -z "$JAVA_HOME" ]; then
     /usr/lib/jvm/java-6-sun \
     /usr/lib/jvm/java-1.6.0-sun-1.6.0.* \
     /usr/lib/j2sdk1.6-sun \
-    /usr/java/jdk1.6* \
     /usr/java/jre1.6* \
-    /Library/Java/Home ; do
+    /usr/java/jdk1.6* \
+    /Library/Java/Home \
+    /Library/Java/JavaVirtualMachines/jdk1.7*/Contents/Home \
+    /Library/Java/JavaVirtualMachines/jdk1.8*/Contents/Home \
+    /usr/java/latest \
+    /usr/java/default ; do
     if [ -e $candidate/bin/java ]; then
+      # don't break out of the loop to ensure that the latest Java version is used
       export JAVA_HOME=$candidate
-      break
     fi
   done
   # if we didn't set it
