@@ -1,0 +1,43 @@
+---
+# Purpose: Creates the Kerberos principals needed
+#
+# Notes: 
+#   - Executed on KDC server as it requires kadmin.local
+#   - The principal database must already exit
+
+- name: Determine existing principals
+  shell: kadmin.local -q 'listprincs'
+  register: principal_list
+  changed_when: false 
+
+- debug: var=principal_list.stdout_lines
+
+- name: Add UPNs
+  command: kadmin.local -q 'addprinc -pw krbsekret larsgeorge/admin@{{ KRB_REALM }}'
+  when: principal_list.stdout.find('larsgeorge/admin@{{ KRB_REALM }}') == -1
+- command: kadmin.local -q 'addprinc -pw krbsekret larsgeorge@{{ KRB_REALM }}'
+  when: principal_list.stdout.find('larsgeorge@{{ KRB_REALM }}') == -1
+- command: kadmin.local -q 'addprinc -pw krbsekret krbtgt/{{ KRB_REALM }}@{{ KRB_REALM }}'
+  when: principal_list.stdout.find('krbtgt/{{ KRB_REALM }}@{{ KRB_REALM }}') == -1
+
+- name: Add SPNs
+  command: kadmin.local -q 'add_principal -randkey {{ item[1] }}/{{ item[0] }}@{{ KRB_REALM }}'
+  with_nested: 
+    - groups.cluster
+    - "{{ KRB_PRINCIPALS }}"
+  when: principal_list.stdout.find('{{ item[1] }}/{{ item[0] }}@{{ KRB_REALM }}') == -1
+
+- name: Export keytabs into root account
+  file: path=/root/keytabs owner=root group=root mode=700 state=directory
+# usually a services has its own principal and the special HTTP principal for its web UIs...
+- command: kadmin.local -q 'xst -k /root/keytabs/{{ item[1] }}-{{ item[0] }}.keytab -norandkey -q {{ item[1] }}/{{ item[0] }}@{{ KRB_REALM }} HTTP/{{ item[0] }}@{{ KRB_REALM }}'
+  args:
+    creates: /root/keytabs/{{ item[1] }}-{{ item[0] }}.keytab
+  with_nested:
+    - groups.cluster
+    - "{{ KRB_SERVICES_WITH_HTTP }}"
+# but for the history server there is only a single principal in the keytab
+- command: kadmin.local -q 'xst -k /root/keytabs/mapred-{{ item }}.keytab -norandkey -q mapred/{{ item }}@{{ KRB_REALM }}'
+  args:
+    creates: /root/keytabs/mapred-{{ item }}.keytab
+  with_items: groups.historyserver

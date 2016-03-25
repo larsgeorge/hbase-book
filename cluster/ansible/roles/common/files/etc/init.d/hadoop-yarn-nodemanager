@@ -1,0 +1,183 @@
+#!/bin/bash
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# Starts a Hadoop nodemanager
+#
+# chkconfig: 345 85 15
+# description: Hadoop nodemanager
+#
+### BEGIN INIT INFO
+# Provides:          hadoop-yarn-nodemanager
+# Short-Description: Hadoop nodemanager
+# Default-Start:     3 4 5
+# Default-Stop:      0 1 2 6
+# Required-Start:    $syslog $remote_fs
+# Required-Stop:     $syslog $remote_fs
+# Should-Start:
+# Should-Stop:
+### END INIT INFO
+
+. /lib/lsb/init-functions
+BIGTOP_DEFAULTS_DIR=${BIGTOP_DEFAULTS_DIR-/etc/default}
+[ -n "${BIGTOP_DEFAULTS_DIR}" -a -r ${BIGTOP_DEFAULTS_DIR}/hadoop ] && . ${BIGTOP_DEFAULTS_DIR}/hadoop
+[ -n "${BIGTOP_DEFAULTS_DIR}" -a -r ${BIGTOP_DEFAULTS_DIR}/hadoop-yarn-nodemanager ] && . ${BIGTOP_DEFAULTS_DIR}/hadoop-yarn-nodemanager
+
+# Autodetect JAVA_HOME if not defined
+. /usr/lib/bigtop-utils/bigtop-detect-javahome
+
+RETVAL_SUCCESS=0
+
+STATUS_RUNNING=0
+STATUS_DEAD=1
+STATUS_DEAD_AND_LOCK=2
+STATUS_NOT_RUNNING=3
+STATUS_OTHER_ERROR=102
+
+
+ERROR_PROGRAM_NOT_INSTALLED=5
+ERROR_PROGRAM_NOT_CONFIGURED=6
+
+
+RETVAL=0
+SLEEP_TIME=5
+PROC_NAME="java"
+
+DAEMON="hadoop-yarn-nodemanager"
+DESC="Hadoop nodemanager"
+EXEC_PATH="/usr/lib/hadoop-yarn/sbin/yarn-daemon.sh"
+EXEC_DIR=""
+SVC_USER="yarn"
+DAEMON_FLAGS="nodemanager"
+CONF_DIR="/etc/hadoop/conf"
+PIDFILE="/var/run/hadoop-yarn/yarn-yarn-nodemanager.pid"
+LOCKDIR="/var/lock/subsys"
+LOCKFILE="$LOCKDIR/hadoop-yarn-nodemanager"
+WORKING_DIR="/var/lib/hadoop-yarn"
+
+install -d -m 0{{ KDC_REALM }} -o yarn -g yarn /var/run/hadoop-yarn 1>/dev/null 2>&1 || :
+[ -d "$LOCKDIR" ] || install -d -m 0{{ KDC_REALM }} $LOCKDIR 1>/dev/null 2>&1 || :
+  export HADOOP_CLASSPATH="$HADOOP_CLASSPATH:/usr/lib/llama/*:/usr/lib/llama/lib/*"
+
+start() {
+  [ -x $EXEC_PATH ] || exit $ERROR_PROGRAM_NOT_INSTALLED
+  [ -d $CONF_DIR ] || exit $ERROR_PROGRAM_NOT_CONFIGURED
+
+  su -s /bin/bash $SVC_USER -c "cd $WORKING_DIR && $EXEC_PATH --config '$CONF_DIR' start $DAEMON_FLAGS"
+
+  # Some processes are slow to start
+  sleep $SLEEP_TIME
+  checkstatusofproc
+  RETVAL=$?
+
+  if [ $RETVAL -eq $STATUS_RUNNING ]; then
+    touch $LOCKFILE
+    log_success_msg "Started ${DESC}: "
+  else
+	log_failure_msg "Failed to start ${DESC}. Return value: $RETVAL"
+  fi
+  return $RETVAL
+}
+
+
+stop() {
+  start_daemon $EXEC_PATH --config "$CONF_DIR" stop $DAEMON_FLAGS
+  RETVAL=$?
+
+  if [ $RETVAL -eq $RETVAL_SUCCESS ]; then
+	 log_success_msg "Stopped ${DESC}: "
+	 rm -f $LOCKFILE $PIDFILE
+ else
+	 log_failure_msg "Failed to stop ${DESC}. Return value: $RETVAL."
+ fi
+}
+
+restart() {
+  stop
+  start
+}
+
+checkstatusofproc(){
+  pidofproc -p $PIDFILE $PROC_NAME > /dev/null
+}
+
+checkstatus(){
+  checkstatusofproc
+  status=$?
+
+  case "$status" in
+    $STATUS_RUNNING)
+      log_success_msg "${DESC} is running"
+      ;;
+    $STATUS_DEAD)
+      log_failure_msg "${DESC} is dead and pid file exists"
+      ;;
+    $STATUS_DEAD_AND_LOCK)
+      log_failure_msg "${DESC} is dead and lock file exists"
+      ;;
+    $STATUS_NOT_RUNNING)
+      log_failure_msg "${DESC} is not running"
+      ;;
+    *)
+      log_failure_msg "${DESC} status is unknown"
+      ;;
+  esac
+  return $status
+}
+
+condrestart(){
+  [ -e $LOCKFILE ] && restart || :
+}
+
+check_for_root() {
+  if [ $(id -ur) -ne 0 ]; then
+    echo 'Error: root user required'
+    echo
+    exit 1
+  fi
+}
+
+service() {
+  case "$1" in
+    start)
+      check_for_root
+      start
+      ;;
+    stop)
+      check_for_root
+      stop
+      ;;
+    status)
+      checkstatus
+      RETVAL=$?
+      ;;
+    restart)
+      check_for_root
+      restart
+      ;;
+    condrestart|try-restart)
+      check_for_root
+      condrestart
+      ;;
+    *)
+      echo $"Usage: $0 {start|stop|status|restart|try-restart|condrestart}"
+      exit 1
+  esac
+}
+
+service "$@"
+
+exit $RETVAL

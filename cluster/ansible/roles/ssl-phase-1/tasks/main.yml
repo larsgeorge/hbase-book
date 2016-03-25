@@ -1,0 +1,36 @@
+---
+# Purpose: Creates the TLS/SSL certificates needed
+#
+# Notes: 
+#   - Executed on every master and slave server 
+#   - This is part I of a three step process:
+#     Phase 1) Generate all certs, keystores, and CSRs for every server and process
+#     Phase 2) Sign all CSRs with the central CA root certificate
+#     Phase 3) Import all signed CSRs and put shared truststore in place
+
+- name: Create keystores (if not already present)
+  command: /{{ JAVA_HOME }}/bin/keytool -genkeypair -keystore {{ CONFIG_BASE }}/{{ item.path }}/conf/{{ inventory_hostname }}-{{ item.owner }}.jks -keyalg RSA -alias {{ inventory_hostname }} -dname "CN={{ inventory_hostname }}" -storepass "{{ SSL_STORE_PASSWORD }}" -keypass "{{ SSL_KEY_PASSWORD }}" -validity 1000
+  args:
+    creates: /{{ CONFIG_BASE }}/{{ item.path }}/conf/{{ inventory_hostname }}-{{ item.owner }}.jks
+  with_items: "{{ SSL_SERVICES }}"
+
+- name: Export CSRs (if not already present)
+  command: /{{ JAVA_HOME }}/bin/keytool -certreq -keystore {{ CONFIG_BASE }}/{{ item.path }}/conf/{{ inventory_hostname }}-{{ item.owner }}.jks -alias {{ inventory_hostname }} -storepass "{{ SSL_STORE_PASSWORD }}" -keypass "{{ SSL_KEY_PASSWORD }}" -file {{ CONFIG_BASE }}/{{ item.path }}/conf/{{ inventory_hostname }}-{{ item.owner }}.csr
+  args:
+    creates: /{{ CONFIG_BASE }}/{{ item.path }}/conf/{{ inventory_hostname }}-{{ item.owner }}.csr
+  with_items: "{{ SSL_SERVICES }}"
+
+- name: Set access rights for keystores and CSRs
+  file: 
+    path={{ CONFIG_BASE }}/{{ item[0].path }}/conf/{{ inventory_hostname }}-{{ item[0].owner }}.{{ item[1] }}
+    state=file
+    owner={{ item[0].owner }}
+    group=hadoop
+    mode=440
+  with_nested: 
+    - "{{ SSL_SERVICES }}"
+    - [ 'jks', 'csr' ]
+
+- name: Fetch CSRs to KDC server (for signing in phase 2)
+  fetch: src={{ CONFIG_BASE }}/{{ item.path }}/conf/{{ inventory_hostname }}-{{ item.owner }}.csr dest=files/tmp/certs/ flat=yes
+  with_items: "{{ SSL_SERVICES }}"

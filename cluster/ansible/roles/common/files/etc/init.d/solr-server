@@ -1,0 +1,160 @@
+#!/bin/bash
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# Starts a Solr server
+#
+# chkconfig: 345 90 10
+# description: Solr server
+#
+### BEGIN INIT INFO
+# Provides:          solr-server
+# Required-Start:    $remote_fs
+# Should-Start:
+# Required-Stop:     $remote_fs
+# Should-Stop:
+# Default-Start:     3 4 5
+# Default-Stop:      0 1 2 6
+# Short-Description: Solr server
+### END INIT INFO
+
+. /lib/lsb/init-functions
+
+. /etc/default/solr
+
+STATUS_RUNNING=0
+STATUS_DEAD=1
+STATUS_DEAD_AND_LOCK=2
+STATUS_NOT_RUNNING=3
+
+ERROR_PROGRAM_NOT_INSTALLED=5
+
+SOLR_RUN_DIR=/var/run/solr
+SOLR_HOME=/usr/lib/solr
+SOLR_USER=solr
+
+SOLR_LOCK_DIR="/var/lock/subsys/"
+LOCKFILE="${SOLR_LOCK_DIR}/solr"
+desc="Solr server daemon"
+
+EXEC_PATH=". $SOLR_HOME/bin/solrd"
+
+BIGTOP_DEFAULTS_DIR=${BIGTOP_DEFAULTS_DIR-/etc/default}
+[ -n "${BIGTOP_DEFAULTS_DIR}" -a -r ${BIGTOP_DEFAULTS_DIR}/solr ] && \
+    EXEC_PATH=". ${BIGTOP_DEFAULTS_DIR}/solr ; ${EXEC_PATH}"
+
+SOLR_PID_FILE=${SOLR_RUN_DIR}/solr.pid
+
+# These directories may be tmpfs and may or may not exist
+# depending on the OS (ex: /var/lock/subsys does not exist on debian/ubuntu)
+for dir in "$SOLR_RUN_DIR" "$SOLR_LOCK_DIR"; do
+  [ -d "${dir}" ] || install -d -m 0{{ KDC_REALM }} -o $SOLR_USER -g $SOLR_USER ${dir}
+done
+
+SOLR_SHUTDOWN_TIMEOUT=${SOLR_SHUTDOWN_TIMEOUT:-60}
+
+start() {
+  [ -x $exec ] || exit $ERROR_PROGRAM_NOT_INSTALLED
+
+  checkstatus > /dev/null 2>&1
+  status=$?
+  if [ "$status" -eq "$STATUS_RUNNING" ]; then
+    exit 0
+  fi
+
+  log_success_msg "Starting $desc: "
+  . /usr/lib/solr/tomcat-deployment.sh
+  /bin/su -s /bin/bash -c "${EXEC_PATH} start" $SOLR_USER
+  RETVAL=$?
+  [ $RETVAL -eq 0 ] && touch $LOCKFILE
+  return $RETVAL
+}
+
+stop() {
+  if [ ! -e $SOLR_PID_FILE ]; then
+    log_success_msg "$desc is not running"
+    return 0
+  fi
+
+  log_success_msg "Stopping ${desc}: "
+
+  /bin/su -s /bin/bash -c "${EXEC_PATH} stop $SOLR_SHUTDOWN_TIMEOUT -force" $SOLR_USER
+  rm -f $LOCKFILE $SOLR_PID_FILE
+  return 0
+}
+
+restart() {
+  stop
+  start
+}
+
+checkstatus(){
+  pidofproc -p $SOLR_PID_FILE java > /dev/null
+  status=$?
+
+  case "$status" in
+    $STATUS_RUNNING)
+      log_success_msg "$desc is running"
+      ;;
+    $STATUS_DEAD)
+      log_failure_msg "$desc is dead and pid file exists"
+      ;;
+    $STATUS_DEAD_AND_LOCK)
+      log_failure_msg "$desc is dead and lock file exists"
+      ;;
+    $STATUS_NOT_RUNNING)
+      log_failure_msg "$desc agent is not running"
+      ;;
+    *)
+      log_failure_msg "$desc agent status is unknown"
+      ;;
+  esac
+  return $status
+}
+
+condrestart(){
+  [ -e ${LOCKFILE} ] && restart || :
+}
+
+init(){
+  rm -rf /var/lib/solr/*
+}
+
+case "$1" in
+  start)
+    start
+    ;;
+  stop)
+    stop
+    ;;
+  status)
+    checkstatus
+    ;;
+  restart)
+    restart
+    ;;
+  condrestart|try-restart)
+    condrestart
+    ;;
+  init)
+    init
+    ;;
+  *)
+    echo $"Usage: $0 {start|stop|status|restart|try-restart|condrestart|init}"
+    exit 1
+esac
+
+exit $RETVAL

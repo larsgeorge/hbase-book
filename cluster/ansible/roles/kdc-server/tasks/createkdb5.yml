@@ -1,0 +1,11 @@
+---
+- name: Create KDB5 database
+  - command: kdb5_util destroy -f
+    ignore_errors: True
+  - yum: name=rng-tools state=present
+  - command: rngd
+  - command: kdb5_util create -s -P sslsekret
+  - command: killall rngd
+    ignore_errors: True
+  - yum: name=rng-tools state=absent
+  

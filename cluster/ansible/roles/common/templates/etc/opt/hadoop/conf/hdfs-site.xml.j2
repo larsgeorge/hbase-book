@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+<!--
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License. See accompanying LICENSE file.
+-->
+
+<!-- Put site-specific property overrides in this file. -->
+
+<configuration>
+  <property>
+    <name>dfs.datanode.data.dir</name>
+    <value>/data/hadoop/hdfs/data</value>
+  </property>
+  <property>
+    <name>dfs.namenode.name.dir</name>
+    <value>/data/hadoop/hdfs/name</value>
+  </property>
+  <property>
+    <name>dfs.namenode.safemode.min.datanodes</name>
+    <value>1</value>
+  </property>
+  <!-- Impala configuration -->
+  <property>
+    <name>OFF-dfs.datanode.hdfs-blocks-metadata.enabled</name>
+    <value>true</value>
+  </property>
+  <property>
+    <name>OFF-dfs.client.file-block-storage-locations.timeout.millis</name>
+    <value>10000</value>
+  </property>
+  <property>
+    <name>OFF-dfs.client.read.shortcircuit</name>
+    <value>true</value>
+  </property>
+  <property>
+    <name>dfs.domain.socket.path</name>
+    <value>/var/opt/hadoop/run/dn_socket</value>
+  </property>
+  {%- if KERBEROS_ENABLED -%}
+  <property>
+    <name>dfs.block.access.token.enable</name>
+    <value>true</value>
+  </property>
+  <property>
+    <name>dfs.namenode.keytab.file</name>
+    <value>/etc/opt/hadoop/conf/hdfs.keytab</value>
+  </property>
+  <property>
+    <name>dfs.namenode.kerberos.principal</name>
+    <value>hdfs/_HOST@INTERNAL.LARSGEORGE.COM</value>
+  </property>
+  <property>
+    <name>dfs.namenode.kerberos.internal.spnego.principal</name>
+    <value>HTTP/_HOST@INTERNAL.LARSGEORGE.COM</value>
+  </property>
+  <property>
+    <name>dfs.secondary.namenode.keytab.file</name> 
+    <value>/etc/opt/hadoop/conf/hdfs.keytab</value>
+  </property>
+  <property>
+    <name>dfs.secondary.namenode.kerberos.principal</name>
+    <value>hdfs/_HOST@INTERNAL.LARSGEORGE.COM</value>
+  </property>
+  <property>
+    <name>dfs.secondary.namenode.kerberos.internal.spnego.principal</name>
+    <value>HTTP/_HOST@INTERNAL.LARSGEORGE.COM</value>
+  </property>
+  <property>
+    <name>dfs.journalnode.keytab.file</name>
+    <value>/etc/opt/hadoop/conf/hdfs.keytab</value>
+  </property>
+  <property>
+    <name>dfs.journalnode.kerberos.principal</name>
+    <value>hdfs/_HOST@INTERNAL.LARSGEORGE.COM</value>
+  </property>
+  <property>
+    <name>dfs.journalnode.kerberos.internal.spnego.principal</name>
+    <value>HTTP/_HOST@INTERNAL.LARSGEORGE.COM</value>
+  </property>
+  <!-- USING SASL INSTEAD, SEE dfs.http.policy BELOW
+  <property>
+    <name>dfs.datanode.address</name>
+    <value>0.0.0.0:1004</value>
+  </property>
+  <property>
+    <name>dfs.datanode.http.address</name>
+    <value>0.0.0.0:1006</value>
+  </property> 
+  -->
+  <property>
+    <name>dfs.datanode.keytab.file</name>
+    <value>/etc/opt/hadoop/conf/hdfs.keytab</value>
+  </property>
+    <property>
+    <name>dfs.datanode.kerberos.principal</name>
+    <value>hdfs/_HOST@INTERNAL.LARSGEORGE.COM</value>
+  </property>
+  <property>
+    <name>dfs.web.authentication.kerberos.keytab</name>
+    <value>/etc/opt/hadoop/conf/hdfs.keytab</value>
+  </property>
+  <property>
+    <name>dfs.web.authentication.kerberos.principal</name>
+    <value>HTTP/_HOST@INTERNAL.LARSGEORGE.COM</value>
+  </property>
+  {%- endif -%}
+  {%- if SSL_ENABLED -%}
+  <property>
+    <name>dfs.http.policy</name>
+    <value>HTTPS_ONLY</value>
+  </property>
+  <property>
+    <name>hadoop.security.authorization</name>
+    <value>true</value>
+  </property>
+  {%- endif -%}
+</configuration>

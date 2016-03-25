@@ -1,0 +1,150 @@
+#! /bin/bash
+
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# Starts Oozie Server
+#
+# chkconfig: 2345 90 10
+# description: Oozie Server
+#
+### BEGIN INIT INFO
+# Provides:          oozie
+# Required-Start:    $network $local_fs $remote_fs
+# Required-Stop:     $remote_fs
+# Should-Start:      $named
+# Should-Stop:
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Oozie server daemon
+### END INIT INFO
+
+# Autodetect JAVA_HOME if not defined
+. /usr/lib/bigtop-utils/bigtop-detect-javahome
+# TODO: Make sure we require a bigtop-utils that has this
+. /usr/lib/bigtop-utils/bigtop-detect-classpath
+
+is_oozie_alive() {
+  if [ ! -f "$OOZIE_PID" ]; then
+    #not running
+    STATUS=3
+  elif read pid < "$OOZIE_PID" && ps -p "$pid" > /dev/null 2>&1; then
+    #running
+    STATUS=0
+  else
+    #pid file but not running
+    STATUS=1
+  fi
+}
+
+start_oozie() {
+  . /usr/lib/oozie/tomcat-deployment.sh
+  install -d -o oozie -g oozie /var/run/oozie
+  install -d -o oozie -g oozie /var/log/oozie
+  install -d -o oozie -g oozie /var/tmp/oozie
+  su --shell=/bin/bash -l oozie -c "env JAVA_HOME=$JAVA_HOME /usr/lib/oozie/bin/oozied.sh start"
+}
+
+stop_oozie() {
+  is_oozie_alive
+  if [ "${STATUS}" = "0" ]; then
+    su --shell=/bin/bash -l oozie -c "env JAVA_HOME=$JAVA_HOME /usr/lib/oozie/bin/oozied.sh stop -force"
+    if [ $? -eq 0 ]; then
+      is_oozie_alive
+      if [ "${STATUS}" = "1" ]; then
+        rm ${OOZIE_PID}
+      elif [ "${STATUS}" = "0" ]; then
+        read pid < "$OOZIE_PID" && ps -p "$pid" > /dev/null 2>&1
+        kill -9 ${pid}
+        rm ${OOZIE_PID}
+      fi
+    fi
+  elif [ "${STATUS}" = "1" ]; then
+    rm ${OOZIE_PID}
+  fi
+}
+
+. /usr/lib/oozie/bin/oozie-env.sh
+
+OOZIE_PID=${CATALINA_PID}
+
+case "$1" in
+  start)
+        is_oozie_alive
+        if [ "${STATUS}" = "0" ]; then
+          echo "already running"
+          exit 0
+        fi
+        if [ "${STATUS}" = "1" ]; then
+          rm ${OOZIE_PID}
+        fi
+        start_oozie
+        exit 0
+        ;;
+  force-reload|condrestart|try-restart)
+        is_oozie_alive
+        if [ ${STATUS} -eq 0 ] ; then
+          stop_oozie
+          start_oozie
+        fi
+        exit 0
+        ;;
+  restart|reload)
+        stop_oozie
+        start_oozie
+        exit 0
+        ;;
+  stop)
+        stop_oozie
+        exit 0
+        ;;
+  status)
+        is_oozie_alive
+        case ${STATUS} in
+          3)
+            echo "not running."
+            exit ${STATUS}
+            ;;
+          1)
+            echo "not running but $CATALINA_PID exists."
+            exit ${STATUS}
+            ;;
+          0)
+            echo "running"
+            exit ${STATUS}
+            ;;
+          *)
+            echo "unexpected error"
+            exit 5
+            ;;
+        esac 
+        ;;
+  init)
+        is_oozie_alive
+        if [ ${STATUS} -eq 0 ] ; then
+          echo "Error: Oozie is running. Stop it first."
+          exit 1
+        else
+          (cd /tmp ; su --shell=/bin/bash -l oozie -c "env JAVA_HOME=$JAVA_HOME /usr/lib/oozie/bin/ooziedb.sh create -run")
+        fi
+        exit 0
+        ;;
+  *)
+        echo "Usage: $0 start|stop|status|restart|reload|force-reload|condrestart|try-restart|init" >&2
+        exit 3
+        ;;
+esac
+exit 6
+

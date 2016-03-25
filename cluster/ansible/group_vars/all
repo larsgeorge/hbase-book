@@ -1,0 +1,29 @@
+---
+
+RESTART_ON_CHANGE: true
+
+CLUSTER_DOMAIN: internal.larsgeorge.com
+OS_USERS: [ 'hdfs', 'yarn', 'mapred', 'hbase', 'zookeeper', 'hue' ]
+
+SSL_ENABLED: true
+SSL_SERVICES: 
+  - { owner: 'hdfs', path: 'hadoop' }
+#  - { owner: 'yarn', path: 'hadoop' } # YARN shares the "hadoop" configuration with HDFS
+  - { owner: 'hbase', path: 'hbase' }
+  - { owner: 'zookeeper', path: 'zookeeper' }
+SSL_STORE_PASSWORD: sslsekret
+SSL_KEY_PASSWORD: sslsekret
+
+KERBEROS_ENABLED: true
+KRB_REALM: INTERNAL.LARSGEORGE.COM
+KRB_SERVER: master-2.internal.larsgeorge.com
+KRB_PRINCIPALS: [ 'hdfs', 'HTTP', 'yarn', 'hbase', 'zookeeper' ]
+KRB_SERVICES_WITH_HTTP: [ 'hdfs', 'yarn', 'hbase', 'zookeeper' ]
+
+# Paths
+
+JAVA_HOME: /etc/alternatives/jre
+
+PACKAGE_BASE: /opt
+CONFIG_BASE: /etc/opt
+VAR_RUN_BASE: /var/opt

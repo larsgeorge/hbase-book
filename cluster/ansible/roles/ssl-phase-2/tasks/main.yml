@@ -1,0 +1,75 @@
+---
+# Purpose: Signs the TLS/SSL certificates of each server
+#
+# Notes: 
+#   - Executed on KDC server 
+#   - This is part II of a three step process:
+#     Phase 1) Generate all certs, keystores, and CSRs for every server and process
+#     Phase 2) Sign all CSRs with the central CA root certificate
+#     Phase 3) Import all signed CSRs and put shared truststore in place
+
+- name: Create directory in root account (if not already present)
+  file: 
+    path=/root/certs
+    state=directory
+    owner=root
+    group=root
+    mode=750
+
+- name: Create private key to sign CSRs with (if not already created)
+  command: openssl req -new -x509 -nodes -newkey rsa:2048 -keyout rootCA.key -out rootCA.pem -subj "/C=DE/ST=/L=Wedel/O=OpenCore/OU=Internal/CN={{ CLUSTER_DOMAIN }}" -days 1000
+  args:
+    chdir: /root/certs/
+    creates: /root/certs/rootCA.key
+
+- name: Set access rights for CA root certificate files
+  file: 
+    path=/root/certs/rootCA.{{ item.ext }}
+    state=file
+    owner=root
+    group=root
+    mode={{ item.mode }}
+  with_items: 
+    - { ext: 'key', mode: 600 }
+    - { ext: 'pem', mode: 666 }
+
+- name: Create shared truststore (if not already created)
+  command: /{{ JAVA_HOME }}/bin/keytool -importcert -keystore truststore.jks -alias CARoot -storepass "{{ SSL_STORE_PASSWORD }}" -keypass "{{ SSL_KEY_PASSWORD }}" -file rootCA.pem -noprompt
+  args:
+    chdir: /root/certs/
+    creates: /root/certs/truststore.jks
+
+- name: Set access rights for truststore
+  file: 
+    path=/root/certs/truststore.jks
+    state=file
+    owner=root
+    group=root
+    mode=600
+
+- name: Copy CSRs to be signed (if not already copied)
+  copy: src=files/tmp/certs/{{ item[0] }}-{{ item[1].owner }}.csr dest=/root/certs/ 
+  with_nested:
+    - groups.cluster
+    - "{{ SSL_SERVICES }}"
+      
+- name: Sign CSRs
+  command: openssl x509 -req -CA rootCA.pem -CAkey rootCA.key -in {{ item[0] }}-{{ item[1].owner }}.csr -out {{ item[0] }}-{{ item[1].owner }}.crt -days 1000 -CAcreateserial -passin pass:{{ SSL_KEY_PASSWORD }}
+  args:
+    chdir: /root/certs/
+    creates: /{{ item[0] }}-{{ item[1].owner }}.crt
+  with_nested:
+    - groups.cluster
+    - "{{ SSL_SERVICES }}"
+    
+- name: Fetch signed certs (for importing in phase 3)
+  fetch: src=/root/certs/{{ item[0] }}-{{ item[1].owner }}.crt dest=files/tmp/certs/ flat=yes
+  with_nested:
+    - groups.cluster
+    - "{{ SSL_SERVICES }}"
+
+- name: Fetch public key of CA root certificate (for importing in phase 3)
+  fetch: src=/root/certs/rootCA.pem dest=files/tmp/certs/ flat=yes
+
+- name: Fetch signed truststore (for copying in phase 3)
+  fetch: src=/root/certs/truststore.jks dest=files/tmp/certs/ flat=yes

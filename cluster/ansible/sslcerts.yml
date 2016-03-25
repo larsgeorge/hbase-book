@@ -1,0 +1,27 @@
+---
+# Special playbook to install only SSL related details.
+
+- name: SSL Phase 1 (Prepare Servers)
+  hosts: all
+  remote_user: larsgeorge
+  become: yes
+
+  roles:
+    - { role: ssl-phase-1, when: SSL_ENABLED == true }
+
+- name: SSL Phase 2 (Sign CSRs)
+  hosts: kdc-server
+  remote_user: larsgeorge
+  become: yes
+
+  roles:
+    - { role: ssl-phase-2, when: SSL_ENABLED == true }
+
+- name: SSL Phase 3 (Install CSRs and Truststores)
+  hosts: all
+  remote_user: larsgeorge
+  become: yes
+
+  roles:
+    - { role: ssl-phase-3, when: SSL_ENABLED == true }
+

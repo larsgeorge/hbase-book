@@ -1,0 +1,44 @@
+---
+# Main playbook to install all components needed.
+
+- name: Apply common configuration to all nodes
+  hosts: all
+  remote_user: larsgeorge
+  become: yes
+
+  roles:
+    - common
+    - { role: krb-client, when: KERBEROS_ENABLED == true }
+
+- name: Set up Kerberos KDC
+  hosts: kdc-server
+  remote_user: larsgeorge
+  become: yes
+
+  roles:
+    - { role: kdc-server, when: KERBEROS_ENABLED == true }
+
+- name: SSL Phase 1 (Prepare Servers)
+  hosts: all
+  remote_user: larsgeorge
+  become: yes
+
+  roles:
+    - { role: ssl-phase-1, when: SSL_ENABLED == true }
+
+- name: SSL Phase 2 (Sign CSRs)
+  hosts: kdc-server
+  remote_user: larsgeorge
+  become: yes
+
+  roles:
+    - { role: ssl-phase-2, when: SSL_ENABLED == true }
+
+- name: SSL Phase 3 (Install CSRs and Truststores)
+  hosts: all
+  remote_user: larsgeorge
+  become: yes
+
+  roles:
+    - { role: ssl-phase-3, when: SSL_ENABLED == true }
+

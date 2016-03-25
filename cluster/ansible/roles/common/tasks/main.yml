@@ -1,0 +1,144 @@
+---
+# Purpose: Common Hadoop node related settings
+#
+# Notes: 
+#   - Executed on all servers in the cluster
+#   - Installs also the Hadoop related tarballs etc.
+
+# Set os prerequisites
+
+- name: Disable SE Linux
+  selinux: state=disabled
+
+- name: Stop IP Tables
+  service: name={{ item }} state=stopped enabled=no
+  with_items:
+    - iptables
+    - ip6tables
+
+- name: Set file limits 
+  lineinfile: dest=/etc/security/limits.conf line="{{ item }}" state=present
+  with_items:
+    - '* soft nofile 65535'
+    - '* hard nofile 65535'
+    - '* soft memlock unlimited'
+    - '* hard memlock unlimited'
+
+- name: Adjust values in sysctl.conf
+  sysctl: name={{ item.owner }} value={{ item.value }} state={{ item.state }}
+  with_items:
+    - { name: 'vm.swappiness', value: '1', state: 'present' }
+    - { name: 'net.ipv6.conf.all.disable_ipv6', value: '1', state: 'present' }
+    - { name: 'net.ipv6.conf.default.disable_ipv6', value: '1', state: 'present' }
+
+- name: Disable transparent huge page defragmentation
+  command: echo never > /sys/kernel/mm/transparent_hugepage/defrag
+
+# Add shared environment details and install packages
+  
+- name: Add variables to /etc/environment
+  lineinfile: dest=/etc/environment line="{{ item }}" state=present
+  with_items:
+    - 'JAVA_HOME={{ JAVA_HOME }}'
+    - 'JAVA_LIBRARY_PATH=/usr/local/lib'
+    - 'ZOOKEEPER_HOME={{ PACKAGE_BASE }}/zookeeper'
+    - 'ZOOCFGDIR={{ CONFIG_BASE }}/zookeeper/conf'
+    - 'HADOOP_HOME={{ PACKAGE_BASE }}/hadoop'
+    - 'HADOOP_CONF_DIR={{ CONFIG_BASE }}/hadoop/conf'
+    - 'HBASE_HOME={{ PACKAGE_BASE }}/hbase'
+    - 'HBASE_CONF_DIR={{ CONFIG_BASE }}/hbase/conf'
+
+- name: Set PATH in bash profile
+  lineinfile: dest=.bash_profile line="{{ item }}" state=present
+  with_items:
+    - 'export PATH=$PATH:$HOME/bin:$JAVA_HOME/bin:$ZOOKEEPER_HOME/bin:$HADOOP_HOME/bin:$HADOOP_HOME/sbin:$HBASE_HOME/bin'
+    
+- name: Install basic OS packages
+  yum: name={{ item }} state=present # update_cache=yes
+  with_items:
+    - epel-release
+    - snappy
+    - snappy-devel
+    - ntp
+    - ntpdate
+    - java-1.7.0-openjdk
+    - java-1.7.0-openjdk-devel
+    - libselinux-python
+    - unzip
+    - tar
+
+- name: Start services
+  service: name={{ item }} state=started enabled=yes
+  with_items:
+    - ntpd
+
+# Install Hadoop and other packages from tarballs
+
+- name: Create Hadoop system user accounts
+  group: name=hadoop state=present
+- user: name={{ item }} group=hadoop createhome=no shell=/bin/false state=present
+  with_items: 
+    - "{{ OS_USERS }}"
+
+- name: Create Hadoop related directories
+  file: path={{ item.path }} owner={{ item.owner }} group=hadoop mode={{ item.mode }} recurse=yes state=directory
+  with_items:
+    - { path: '/data/hadoop/hdfs', owner: 'hdfs', mode: 700 }
+    - { path: '{{ VAR_RUN_BASE }}/hadoop', owner: 'hdfs', mode: 755 }
+    - { path: '{{ VAR_RUN_BASE }}/hbase', owner: 'hbase', mode: 755 }
+    - { path: '{{ VAR_RUN_BASE }}/zookeeper', owner: 'zookeeper', mode: 755 }
+    - { path: '{{ CONFIG_BASE }}/hadoop', owner: 'hdfs', mode: 775 }
+    - { path: '{{ CONFIG_BASE }}/hbase', owner: 'hbase', mode: 775 }
+    - { path: '{{ CONFIG_BASE }}/zookeeper', owner: 'zookeeper', mode: 775 }
+
+# TODO:
+# - name: Copy and untar Hadoop
+# - name: Copy and untar HBase
+# - name: Copy and untar ZooKeeper
+# - name: Copy and untar Hue
+
+- name: Put Hadoop configuration in place
+  template: src={{ item.src }} dest={{ item.dest }} owner=hdfs group=hadoop mode=0644
+  with_items:
+    - { src: "slaves.j2", dest: "{{ CONFIG_BASE }}/hadoop/conf/slaves" }
+    - { src: "etc/opt/hadoop/conf/hadoop-env.sh.j2", dest: "{{ CONFIG_BASE }}/hadoop/conf/hadoop-env.sh" }
+    - { src: "etc/opt/hadoop/conf/yarn-env.sh.j2", dest: "{{ CONFIG_BASE }}/hadoop/conf/yarn-env.sh" }
+    - { src: "etc/opt/hadoop/conf/mapred-env.sh.j2", dest: "{{ CONFIG_BASE }}/hadoop/conf/mapred-env.sh" }
+    - { src: "etc/opt/hadoop/conf/core-site.xml.j2", dest: "{{ CONFIG_BASE }}/hadoop/conf/core-site.xml" }
+    - { src: "etc/opt/hadoop/conf/hdfs-site.xml.j2", dest: "{{ CONFIG_BASE }}/hadoop/conf/hdfs-site.xml" }
+    - { src: "etc/opt/hadoop/conf/yarn-site.xml.j2", dest: "{{ CONFIG_BASE }}/hadoop/conf/yarn-site.xml" }
+    - { src: "etc/opt/hadoop/conf/mapred-site.xml.j2", dest: "{{ CONFIG_BASE }}/hadoop/conf/mapred-site.xml" }
+    - { src: "etc/opt/hadoop/conf/ssl-client.xml.j2", dest: "{{ CONFIG_BASE }}/hadoop/conf/ssl-client.xml" }
+    - { src: "etc/opt/hadoop/conf/ssl-server.xml.j2", dest: "{{ CONFIG_BASE }}/hadoop/conf/ssl-server.xml" }
+    - { src: "etc/opt/hadoop/conf/container-executor.cfg.j2", dest: "{{ CONFIG_BASE }}/hadoop/conf/container-executor.cfg" }
+#  notify:
+#    - restart hadoop
+
+# Also: hadoop-policy.xml, httpfs-env.sh, httpfs-site.xml, log4j.properties
+
+- name: Put HBase configuration in place
+  template: src={{ item.src }} dest={{ item.dest }} owner=hbase group=hadoop mode=0644
+  with_items:
+    - { src: "etc/opt/hbase/conf/regionservers.j2", dest: "{{ CONFIG_BASE }}/hbase/conf/regionservers" }
+    - { src: "etc/opt/hbase/conf/backup-masters.j2", dest: "{{ CONFIG_BASE }}/hbase/conf/backup-masters" }
+    - { src: "etc/opt/hbase/conf/hbase-env.sh.j2", dest: "{{ CONFIG_BASE }}/hbase/conf/hbase-env.sh" }
+    - { src: "etc/opt/hbase/conf/hbase-site.xml.j2", dest: "{{ CONFIG_BASE }}/hbase/conf/hbase-site.xml" }
+#  notify:
+#    - restart hbase
+  
+# Also: hbase-policy.xml, log4j.properties, hadoop-metrics2-hbase.properties
+
+- name: Put Zookeeper configuration in place
+  template: src={{ item.src }} dest={{ item.dest }} owner=zookeeper group=hadoop mode=0644
+  with_items:
+    - { src: "etc/opt/zookeeper/conf/zoo.cfg.j2", dest: "{{ CONFIG_BASE }}/zookeeper/conf/zoo.cfg" }
+#  notify:
+#    - restart hbase
+  
+# Also: log4j.properties
+# Zookeeper: http://www.cloudera.com/documentation/enterprise/latest/topics/cdh_sg_zookeeper_security.html
+
+- name: Copy init.d scripts
+  copy: src=etc/init.d/ dest=/etc/init.d/ owner=root group=root mode=755 backup=yes
+    
+

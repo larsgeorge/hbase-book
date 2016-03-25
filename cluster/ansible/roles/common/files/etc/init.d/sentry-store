@@ -1,0 +1,188 @@
+#!/bin/bash
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# Starts a Sentry DB Store Service
+#
+# chkconfig: 345 85 15
+# description: Sentry DB Store Service
+#
+### BEGIN INIT INFO
+# Provides:          sentry-store
+# Short-Description: Sentry DB Store Service
+# Default-Start:     3 4 5
+# Default-Stop:      0 1 2 6
+# Required-Start:    $syslog $remote_fs
+# Required-Stop:     $syslog $remote_fs
+# Should-Start:
+# Should-Stop:
+### END INIT INFO
+
+. /lib/lsb/init-functions
+BIGTOP_DEFAULTS_DIR=${BIGTOP_DEFAULTS_DIR-/etc/default}
+[ -n "${BIGTOP_DEFAULTS_DIR}" -a -r ${BIGTOP_DEFAULTS_DIR}/hadoop ] && . ${BIGTOP_DEFAULTS_DIR}/hadoop
+[ -n "${BIGTOP_DEFAULTS_DIR}" -a -r ${BIGTOP_DEFAULTS_DIR}/sentry-store ] && . ${BIGTOP_DEFAULTS_DIR}/sentry-store
+
+# Autodetect JAVA_HOME if not defined
+. /usr/lib/bigtop-utils/bigtop-detect-javahome
+
+RETVAL_SUCCESS=0
+
+STATUS_RUNNING=0
+STATUS_DEAD=1
+STATUS_DEAD_AND_LOCK=2
+STATUS_NOT_RUNNING=3
+STATUS_OTHER_ERROR=102
+
+
+ERROR_PROGRAM_NOT_INSTALLED=5
+ERROR_PROGRAM_NOT_CONFIGURED=6
+
+
+RETVAL=0
+SLEEP_TIME=5
+PROC_NAME="java"
+
+DAEMON="sentry-store"
+DESC="Sentry DB Store Service"
+EXEC_PATH="/usr/bin/sentry"
+EXEC_DIR=""
+SVC_USER="sentry"
+DAEMON_FLAGS="--command service --conffile /etc/sentry/conf/sentry-site.xml"
+CONF_DIR="/etc/sentry/conf"
+PIDFILE="/var/run/sentry/sentry-store.pid"
+LOCKDIR="/var/lock/subsys"
+LOCKFILE="$LOCKDIR/sentry-store"
+WORKING_DIR="/var/lib/sentry"
+
+install -d -m 0{{ KDC_REALM }} -o sentry -g sentry /var/run/sentry 1>/dev/null 2>&1 || :
+[ -d "$LOCKDIR" ] || install -d -m 0{{ KDC_REALM }} $LOCKDIR 1>/dev/null 2>&1 || :
+start() {
+    [ -x $EXEC_PATH ] || exit $ERROR_PROGRAM_NOT_INSTALLED
+
+    checkstatusofproc
+    status=$?
+    if [ "$status" -eq "$STATUS_RUNNING" ]; then
+        log_success_msg "${DESC} is running"
+        exit 0
+    fi
+
+    mkdir -p `dirname ${PIDFILE}`
+    chown ${SVC_USER}:sentry `dirname ${PIDFILE}`
+
+    su -s /bin/bash $SVC_USER  -c "/bin/bash -c 'echo \$\$ >${PIDFILE} && cd ${WORKING_DIR} && exec ${EXEC_PATH} ${DAEMON_FLAGS} >> /var/log/sentry/${DAEMON}.out 2>&1 </dev/null' &"
+
+    checkstatusofproc
+    RETVAL=$?
+
+    if [ $RETVAL -eq $STATUS_RUNNING ]; then
+      touch $LOCKFILE
+      log_success_msg "Started ${DESC} (${DAEMON}): "
+    else
+      log_failure_msg "Failed to start ${DESC} (${DAEMON}). Return value: $RETVAL"
+    fi
+
+    return $RETVAL
+}
+stop() {
+    killproc -p $PIDFILE java
+    RETVAL=$?
+
+    if [ $RETVAL -eq $RETVAL_SUCCESS ]; then
+      log_success_msg "Stopped ${DESC} (${DAEMON}): "
+      rm -f $LOCKFILE $PIDFILE
+    else
+      log_failure_msg "Failure to stop ${DESC} (${DAEMON}). Return value: $RETVAL"
+    fi
+
+    return $RETVAL
+}
+restart() {
+  stop
+  start
+}
+
+checkstatusofproc(){
+  pidofproc -p $PIDFILE $PROC_NAME > /dev/null
+}
+
+checkstatus(){
+  checkstatusofproc
+  status=$?
+
+  case "$status" in
+    $STATUS_RUNNING)
+      log_success_msg "${DESC} is running"
+      ;;
+    $STATUS_DEAD)
+      log_failure_msg "${DESC} is dead and pid file exists"
+      ;;
+    $STATUS_DEAD_AND_LOCK)
+      log_failure_msg "${DESC} is dead and lock file exists"
+      ;;
+    $STATUS_NOT_RUNNING)
+      log_failure_msg "${DESC} is not running"
+      ;;
+    *)
+      log_failure_msg "${DESC} status is unknown"
+      ;;
+  esac
+  return $status
+}
+
+condrestart(){
+  [ -e $LOCKFILE ] && restart || :
+}
+
+check_for_root() {
+  if [ $(id -ur) -ne 0 ]; then
+    echo 'Error: root user required'
+    echo
+    exit 1
+  fi
+}
+
+service() {
+  case "$1" in
+    start)
+      check_for_root
+      start
+      ;;
+    stop)
+      check_for_root
+      stop
+      ;;
+    status)
+      checkstatus
+      RETVAL=$?
+      ;;
+    restart)
+      check_for_root
+      restart
+      ;;
+    condrestart|try-restart)
+      check_for_root
+      condrestart
+      ;;
+    *)
+      echo $"Usage: $0 {start|stop|status|restart|try-restart|condrestart}"
+      exit 1
+  esac
+}
+
+service "$@"
+
+exit $RETVAL

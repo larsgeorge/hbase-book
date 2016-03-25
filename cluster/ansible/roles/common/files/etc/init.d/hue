@@ -1,0 +1,139 @@
+#!/bin/bash
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+#       /etc/rc.d/init.d/hue
+#
+#       Hue web server
+#
+# chkconfig: 2345 90 10
+# description: Hue web server
+# pidfile: /usr/lib/hue/pids/supervisor.pid
+
+. /etc/init.d/functions
+
+LOCKFILE=/var/lock/subsys/hue
+DAEMON=/usr/lib/hue/build/env/bin/supervisor # Introduce the server's location here
+LOGDIR=/var/log/hue  # Log directory to use
+PIDFILE=/var/run/hue/supervisor.pid
+USER=hue
+EXEC=/usr/lib/hue/build/env/bin/python
+DAEMON_OPTS="-p $PIDFILE -l $LOGDIR -d"
+HUE_SHUTDOWN_TIMEOUT=15
+
+hue_start() {
+        export PYTHON_EGG_CACHE='/tmp/.hue-python-eggs'
+        RE_REGISTER=/usr/lib/hue/.re_register
+        if [ -e $RE_REGISTER ]; then
+            # Do app_reg on upgraded apps. This is a workaround for DISTRO-11.
+            # We can probably take it out after another release.
+            DO="/sbin/runuser -s /bin/bash $USER -c"
+            APP_REG="/usr/lib/hue/tools/app_reg/app_reg.py"
+            # Upgraded apps write their paths in the re_rgister file.
+            RE_REG_LOG=/var/log/hue/hue_re_register.log
+
+            # Make cwd somewhere that $USER can chdir into
+            pushd / > /dev/null
+            $DO "DESKTOP_LOG_DIR=$LOGDIR $EXEC $APP_REG --install $(cat $RE_REGISTER | xargs echo -n)  >> $RE_REG_LOG 2>&1"
+            ok=$?
+            popd > /dev/null
+            if [ $ok -eq 0 ] ; then
+                rm -f $RE_REGISTER
+            else
+                echo "Failed to register some apps: Details in $RE_REG_LOG"
+            fi
+        fi
+
+        echo -n "Starting hue: "
+        for dir in $(dirname $PIDFILE) $LOGDIR ${PYTHON_EGG_CACHE}
+        do
+            mkdir -p $dir
+            chown -R $USER $dir
+        done
+
+        # Check if already running
+        if [ -e $PIDFILE ] && checkpid $(cat $PIDFILE) ; then
+            echo "already running"
+            return 0
+        fi
+        # the supervisor itself will setuid down to $USER
+        su -s /bin/bash $USER -c "$DAEMON $DAEMON_OPTS"
+        ret=$?
+        base=$(basename $0)
+        if [ $ret -eq 0 ]; then
+            sleep 5
+            test -e $PIDFILE && checkpid $(cat $PIDFILE)
+            ret=$?
+        fi
+        if [ $ret -eq 0 ]; then
+            touch $LOCKFILE
+            success $"$base startup"
+        else
+            failure $"$base startup"
+        fi
+        echo
+        return $ret
+}
+
+hue_stop() {
+        if [ ! -e $PIDFILE ]; then
+            success "Hue is not running"
+            return 0
+        fi
+
+        echo -n "Shutting down hue: "
+
+        HUE_PID=`cat $PIDFILE 2>/dev/null`
+        if [ -n "$HUE_PID" ]; then
+          kill -TERM ${HUE_PID} &>/dev/null
+          for i in `seq 1 ${HUE_SHUTDOWN_TIMEOUT}` ; do
+            kill -0 ${HUE_PID} &>/dev/null || break
+            sleep 1
+          done
+          kill -KILL ${HUE_PID} &>/dev/null
+        fi
+        echo
+        rm -f $LOCKFILE $PIDFILE
+        return 0
+}
+
+hue_restart() {
+  hue_stop
+  hue_start
+}
+
+case "$1" in
+    start)
+        hue_start
+        ;;
+    stop)
+        hue_stop
+        ;;
+    status)
+        status -p $PIDFILE supervisor
+        ;;
+    restart|reload)
+        hue_restart
+        ;;
+    condrestart)
+        [ -f $LOCKFILE ] && restart || :
+        ;;
+    *)
+        echo "Usage: hue {start|stop|status|reload|restart|condrestart"
+        exit 1
+        ;;
+esac
+exit $?
