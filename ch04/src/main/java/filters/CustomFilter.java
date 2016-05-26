@@ -52,7 +52,7 @@ public class CustomFilter extends FilterBase {
   public byte [] toByteArray() {
     FilterProtos.CustomFilter.Builder builder =
       FilterProtos.CustomFilter.newBuilder();
-    if (value != null) builder.setValue(ByteStringer.wrap(value)); // co CustomFilter-6-Write Writes the given value out so it can be send to the servers.
+    if (value != null) builder.setValue(ByteStringer.wrap(value)); // co CustomFilter-6-Write Writes the given value out so it can be sent to the servers.
     return builder.build().toByteArray();
   }
 
