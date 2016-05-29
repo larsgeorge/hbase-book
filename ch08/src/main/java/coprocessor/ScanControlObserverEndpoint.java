@@ -2,13 +2,14 @@ package coprocessor;
 
 import java.io.IOException;
 import java.util.BitSet;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.NavigableSet;
 
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.RpcCallback;
+import com.google.protobuf.RpcController;
+import com.google.protobuf.Service;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -37,15 +38,12 @@ import org.apache.hadoop.hbase.io.Reference;
 import org.apache.hadoop.hbase.io.hfile.CacheConfig;
 import org.apache.hadoop.hbase.protobuf.ResponseConverter;
 
-import com.google.protobuf.RpcController;
-import com.google.protobuf.Service;
-
-import coprocessor.generated.ScanControlProtos;
 import org.apache.hadoop.hbase.regionserver.DeleteTracker;
 import org.apache.hadoop.hbase.regionserver.HRegion;
 import org.apache.hadoop.hbase.regionserver.InternalScanner;
 import org.apache.hadoop.hbase.regionserver.KeyValueScanner;
 import org.apache.hadoop.hbase.regionserver.MiniBatchOperationInProgress;
+import org.apache.hadoop.hbase.regionserver.Region;
 import org.apache.hadoop.hbase.regionserver.RegionScanner;
 import org.apache.hadoop.hbase.regionserver.ScanType;
 import org.apache.hadoop.hbase.regionserver.Store;
@@ -55,6 +53,8 @@ import org.apache.hadoop.hbase.regionserver.wal.HLogKey;
 import org.apache.hadoop.hbase.regionserver.wal.WALEdit;
 import org.apache.hadoop.hbase.util.Pair;
 import org.apache.hadoop.hbase.wal.WALKey;
+
+import coprocessor.generated.ScanControlProtos;
 
 // cc ScanControlObserverEndpoint Observer and endpoint for scan operations
 // vv ScanControlObserverEndpoint
@@ -267,7 +267,7 @@ public class ScanControlObserverEndpoint
 
   @Override
   public void postSplit(ObserverContext<RegionCoprocessorEnvironment> c,
-    HRegion l, HRegion r) throws IOException {
+    Region l, Region r) throws IOException {
 
   }
 

@@ -19,39 +19,28 @@
     <url>http://github.com/larsgeorge/hbase-book</url>
   </scm>
 
-  <repositories>
-    <repository>
-      <id>apache-releases</id>
-      <url>https://repository.apache.org/content/repositories/releases/</url>
-      <layout>default</layout>
-      <releases>
-        <enabled>true</enabled>
-        <updatePolicy>always</updatePolicy>
-        <checksumPolicy>warn</checksumPolicy>
-      </releases>
-      <snapshots>
-        <enabled>false</enabled>
-        <updatePolicy>never</updatePolicy>
-        <checksumPolicy>fail</checksumPolicy>
-      </snapshots>
-    </repository>
-    <repository>
-      <id>cloudera-releases</id>
-      <url>https://repository.cloudera.com/artifactory/cloudera-repos/</url>
-      <releases>
-        <enabled>true</enabled>
-      </releases>
-      <snapshots>
-        <enabled>true</enabled>
-      </snapshots>
-    </repository>
-  </repositories>
+  <!--<repositories>-->
+    <!--<repository>-->
+      <!--<id>cloudera-releases</id>-->
+      <!--<url>https://repository.cloudera.com/artifactory/cloudera-repos/</url>-->
+      <!--<releases>-->
+        <!--<enabled>true</enabled>-->
+      <!--</releases>-->
+      <!--<snapshots>-->
+        <!--<enabled>true</enabled>-->
+      <!--</snapshots>-->
+    <!--</repository>-->
+  <!--</repositories>-->
 
   <properties>
     <jdkLevel>1.7</jdkLevel>
     <requiredMavenVersion>[2.1,)</requiredMavenVersion>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.build.outputEncoding>UTF-8</project.build.outputEncoding>
+
+    <hadoop.version>2.7.2</hadoop.version>
+    <zookeeper.version>3.4.8</zookeeper.version>
+    <hbase.version>1.2.1</hbase.version>
   </properties>
 
   <build>
@@ -90,7 +79,7 @@
     <dependency>
       <groupId>org.apache.hadoop</groupId>
       <artifactId>hadoop-client</artifactId>
-      <version>2.6.0</version>
+      <version>${hadoop.version}</version>
       <exclusions>
         <exclusion>
           <groupId>commons-cli</groupId>
@@ -249,7 +238,7 @@
     <dependency>
       <groupId>org.apache.hadoop</groupId>
       <artifactId>hadoop-common</artifactId>
-      <version>2.6.0</version>
+      <version>${hadoop.version}</version>
       <exclusions>
         <exclusion>
           <artifactId>hadoop-annotations</artifactId>
@@ -424,7 +413,7 @@
     <dependency>
       <groupId>org.apache.hadoop</groupId>
       <artifactId>hadoop-auth</artifactId>
-      <version>2.6.0</version>
+      <version>${hadoop.version}</version>
       <exclusions>
         <exclusion>
           <artifactId>commons-codec</artifactId>
@@ -455,12 +444,12 @@
     <dependency>
       <groupId>org.apache.hadoop</groupId>
       <artifactId>hadoop-annotations</artifactId>
-      <version>2.6.0</version>
+      <version>${hadoop.version}</version>
     </dependency>
     <dependency>
       <groupId>org.apache.zookeeper</groupId>
       <artifactId>zookeeper</artifactId>
-      <version>3.4.6</version>
+      <version>${zookeeper.version}</version>
       <exclusions>
         <exclusion>
           <groupId>log4j</groupId>
@@ -487,7 +476,7 @@
     <dependency>
       <groupId>org.apache.hbase</groupId>
       <artifactId>hbase-client</artifactId>
-      <version>1.0.0</version>
+      <version>${hbase.version}</version>
       <exclusions>
         <exclusion>
           <groupId>org.apache.avro</groupId>
@@ -690,7 +679,7 @@
     <dependency>
       <groupId>org.apache.hbase</groupId>
       <artifactId>hbase-common</artifactId>
-      <version>1.0.0</version>
+      <version>${hbase.version}</version>
       <exclusions>
         <exclusion>
           <artifactId>hbase-annotations</artifactId>
@@ -753,7 +742,7 @@
     <dependency>
       <groupId>org.apache.hbase</groupId>
       <artifactId>hbase-protocol</artifactId>
-      <version>1.0.0</version>
+      <version>${hbase.version}</version>
       <exclusions>
         <exclusion>
           <artifactId>findbugs-annotations</artifactId>
@@ -780,7 +769,7 @@
     <dependency>
       <groupId>org.apache.hbase</groupId>
       <artifactId>hbase-server</artifactId>
-      <version>1.0.0</version>
+      <version>${hbase.version}</version>
       <exclusions>
         <exclusion>
           <artifactId>hbase-protocol</artifactId>
@@ -939,7 +928,7 @@
     <dependency>
       <groupId>org.apache.hbase</groupId>
       <artifactId>hbase-annotations</artifactId>
-      <version>1.0.0</version>
+      <version>${hbase.version}</version>
       <exclusions>
         <exclusion>
           <artifactId>findbugs-annotations</artifactId>

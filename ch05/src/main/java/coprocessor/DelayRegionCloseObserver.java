@@ -32,8 +32,8 @@ public class DelayRegionCloseObserver extends BaseRegionObserver {
     try {
       long delay = rnd.nextInt(3);
       LOG.info("@@@ Delaying region " +
-        ctx.getEnvironment().getRegion().getRegionNameAsString() +
-        " for " + delay + " seconds...");
+        ctx.getEnvironment().getRegion().getRegionInfo().
+          getRegionNameAsString() + " for " + delay + " seconds...");
       Thread.sleep(delay * 1000);
     } catch (InterruptedException ie) {
       LOG.error(ie);
