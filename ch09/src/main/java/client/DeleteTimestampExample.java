@@ -31,7 +31,8 @@ public class DeleteTimestampExample {
 
     Connection connection = ConnectionFactory.createConnection(conf);
 
-    Table table = connection.getTable(TableName.valueOf("testtable"));
+    TableName tableName = TableName.valueOf("testtable");
+    Table table = connection.getTable(tableName);
     Admin admin = connection.getAdmin();
 
     // vv DeleteTimestampExample
@@ -43,9 +44,9 @@ public class DeleteTimestampExample {
     // ^^ DeleteTimestampExample
     System.out.println("After put calls...");
     helper.dump("testtable", new String[] { "row1" }, null, null);
-//    admin.flush("testtable");
+//    admin.flush(tableName);
 //    Thread.sleep(3000);
-//    admin.majorCompact("testtable");
+//    admin.majorCompact(tableName);
 //    Thread.sleep(3000);
     // vv DeleteTimestampExample
 
