@@ -27,7 +27,7 @@ public class DeleteTimestampExample {
 
     HBaseHelper helper = HBaseHelper.getHelper(conf);
     helper.dropTable("testtable");
-    helper.createTable("testtable", "colfam1");
+    helper.createTable("testtable", 3, "colfam1");
 
     Connection connection = ConnectionFactory.createConnection(conf);
 
