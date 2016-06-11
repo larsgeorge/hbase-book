@@ -1,0 +1,26 @@
+---
+# Purpose: Monitoring frontend related settings
+#
+# Notes: 
+#   - Executed on a specific server in the cluster
+#   - Installs web frontend that displays the system metrics
+
+- name: Install monitoring frontend packages
+  yum: name={{ item }} state=present # update_cache=yes
+  with_items:
+    - ganglia-web # installs httpd etc. as dependencies
+
+- name: Allow access to frontend from host network
+  template: src={{ item.src }} dest={{ item.dest }} owner=root group=root mode=0644
+  with_items:
+    - { src: "etc/httpd/conf.d/ganglia.conf.j2", dest: "/etc/httpd/conf.d/ganglia.conf" }
+  notify:
+    - Restart monitoring frontend daemons
+
+- name: Start monitoring frontend services
+  service: name={{ item }} state=started enabled=yes
+  with_items:
+    - httpd
+
+    
+

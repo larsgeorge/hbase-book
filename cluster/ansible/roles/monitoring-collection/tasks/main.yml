@@ -1,0 +1,38 @@
+---
+# Purpose: Monitoring collection related settings
+#
+# Notes: 
+#   - Executed (usually) on all servers in the cluster
+#   - Installs agents/daemons that collect the system metrics
+
+- name: Install monitoring collection packages
+  yum: name={{ item }} state=present # update_cache=yes
+  with_items:
+    - ganglia-gmond
+
+# cluster {
+#   name = "unspecified"
+#   owner = "unspecified"
+#   latlong = "unspecified"
+#   url = "unspecified"
+# }
+#
+# host {
+#   location = "unspecified"
+# }
+
+- name: Configure monitoring environment
+  template: src={{ item.src }} dest={{ item.dest }} owner=root group=root mode=0644
+  with_items:
+    - { src: "etc/ganglia/gmond.conf.j2", dest: "/etc/ganglia/gmond.conf" }
+  notify:
+    - Restart monitoring collection daemons
+
+#- name: Modify monitoring collection daemon configuration
+#  lineinfile: dest="/etc/ganglia/gmond.conf" regexp='  name = "unspecified"' line='  name = "HBase Cluster"'
+#  lineinfile: dest="/etc/ganglia/gmond.conf" regexp='  owner = "unspecified"' line='  owner = "HBase Book Project"'
+
+- name: Start monitoring collection services
+  service: name={{ item }} state=started enabled=yes
+  with_items:
+    - gmond

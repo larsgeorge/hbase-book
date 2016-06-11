@@ -1,0 +1,74 @@
+---
+# Purpose: Common node related settings
+#
+# Notes: 
+#   - Executed on all servers in the cluster
+
+# Set os prerequisites
+
+- name: Disable SE Linux
+  selinux: state=disabled
+
+- name: Stop IP Tables
+  service: name={{ item }} state=stopped enabled=no
+  with_items:
+    - iptables
+    - ip6tables
+
+- name: Set file limits 
+  lineinfile: dest=/etc/security/limits.conf line="{{ item }}" state=present
+  with_items:
+    - '* soft nofile 65535'
+    - '* hard nofile 65535'
+    - '* soft memlock unlimited'
+    - '* hard memlock unlimited'
+
+- name: Adjust values in sysctl.conf
+  sysctl: name={{ item.name }} value={{ item.value }} state={{ item.state }}
+  with_items:
+    - { name: 'vm.swappiness', value: '1', state: 'present' }
+    - { name: 'net.ipv6.conf.all.disable_ipv6', value: '1', state: 'present' }
+    - { name: 'net.ipv6.conf.default.disable_ipv6', value: '1', state: 'present' }
+
+- name: Disable transparent huge page defragmentation
+  command: echo never > /sys/kernel/mm/transparent_hugepage/defrag
+
+# Add shared environment details and install packages
+  
+- name: Add variables to /etc/environment
+  lineinfile: dest=/etc/environment line="{{ item }}" state=present
+  with_items:
+    - 'JAVA_HOME={{ JAVA_HOME }}'
+    - 'JAVA_LIBRARY_PATH=/usr/local/lib'
+    - 'ZOOKEEPER_HOME={{ PACKAGE_BASE }}/zookeeper'
+    - 'ZOOCFGDIR={{ CONFIG_BASE }}/zookeeper/conf'
+    - 'HADOOP_HOME={{ PACKAGE_BASE }}/hadoop'
+    - 'HADOOP_CONF_DIR={{ CONFIG_BASE }}/hadoop/conf'
+    - 'HBASE_HOME={{ PACKAGE_BASE }}/hbase'
+    - 'HBASE_CONF_DIR={{ CONFIG_BASE }}/hbase/conf'
+
+- name: Set PATH in bash profile
+  lineinfile: dest=.bash_profile line="{{ item }}" state=present
+  with_items:
+    - 'export PATH=$PATH:$HOME/bin:$JAVA_HOME/bin:$ZOOKEEPER_HOME/bin:$HADOOP_HOME/bin:$HADOOP_HOME/sbin:$HBASE_HOME/bin'
+    
+- name: Install basic OS packages
+  yum: name={{ item }} state=present # update_cache=yes
+  with_items:
+    - epel-release
+    - snappy
+    - snappy-devel
+    - ntp
+    - ntpdate
+    - java-1.7.0-openjdk
+    - java-1.7.0-openjdk-devel
+    - libselinux-python
+    - unzip
+    - tar
+
+- name: Start services
+  service: name={{ item }} state=started enabled=yes
+  with_items:
+    - ntpd
+
+

@@ -1,0 +1,26 @@
+---
+# Sub playbook to install all monitoring components needed.
+
+- name: Install monitoring collection daemons
+  hosts: monitoring_collection
+  remote_user: larsgeorge
+  become: yes
+
+  roles:
+    - monitoring-collection
+
+- name: Install monitoring aggregation daemons
+  hosts: monitoring_aggregation
+  remote_user: larsgeorge
+  become: yes
+
+  roles:
+    - monitoring-aggregation
+
+- name: Install monitoring frontend
+  hosts: monitoring_frontend
+  remote_user: larsgeorge
+  become: yes
+
+  roles:
+    - monitoring-frontend

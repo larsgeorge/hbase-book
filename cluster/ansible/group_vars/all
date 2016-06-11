@@ -1,11 +1,13 @@
 ---
 
+SECURITY_ENABLED: false
+
 RESTART_ON_CHANGE: true
 
 CLUSTER_DOMAIN: internal.larsgeorge.com
 OS_USERS: [ 'hdfs', 'yarn', 'mapred', 'hbase', 'zookeeper', 'hue' ]
 
-SSL_ENABLED: true
+SSL_ENABLED: false
 SSL_SERVICES: 
   - { owner: 'hdfs', path: 'hadoop' }
 #  - { owner: 'yarn', path: 'hadoop' } # YARN shares the "hadoop" configuration with HDFS
@@ -14,7 +16,7 @@ SSL_SERVICES:
 SSL_STORE_PASSWORD: sslsekret
 SSL_KEY_PASSWORD: sslsekret
 
-KERBEROS_ENABLED: true
+KERBEROS_ENABLED: false
 KRB_REALM: INTERNAL.LARSGEORGE.COM
 KRB_SERVER: master-2.internal.larsgeorge.com
 KRB_PRINCIPALS: [ 'hdfs', 'HTTP', 'yarn', 'hbase', 'zookeeper' ]

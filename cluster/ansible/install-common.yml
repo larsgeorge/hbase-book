@@ -1,0 +1,11 @@
+---
+# Sub playbook to install all common components needed.
+
+- name: Apply common configuration to all nodes
+  hosts: all
+  remote_user: larsgeorge
+  become: yes
+
+  roles:
+    - common
+    - { role: krb-client, when: KERBEROS_ENABLED == true }

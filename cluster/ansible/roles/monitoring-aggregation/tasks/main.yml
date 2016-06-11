@@ -1,0 +1,23 @@
+---
+# Purpose: Monitoring aggregation related settings
+#
+# Notes: 
+#   - Executed on specific servers in the cluster
+#   - Installs agents/daemons that aggregate the system metrics
+
+- name: Install monitoring aggregation packages
+  yum: name={{ item }} state=present # update_cache=yes
+  with_items:
+    - ganglia-gmetad
+
+- name: Configure monitoring aggregation environment
+  template: src={{ item.src }} dest={{ item.dest }} owner=root group=root mode=0644
+  with_items:
+    - { src: "etc/ganglia/gmetad.conf.j2", dest: "/etc/ganglia/gmetad.conf" }
+  notify:
+    - Restart monitoring aggregation daemons
+
+- name: Start monitoring aggregation services
+  service: name={{ item }} state=started enabled=yes
+  with_items:
+    - gmetad

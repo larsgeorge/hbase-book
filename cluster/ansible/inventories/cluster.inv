@@ -4,19 +4,19 @@ master-[1:3].internal.larsgeorge.com
 [slaves]
 slave-[1:3].internal.larsgeorge.com
 
-[hbase-master]
+[hbase_master]
 master-1.internal.larsgeorge.com
 
-[hbase-backup-masters]
+[hbase_backup_masters]
 master-[2:3].internal.larsgeorge.com
 
-[hbase-slaves:children]
+[hbase_slaves:children]
 slaves
 
 [historyserver]
 master-1.internal.larsgeorge.com
 
-[kdc-server]
+[kdc_server]
 master-2.internal.larsgeorge.com
 
 [cluster:children]
@@ -25,3 +25,13 @@ slaves
 
 [zookeepers:children]
 masters
+
+[monitoring_collection:children]
+masters
+slaves
+
+[monitoring_aggregation]
+master-3.internal.larsgeorge.com
+
+[monitoring_frontend]
+master-3.internal.larsgeorge.com

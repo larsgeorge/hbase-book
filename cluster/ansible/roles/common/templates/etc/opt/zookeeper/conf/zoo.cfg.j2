@@ -11,10 +11,10 @@ dataDir=/var/opt/zookeeper/log/txlog
 # The port at which the clients will connect
 clientPort=2181
 # The servers in the ensemble
-{%- for host in groups.zookeepers -%}
+{% for host in groups.zookeepers %}
 server.{{ loop.index }}={{ host }}:2888:3888
-{%- endfor -%}
-{%- if KERBEROS_ENABLED -%}
+{% endfor %}
+{%- if KERBEROS_ENABLED %}
 authProvider.1=org.apache.zookeeper.server.auth.SASLAuthenticationProvider
 jaasLoginRenew=3600000
-{%- endif -%}
+{% endif -%}
