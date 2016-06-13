@@ -5,6 +5,10 @@
 # default sampling period
 *.period=10
 
+*.sink.ganglia.class=org.apache.hadoop.metrics2.sink.ganglia.GangliaSink31
+*.sink.ganglia.servers={{ groups["monitoring_aggregation"][0] }}:8649
+*.sink.ganglia.period=10
+
 # Below are some examples of sinks that could be used
 # to monitor different hbase daemons.
 

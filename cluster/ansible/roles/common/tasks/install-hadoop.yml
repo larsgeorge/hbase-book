@@ -69,6 +69,7 @@
     - { src: "etc/opt/hbase/conf/backup-masters.j2", dest: "{{ CONFIG_BASE }}/hbase/conf/backup-masters" }
     - { src: "etc/opt/hbase/conf/hbase-env.sh.j2", dest: "{{ CONFIG_BASE }}/hbase/conf/hbase-env.sh" }
     - { src: "etc/opt/hbase/conf/hbase-site.xml.j2", dest: "{{ CONFIG_BASE }}/hbase/conf/hbase-site.xml" }
+    - { src: "etc/opt/hbase/conf/hadoop-metrics2-hbase.properties.j2", dest: "{{ CONFIG_BASE }}/hbase/conf/hadoop-metrics2-hbase.properties" }
 #  notify:
 #    - restart hbase
   
