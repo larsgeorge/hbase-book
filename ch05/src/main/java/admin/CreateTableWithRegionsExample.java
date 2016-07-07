@@ -72,7 +72,7 @@ public class CreateTableWithRegionsExample {
     HTableDescriptor desc2 = new HTableDescriptor(
       TableName.valueOf("testtable2"));
     desc2.addFamily(coldef);
-    admin.createTable(desc2, regions); // co CreateTableWithRegionsExample-6-CreateTable2 Call the crateTable() method again, with a new table name and the list of region split keys.
+    admin.createTable(desc2, regions); // co CreateTableWithRegionsExample-6-CreateTable2 Call the createTable() method again, with a new table name and the list of region split keys.
     printTableRegions("testtable2");
   }
   // ^^ CreateTableWithRegionsExample
