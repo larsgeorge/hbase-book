@@ -1,11 +1,29 @@
 ---
 # Sub playbook to install all common components needed.
 
+- name: Set up Kerberos KDC
+  hosts: kdc_server
+  roles:
+    - { role: kdc-server, when: SECURITY_ENABLED == true }
+
+- name: Install Kerberos Clients
+  hosts: cluster
+  roles:
+    - { role: krb-client, when: SECURITY_ENABLED == true }
+
 - name: Apply common configuration to all nodes
   hosts: all
-  remote_user: larsgeorge
-  become: yes
 
   roles:
+    - { role: goozbach.EPEL, when: ansible_os_family == 'RedHat' }
     - common
-    - { role: krb-client, when: KERBEROS_ENABLED == true }
+
+- name: Install zookeeper nodes
+  hosts: zookeepers
+  roles:
+    - zookeeper
+
+- name: Install Hbase
+  hosts: cluster
+  roles:
+    - hbase

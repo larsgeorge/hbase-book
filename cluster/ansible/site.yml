@@ -1,11 +1,10 @@
 ---
 # Main playbook to install all components needed.
-
 - name: Apply common configuration to all nodes
   include: install-common.yml
   
-- name: Install monitoring
-  include: install-monitoring.yml
+#- name: Install monitoring
+#  include: install-monitoring.yml
   
 - name: Install security
   include: install-security.yml

@@ -1,0 +1,3 @@
+# epel macros
+
+%epel %{?rhel}%{!?rhel:7}

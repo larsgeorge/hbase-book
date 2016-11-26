@@ -19,7 +19,7 @@
 <configuration>
   <property>
     <name>mapreduce.jobtracker.address</name>
-    <value>master-1.internal.larsgeorge.com:8021</value>
+    <value>{{ groups.masters[0] }}.{{ CLUSTER_DOMAIN }}:8021</value>
   </property>
   <property>
     <name>yarn.app.mapreduce.am.resource.mb</name>
@@ -66,33 +66,33 @@
   </property>
   <property>
     <name>mapreduce.jobhistory.address</name>
-    <value>{{ groups.historyserver[0] }}:10020</value>
+    <value>{{ groups.masters[0] }}.{{ CLUSTER_DOMAIN }}:10020</value>
   </property>
   <property>
     <name>mapreduce.jobhistory.webapp.address</name>
-    <value>{{ groups.historyserver[0] }}:19888</value>
+    <value>{{ groups.masters[0] }}.{{ CLUSTER_DOMAIN }}:19888</value>
   </property>
   <property>
     <description>To set the value of tmp directory for map and reduce tasks.</description>
     <name>mapreduce.task.tmp.dir</name>
     <value>/var/opt/hadoop/cache/${user.name}/tasks</value>
   </property>
-  {%- if KERBEROS_ENABLED -%}
+  {%- if SECURITY_ENABLED -%}
   <property>
     <name>mapreduce.jobhistory.principal</name>
-    <value>mapred/_HOST@INTERNAL.LARSGEORGE.COM</value>
+    <value>mapred/_HOST@{{ KRB_REALM }}</value>
   </property>
   <property>
     <name>mapreduce.jobhistory.webapp.spnego-principal</name>
-    <value>HTTP/_HOST@INTERNAL.LARSGEORGE.COM</value>
+    <value>HTTP/_HOST@{{ KRB_REALM }}</value>
   </property>
   <property>
     <name>mapreduce.jobhistory.keytab</name>
-    <value>mapred.keytab</value>
+    <value>{{ HADOOP_CONFIG }}/mapred.keytab</value>
   </property>
   <property>
     <name>mapreduce.jobhistory.webapp.spnego-keytab-file</name>
-    <value>mapred.keytab</value>
+    <value>{{ HADOOP_CONFIG }}/mapred.keytab</value>
   </property>
   {%- endif -%}
 </configuration>

@@ -1,11 +1,23 @@
 ---
-- name: Create KDB5 database
-  - command: kdb5_util destroy -f
-    ignore_errors: True
-  - yum: name=rng-tools state=present
-  - command: rngd
-  - command: kdb5_util create -s -P sslsekret
-  - command: killall rngd
-    ignore_errors: True
-  - yum: name=rng-tools state=absent
+#- name: Create KDB5 database
+#  command: kdb5_util destroy -f
+#  ignore_errors: True
+
+- name: Install rng-tools
+  yum: name=rng-tools state=present
+
+- name: Configure rngd to use /dev/urandom since in virtualmachines there usually is no hardware source for random data
+  copy: src=etc/systemd/system/rngd.service dest=/etc/systemd/system/rngd.service owner=root group=root
+
+- name: Start rngd service
+  service: name=rngd state=started
+
+- name: Create key
+  command: kdb5_util create -s -P sslsekret creates=/var/kerberos/krb5kdc/principal
+
+#- name: Stop rngd tools
+#  service: name=rngd state=stopped
+
+#- name: Remove rng-tools
+#  yum: name=rng-tools state=absent
   

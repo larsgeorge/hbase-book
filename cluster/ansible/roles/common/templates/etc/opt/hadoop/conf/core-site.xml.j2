@@ -18,14 +18,14 @@
 
 <configuration>
   <property>
-    <name>fs.defaultFS</name>
-    <value>hdfs://master-1.internal.larsgeorge.com:9000</value>
+    <name>fs.default.name</name>
+    <value>hdfs://{{ groups.masters[0] }}.{{ CLUSTER_DOMAIN }}/</value>
   </property>
   <property>
     <name>hadoop.tmp.dir</name>
-    <value>/data/tmp/hadoop-\${user.name}</value>
+    <value>{{ TMP_DIR }}/hadoop-${user.name}</value>
   </property>
-  {%- if KERBEROS_ENABLED -%}
+  {%- if SECURITY_ENABLED -%}
   <property>
     <name>hadoop.security.authentication</name>
     <value>kerberos</value>

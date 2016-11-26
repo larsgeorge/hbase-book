@@ -11,7 +11,7 @@
 - name: Copy signed certificates
   copy: 
     src=files/tmp/certs/{{ inventory_hostname }}-{{ item.owner }}.crt
-    dest={{ CONFIG_BASE }}/{{ item.path }}/conf/{{item.owner }}.crt
+    dest={{ HADOOP_CONFIG }}/{{ inventory_hostname }}-{{item.owner }}.crt
     owner={{ item.owner }}
     group=hadoop
     mode=440
@@ -20,7 +20,7 @@
 - name: Copy public CA root certificate
   copy: 
     src=files/tmp/certs/rootCA.pem 
-    dest={{ CONFIG_BASE }}/{{ item.path }}/conf/
+    dest={{ HADOOP_CONFIG }}/
     owner={{ item.owner }}
     group=hadoop 
     mode=440
@@ -29,29 +29,30 @@
 - name: Copy shared truststore
   copy: 
     src=files/tmp/certs/truststore.jks 
-    dest={{ CONFIG_BASE }}/{{ item.path }}/conf/ 
+    dest={{ HADOOP_CONFIG }}/ 
     owner={{ item.owner }} 
     group=hadoop 
     mode=440
   with_items: "{{ SSL_SERVICES }}"
 
 - name: Import root CA certificate into keystores
-  command: /{{ JAVA_HOME }}/bin/keytool -importcert -keystore {{ inventory_hostname }}-{{ item.owner }}.jks -alias CARoot -storepass "{{ SSL_STORE_PASSWORD }}" -keypass "{{ SSL_KEY_PASSWORD }}" -file rootCA.pem -noprompt
+  command: /usr/bin/keytool -importcert -keystore {{ inventory_hostname }}-{{ item.owner }}.jks -alias CARoot -storepass "{{ SSL_STORE_PASSWORD }}" -keypass "{{ SSL_KEY_PASSWORD }}" -file rootCA.pem -noprompt
   args:
-    chdir: /{{ CONFIG_BASE }}/{{ item.path }}/conf/
+    chdir: /{{ HADOOP_CONFIG }}/
   with_items: "{{ SSL_SERVICES }}"
+  ignore_errors: yes
 
 - name: Import signed certificate into keystores
-  command: /{{ JAVA_HOME }}/bin/keytool -importcert -keystore {{ inventory_hostname }}-{{ item.owner }}.jks -alias {{ inventory_hostname }} -storepass "{{ SSL_STORE_PASSWORD }}" -keypass "{{ SSL_KEY_PASSWORD }}" -file {{ inventory_hostname }}-{{ item.owner }}.crt -noprompt
+  command: /usr/bin/keytool -importcert -keystore {{ inventory_hostname }}-{{ item.owner }}.jks -alias {{ inventory_hostname }} -storepass "{{ SSL_STORE_PASSWORD }}" -keypass "{{ SSL_KEY_PASSWORD }}" -file {{ inventory_hostname }}-{{ item.owner }}.crt -noprompt
   args:
-    chdir: /{{ CONFIG_BASE }}/{{ item.path }}/conf/
+    chdir: /{{ HADOOP_CONFIG }}/
   with_items: "{{ SSL_SERVICES }}"
 
 # Note: We could either add the real name into the ssl-server.xml/ss-client.xml or use the below approach
 - name: Copy local keystore
   copy: 
-    src={{ CONFIG_BASE }}/{{ item.path }}/conf/{{ inventory_hostname }}-{{ item.owner }}.jks 
-    dest={{ CONFIG_BASE }}/{{ item.path }}/conf/keystore.jks 
+    src={{ HADOOP_CONFIG }}/{{ inventory_hostname }}-{{ item.owner }}.jks 
+    dest={{ HADOOP_CONFIG }}/keystore.jks 
     owner={{ item.owner }} 
     group=hadoop 
     mode=440
@@ -63,6 +64,6 @@
 # - command: cp {{ JAVA_HOME }}/jre/lib/security/cacerts {{ JAVA_HOME }}/jre/lib/security/jssecacerts
 # - command: /{{ JAVA_HOME }}/bin/keytool -importcert -keystore {{ JAVA_HOME }}/jre/lib/security/jssecacerts -alias CA -storepass changeit -file rootCA.pem -noprompt
 #   args:
-#     chdir: /{{ CONFIG_BASE }}/{{ item.path }}/conf/
+#     chdir: /{{ HADOOP_CONFIG }}/
 #   with_items: "{{ SSL_SERVICES }}"
    

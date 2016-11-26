@@ -7,7 +7,7 @@
   become: yes
 
   roles:
-    - { role: ssl-phase-1, when: SSL_ENABLED == true }
+    - { role: ssl-phase-1, when: SECURITY_ENABLED == true }
 
 - name: SSL Phase 2 (Sign CSRs)
   hosts: kdc_server
@@ -15,7 +15,7 @@
   become: yes
 
   roles:
-    - { role: ssl-phase-2, when: SSL_ENABLED == true }
+    - { role: ssl-phase-2, when: SECURITY_ENABLED == true }
 
 - name: SSL Phase 3 (Install CSRs and Truststores)
   hosts: all
@@ -23,5 +23,5 @@
   become: yes
 
   roles:
-    - { role: ssl-phase-3, when: SSL_ENABLED == true }
+    - { role: ssl-phase-3, when: SECURITY_ENABLED == true }
 

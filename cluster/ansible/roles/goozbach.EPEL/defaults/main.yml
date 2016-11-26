@@ -1,0 +1,4 @@
+---
+epel_testing_enabled: 0
+epel_enabled: 1
+epel_state: installed

@@ -9,20 +9,20 @@
 #     Phase 3) Import all signed CSRs and put shared truststore in place
 
 - name: Create keystores (if not already present)
-  command: /{{ JAVA_HOME }}/bin/keytool -genkeypair -keystore {{ CONFIG_BASE }}/{{ item.path }}/conf/{{ inventory_hostname }}-{{ item.owner }}.jks -keyalg RSA -alias {{ inventory_hostname }} -dname "CN={{ inventory_hostname }}" -storepass "{{ SSL_STORE_PASSWORD }}" -keypass "{{ SSL_KEY_PASSWORD }}" -validity 1000
+  command: /usr/bin/keytool -genkeypair -keystore {{ HADOOP_CONFIG }}/{{ inventory_hostname }}-{{ item.owner }}.jks -keyalg RSA -alias {{ inventory_hostname }} -dname "CN={{ inventory_hostname }}" -storepass "{{ SSL_STORE_PASSWORD }}" -keypass "{{ SSL_KEY_PASSWORD }}" -validity 1000
   args:
-    creates: /{{ CONFIG_BASE }}/{{ item.path }}/conf/{{ inventory_hostname }}-{{ item.owner }}.jks
+    creates: "{{ HADOOP_CONFIG }}/{{ inventory_hostname }}-{{ item.owner }}.jks"
   with_items: "{{ SSL_SERVICES }}"
 
 - name: Export CSRs (if not already present)
-  command: /{{ JAVA_HOME }}/bin/keytool -certreq -keystore {{ CONFIG_BASE }}/{{ item.path }}/conf/{{ inventory_hostname }}-{{ item.owner }}.jks -alias {{ inventory_hostname }} -storepass "{{ SSL_STORE_PASSWORD }}" -keypass "{{ SSL_KEY_PASSWORD }}" -file {{ CONFIG_BASE }}/{{ item.path }}/conf/{{ inventory_hostname }}-{{ item.owner }}.csr
+  command: /usr/bin/keytool -certreq -keystore {{ HADOOP_CONFIG }}/{{ inventory_hostname }}-{{ item.owner }}.jks -alias {{ inventory_hostname }} -storepass "{{ SSL_STORE_PASSWORD }}" -keypass "{{ SSL_KEY_PASSWORD }}" -file {{ HADOOP_CONFIG }}/{{ inventory_hostname }}-{{ item.owner }}.csr
   args:
-    creates: /{{ CONFIG_BASE }}/{{ item.path }}/conf/{{ inventory_hostname }}-{{ item.owner }}.csr
+    creates: "{{ HADOOP_CONFIG }}/{{ inventory_hostname }}-{{ item.owner }}.csr"
   with_items: "{{ SSL_SERVICES }}"
 
 - name: Set access rights for keystores and CSRs
   file: 
-    path={{ CONFIG_BASE }}/{{ item[0].path }}/conf/{{ inventory_hostname }}-{{ item[0].owner }}.{{ item[1] }}
+    path={{ HADOOP_CONFIG }}/{{ inventory_hostname }}-{{ item[0].owner }}.{{ item[1] }}
     state=file
     owner={{ item[0].owner }}
     group=hadoop
@@ -32,5 +32,5 @@
     - [ 'jks', 'csr' ]
 
 - name: Fetch CSRs to KDC server (for signing in phase 2)
-  fetch: src={{ CONFIG_BASE }}/{{ item.path }}/conf/{{ inventory_hostname }}-{{ item.owner }}.csr dest=files/tmp/certs/ flat=yes
+  fetch: src={{ HADOOP_CONFIG }}/{{ inventory_hostname }}-{{ item.owner }}.csr dest=files/tmp/certs/ flat=yes
   with_items: "{{ SSL_SERVICES }}"

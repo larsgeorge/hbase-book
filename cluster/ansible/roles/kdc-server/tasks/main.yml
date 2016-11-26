@@ -30,11 +30,21 @@
   notify:
   - restart kerberos
 
-- name: Check if KRB5 database needs to be generated
-  stat: path=/var/kerberos/krb5kdc/principal
-  register: principal_file
-- include: createkdb5.yml
-  when: principal_file.stat.exists is not defined
+- name: Copy and configure client krb5.conf
+  template:
+    src=etc/krb5.conf.j2
+    dest=/etc/krb5.conf
+    mode=0644
+    owner=root
+    group=root
+
+#- name: Check if KRB5 database needs to be generated
+#  stat: path=/var/kerberos/krb5kdc/principal
+#  register: principal_file
+
+- name: Create KRB5 database if necessary
+  include: createkdb5.yml
+#  when: (principal_file.stat.exists is defined and not principal_file.stat.exists) or principal_file.stat.exists is not defined
   
 - name: Start Kerberos services
   service: name={{ item }} state=started enabled=yes

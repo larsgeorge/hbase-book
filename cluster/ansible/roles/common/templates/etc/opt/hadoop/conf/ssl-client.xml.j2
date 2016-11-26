@@ -20,7 +20,7 @@
 
 <property>
   <name>ssl.client.truststore.location</name>
-  <value>/etc/opt/hadoop/conf/truststore.jks</value>
+  <value>{{ HADOOP_CONFIG }}/truststore.jks</value>
   <description>Truststore to be used by clients like distcp. Must be
   specified.
   </description>
@@ -50,7 +50,7 @@
 
 <property>
   <name>ssl.client.keystore.location</name>
-  <value>/etc/opt/hadoop/conf/keystore.jks</value>
+  <value>{{ HADOOP_CONFIG }}/{{ inventory_hostname}}-hdfs.jks</value>
   <description>Keystore to be used by clients like distcp. Must be
   specified.
   </description>

@@ -1,0 +1,120 @@
+# Also see:
+# https://fedoraproject.org/wiki/Starting_services_by_default
+
+# On Fedora we deviate from some upstream defaults
+disable systemd-timesyncd.service
+disable systemd-networkd.service
+disable systemd-resolved.service
+
+# System stuff
+enable sshd.service
+enable atd.*
+enable crond.*
+enable chronyd.service
+enable rpcbind.*
+enable NetworkManager.service
+enable NetworkManager-dispatcher.service
+enable ModemManager.service
+enable auditd.service
+enable restorecond.service
+enable bluetooth.*
+enable avahi-daemon.*
+enable cups.*
+
+# The various syslog implementations
+enable rsyslog.*
+enable syslog-ng.*
+enable sysklogd.*
+
+# Network facing
+enable firewalld.service
+enable libvirtd.service
+enable xinetd.service
+enable ladvd.service
+
+# Storage
+enable multipathd.service
+enable libstoragemgmt.service
+enable lvm2-monitor.*
+enable lvm2-lvmetad.*
+enable dm-event.*
+enable dmraid-activation.service
+
+# https://bugzilla.redhat.com/show_bug.cgi?id=855372
+enable mdmonitor.service
+enable mdmonitor-takeover.service
+
+# https://bugzilla.redhat.com/show_bug.cgi?id=876237
+enable spice-vdagentd.service
+
+# https://bugzilla.redhat.com/show_bug.cgi?id=885406
+enable qemu-guest-agent.service
+
+# https://bugzilla.redhat.com/show_bug.cgi?id=928726
+enable dnf-makecache.timer
+
+# https://bugzilla.redhat.com/show_bug.cgi?id=929403
+enable initial-setup-graphical.service
+enable initial-setup-text.service
+
+# https://bugzilla.redhat.com/show_bug.cgi?id=957135
+enable vmtoolsd.service
+
+# https://bugzilla.redhat.com/show_bug.cgi?id=976315
+enable dkms.service
+
+# https://bugzilla.redhat.com/show_bug.cgi?id=961878
+enable ipmi.service
+enable ipmievd.service
+
+# https://bugzilla.redhat.com/show_bug.cgi?id=1039351
+enable x509watch.timer
+
+# https://bugzilla.redhat.com/show_bug.cgi?id=1060754
+enable dnssec-triggerd.service
+
+# https://bugzilla.redhat.com/show_bug.cgi?id=1095353
+enable uuidd.socket
+
+# Hardware
+enable gpm.*
+
+# https://bugzilla.redhat.com/show_bug.cgi?id=1066421
+enable gpsd.socket
+
+# https://bugzilla.redhat.com/show_bug.cgi?id=1141607
+enable x2gocleansessions.service
+
+enable irqbalance.service
+enable lm_sensors.service
+enable mcelog.*
+enable acpid.*
+enable smartd.service
+enable pcscd.socket
+enable rngd.service
+
+# Other stuff
+enable abrtd.service
+enable abrt-ccpp.service
+enable abrt-oops.service
+enable abrt-xorg.service
+enable abrt-vmcore.service
+enable lttng-sessiond.service
+enable ksm.service
+enable ksmtuned.service
+enable rootfs-resize.service
+enable sysstat.service
+enable sysstat-collect.timer
+enable sysstat-summary.timer
+enable uuidd.service
+enable xendomains.service
+enable xenstored.service
+enable xenconsoled.service
+
+# Desktop stuff
+enable accounts-daemon.service
+enable rtkit-daemon.service
+enable upower.service
+enable udisks2.service
+enable polkit.service
+enable packagekit-offline-update.service

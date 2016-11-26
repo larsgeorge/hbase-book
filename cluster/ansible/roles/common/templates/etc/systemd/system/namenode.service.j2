@@ -1,0 +1,16 @@
+[Unit]
+Description=HDFS namenode
+Before=
+After=network.target
+
+[Service]
+User=hdfs
+ExecStart={{ HADOOP_HOME }}/bin/hdfs namenode
+ExecStop=/bin/kill $MAINPID
+Restart=on-abort
+StandardOutput=journal
+EnvironmentFile=/etc/environment
+PIDFile={{ PID_DIR }}/namenode.pid
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,34 @@
+---
+# vars for epel package
+goozbach_epel_hash:
+    "5":
+        gpgkey_file: 'RPM-GPG-KEY-EPEL'
+        doc_dir: '/usr/share/doc/epel-release-5'
+        macro_enabled: 0
+        preset_enabled: 0
+    "6":
+        gpgkey_file: 'RPM-GPG-KEY-EPEL-6'
+        macro_dir: '/etc/rpm/'
+        macro_file: 'macros.ghc-srpm'
+        macro_enabled: 1
+        doc_dir: '/usr/share/doc/epel-release-6/'
+        preset_enabled: 0
+    "7":
+        gpgkey_file: 'RPM-GPG-KEY-EPEL-7'
+        macro_dir: '/usr/lib/rpm/macros.d/'
+        macro_file: 'macros.ghc-srpm'
+        macro_enabled: 1
+        doc_dir: '/usr/share/doc/epel-release-7'
+        preset_dir: '/usr/lib/systemd/system-preset/'
+        preset_file: '90-epel.preset'
+        preset_enabled: 1
+
+
+gpgkey_file: "{{ goozbach_epel_hash[ansible_distribution_major_version]['gpgkey_file'] }}"
+macro_file: "{{ goozbach_epel_hash[ansible_distribution_major_version]['macro_file'] }}"
+macro_dir: "{{ goozbach_epel_hash[ansible_distribution_major_version]['macro_dir'] }}"
+doc_dir: "{{ goozbach_epel_hash[ansible_distribution_major_version]['doc_dir'] }}"
+preset_dir: "{{ goozbach_epel_hash[ansible_distribution_major_version]['preset_dir'] }}"
+preset_file: "{{ goozbach_epel_hash[ansible_distribution_major_version]['preset_file'] }}"
+preset_enabled: "{{ goozbach_epel_hash[ansible_distribution_major_version]['preset_enabled'] }}"
+macro_enabled: "{{ goozbach_epel_hash[ansible_distribution_major_version]['macro_enabled'] }}"

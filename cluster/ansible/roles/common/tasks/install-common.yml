@@ -6,14 +6,23 @@
 
 # Set os prerequisites
 
-- name: Disable SE Linux
-  selinux: state=disabled
+# ==== Stop firewall ====
 
-- name: Stop IP Tables
-  service: name={{ item }} state=stopped enabled=no
-  with_items:
-    - iptables
-    - ip6tables
+# RedHat <= 6
+#- name: Stop IP Tables
+#  service: name={{ item }} state=stopped enabled=no
+#  with_items:
+#    - iptables
+#  when: (ansible_os_family == 'RedHat' and ansible_distribution_major_version <= "6") or ansible_os_family == 'Debian'
+
+# RedHat > 6
+#- name: Stop Firewalld
+#  service: name={{ item }} state=stopped enabled=no
+#  with_items:
+#    - firewalld
+#  when: ansible_os_family == 'RedHat' and ansible_distribution_major_version > "6"
+
+# ==== Stop firewall ====
 
 - name: Set file limits 
   lineinfile: dest=/etc/security/limits.conf line="{{ item }}" state=present
@@ -33,6 +42,9 @@
 - name: Disable transparent huge page defragmentation
   command: echo never > /sys/kernel/mm/transparent_hugepage/defrag
 
+- name: Set hostname
+  hostname: name={{ inventory_hostname }}.{{ CLUSTER_DOMAIN }}
+
 # Add shared environment details and install packages
   
 - name: Add variables to /etc/environment
@@ -40,35 +52,66 @@
   with_items:
     - 'JAVA_HOME={{ JAVA_HOME }}'
     - 'JAVA_LIBRARY_PATH=/usr/local/lib'
-    - 'ZOOKEEPER_HOME={{ PACKAGE_BASE }}/zookeeper'
-    - 'ZOOCFGDIR={{ CONFIG_BASE }}/zookeeper/conf'
-    - 'HADOOP_HOME={{ PACKAGE_BASE }}/hadoop'
-    - 'HADOOP_CONF_DIR={{ CONFIG_BASE }}/hadoop/conf'
-    - 'HBASE_HOME={{ PACKAGE_BASE }}/hbase'
-    - 'HBASE_CONF_DIR={{ CONFIG_BASE }}/hbase/conf'
+    - 'ZOOKEEPER_HOME={{ ZOOKEEPER_HOME }}'
+    - 'ZOOCFGDIR={{ ZOOKEEPER_CONFIG }}'
+    - 'HADOOP_HOME={{ HADOOP_HOME }}'
+    - 'HADOOP_CONF_DIR={{ HADOOP_CONFIG }}'
+    - 'HBASE_HOME={{ HBASE_HOME }}'
+    - 'HBASE_CONF_DIR={{ HBASE_CONFIG }}'
+    - 'ZOO_LOG_DIR={{ LOG_DIR }}/zookeeper'
+
+
 
 - name: Set PATH in bash profile
   lineinfile: dest=.bash_profile line="{{ item }}" state=present
   with_items:
     - 'export PATH=$PATH:$HOME/bin:$JAVA_HOME/bin:$ZOOKEEPER_HOME/bin:$HADOOP_HOME/bin:$HADOOP_HOME/sbin:$HBASE_HOME/bin'
-    
-- name: Install basic OS packages
-  yum: name={{ item }} state=present # update_cache=yes
+  when: ansible_os_family == 'RedHat'
+
+- name: Set PATH in bash profile
+  lineinfile: dest=.profile line="{{ item }}" state=present
   with_items:
-    - epel-release
-    - snappy
-    - snappy-devel
-    - ntp
-    - ntpdate
-    - java-1.7.0-openjdk
-    - java-1.7.0-openjdk-devel
-    - libselinux-python
-    - unzip
-    - tar
+    - 'export PATH=$PATH:$HOME/bin:$JAVA_HOME/bin:$ZOOKEEPER_HOME/bin:$HADOOP_HOME/bin:$HADOOP_HOME/sbin:$HBASE_HOME/bin'
+  when: ansible_os_family == 'Debian'
+
+# ==== Install base packages ====
+
+- name: Install basic OS packages RedHat 7 and later
+  yum: name={{ item }} state=present update_cache=yes
+  with_items:
+    - "{{ BASE_PACKAGES_RH_7 }}"
+  when: ansible_os_family == 'RedHat' and ansible_distribution_major_version > "6"
+
+- name: Install basic OS packages RedHat 6 and earlier
+  yum: name={{ item }} state=present update_cache=yes
+  with_items:
+    - "{{ BASE_PACKAGES_RH_PRE7 }}"
+  when: ansible_os_family == 'RedHat' and ansible_distribution_major_version <= "6"
+
+- name: Install basic OS packages Debian
+  apt: name={{ item }} state=present update_cache=yes
+  with_items:
+    - "{{ BASE_PACKAGES_DEBIAN }}"
+  when: ansible_os_family == 'Debian'
+
+# ==== Install base packages ====
+
+- name: Create SELinux config file if it does not exist
+  file: path=/etc/selinux/config state=touch owner=root group=root
+
+- name: Disable SE Linux
+  selinux: state=disabled
+#  when: ansible_os_family == 'RedHat'
 
 - name: Start services
   service: name={{ item }} state=started enabled=yes
   with_items:
     - ntpd
+  when: ansible_os_family == 'RedHat'
 
+- name: Start services
+  service: name={{ item }} state=started enabled=yes
+  with_items:
+    - ntp
+  when: ansible_os_family == 'Debian'
 

@@ -1,14 +1,13 @@
 ---
 
-SECURITY_ENABLED: false
+SECURITY_ENABLED: true
 
 RESTART_ON_CHANGE: true
 
-CLUSTER_DOMAIN: internal.larsgeorge.com
-OS_USERS: [ 'hdfs', 'yarn', 'mapred', 'hbase', 'zookeeper', 'hue' ]
+CLUSTER_DOMAIN: hbase.book
+OS_USERS: [ 'hdfs', 'yarn', 'mapred', 'hbase', 'zookeeper', 'hue', 'hadoop' ]
 
-SSL_ENABLED: false
-SSL_SERVICES: 
+SSL_SERVICES:
   - { owner: 'hdfs', path: 'hadoop' }
 #  - { owner: 'yarn', path: 'hadoop' } # YARN shares the "hadoop" configuration with HDFS
   - { owner: 'hbase', path: 'hbase' }
@@ -16,16 +15,50 @@ SSL_SERVICES:
 SSL_STORE_PASSWORD: sslsekret
 SSL_KEY_PASSWORD: sslsekret
 
-KERBEROS_ENABLED: false
-KRB_REALM: INTERNAL.LARSGEORGE.COM
-KRB_SERVER: master-2.internal.larsgeorge.com
+KRB_REALM: "{{ CLUSTER_DOMAIN | upper }}"
+KRB_SERVER: master-1.hbase.book
 KRB_PRINCIPALS: [ 'hdfs', 'HTTP', 'yarn', 'hbase', 'zookeeper' ]
 KRB_SERVICES_WITH_HTTP: [ 'hdfs', 'yarn', 'hbase', 'zookeeper' ]
 
+# Versions
+HADOOP_VERSION: 2.7.2
+HBASE_VERSION: 1.2.4
+HUE_VERSION: 3.10.0
+ZOOKEEPER_VERSION: 3.4.8
+SPARK_VERSION: 1.6.1
+
 # Paths
+JAVA_HOME: /etc/alternatives/jre_1.7.0
 
-JAVA_HOME: /etc/alternatives/jre
+PACKAGE_BASE: "/opt"
+CONFIG_BASE: "/etc"
+VAR_RUN_BASE: "/var/opt"
+HADOOP_DATA: "/data/hadoop/hdfs"
+ZOOKEEPER_DATA: "/data/zookeeper"
 
-PACKAGE_BASE: /opt
-CONFIG_BASE: /etc/opt
-VAR_RUN_BASE: /var/opt
+TMP_DIR: "/tmp"
+LOG_DIR: "/var/log/hadoop"
+PID_DIR: "/var/run"
+
+BASE_PACKAGES_RH_PRE7: [ 'snappy', 'ntp', 'ntpdate', 'java-1.7.0-openjdk', 'java-1.7.0-openjdk-devel', 'libselinux-python', 'unzip', 'tar' ]
+BASE_PACKAGES_RH_7: [ 'snappy', 'ntp', 'ntpdate', 'java-1.7.0-openjdk', 'java-1.7.0-openjdk-devel', 'libselinux-python', 'unzip', 'tar' ]
+BASE_PACKAGES_DEBIAN: [ 'libsnappy-dev', 'ntp', 'ntpdate', 'openjdk-7-jdk', 'python-selinux', 'unzip', 'tar' ]
+
+HADOOP_DOWNLOAD_LINK: 'http://ftp.halifax.rwth-aachen.de/apache/hadoop/common'
+ZOOKEEPER_DOWNLOAD_LINK: 'http://ftp.halifax.rwth-aachen.de/apache/zookeeper'
+HBASE_DOWNLOAD_LINK: 'http://ftp.halifax.rwth-aachen.de/apache/hbase'
+HUE_DOWNLOAD_LINK: 'https://dl.dropboxusercontent.com/u/730827/hue/releases'
+
+# Path variables derived from base paths above - Do not touch
+HADOOP_CONFIG: "{{ CONFIG_BASE }}/hadoop/conf"
+HADOOP_HOME: "{{ PACKAGE_BASE }}/hadoop"
+ZOOKEEPER_CONFIG: "{{ CONFIG_BASE }}/zookeeper"
+ZOOKEEPER_HOME: "{{ PACKAGE_BASE }}/zookeeper"
+HBASE_CONFIG: "{{ CONFIG_BASE }}/hbase/conf"
+HBASE_HOME: "{{ PACKAGE_BASE }}/hbase"
+
+# Default values for variables, these will be overriden for master servers in Vagrantfile
+namenode: false
+zookeeper: false
+
+DOWNLOAD_ONCE: true

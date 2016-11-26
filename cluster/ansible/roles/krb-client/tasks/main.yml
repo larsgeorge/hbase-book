@@ -3,6 +3,35 @@
 #
 # Notes: 
 #   - Executed on all servers in the cluster
+- name: Create Hadoop system user accounts
+  group: name=hadoop state=present
+- user: name={{ item }} group=hadoop createhome=no shell=/bin/false state=present
+  with_items:
+    - "{{ OS_USERS }}"
+
+- name: Create Hadoop related directories (secure mode)
+  file: path={{ item.path }} owner={{ item.owner }} group=hadoop mode={{ item.mode }} recurse=yes state=directory
+  with_items:
+    - { path: '{{ HADOOP_DATA }}', owner: 'hdfs', mode: 700 }
+    - { path: '{{ HADOOP_DATA }}/nn', owner: 'hdfs', mode: 700 }
+#    - { path: '{{ VAR_RUN_BASE }}/hadoop/conf', owner: 'hdfs', mode: 755 }
+#    - { path: '{{ VAR_RUN_BASE }}/hbase/conf', owner: 'hbase', mode: 755 }
+#    - { path: '{{ VAR_RUN_BASE }}/zookeeper/conf', owner: 'zookeeper', mode: 755 }
+    - { path: '{{ HADOOP_CONFIG }}', owner: 'hdfs', mode: 775 }
+#    - { path: '{{ HBASE_CONFIG }}', owner: 'hbase', mode: 775 }
+  when: SECURITY_ENABLED == true
+
+- name: Create Hadoop related directories (non-secure mode)
+  file: path={{ item.path }} owner={{ item.owner }} group=hadoop mode={{ item.mode }} recurse=yes state=directory
+  with_items:
+    - { path: '{{ HADOOP_DATA }}/nn', owner: 'hadoop', mode: 775 }
+    - { path: '{{ LOG_DIR }}', owner: 'hadoop', mode: 775 }
+#    - { path: '{{ VAR_RUN_BASE }}/hadoop/conf', owner: 'hadoop', mode: 775 }
+#    - { path: '{{ VAR_RUN_BASE }}/hbase/conf', owner: 'hadoop', mode: 775 }
+#    - { path: '{{ VAR_RUN_BASE }}/zookeeper/conf', owner: 'zookeeper', mode: 775 }
+    - { path: '{{ HADOOP_CONFIG }}', owner: 'hadoop', mode: 775 }
+#    - { path: '{{ HBASE_CONFIG }}', owner: 'hadoop', mode: 775 }
+  when: SECURITY_ENABLED == false
 
 - name: Install JCE libraries
   copy: 
@@ -26,3 +55,8 @@
     mode=0644
     owner=root
     group=root
+
+- name: Upload keytabs
+  copy: dest={{ HADOOP_CONFIG }}/{{ item }}.keytab src=files/keytabs/{{ item }}-{{ inventory_hostname }}.keytab
+  with_items:
+    - "{{ KRB_SERVICES_WITH_HTTP }}"

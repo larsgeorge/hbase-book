@@ -42,7 +42,7 @@
 
 # Indicates if HttpFS is using SSL
 #
-# export HTTPFS_SSL_ENABLED=false
+# export HTTPFS_SECURITY_ENABLED=false
 
 # The location of the SSL keystore if using SSL
 #

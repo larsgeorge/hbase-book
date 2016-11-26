@@ -34,7 +34,7 @@
     - { ext: 'pem', mode: 666 }
 
 - name: Create shared truststore (if not already created)
-  command: /{{ JAVA_HOME }}/bin/keytool -importcert -keystore truststore.jks -alias CARoot -storepass "{{ SSL_STORE_PASSWORD }}" -keypass "{{ SSL_KEY_PASSWORD }}" -file rootCA.pem -noprompt
+  command: /usr/bin/keytool -importcert -keystore truststore.jks -alias CARoot -storepass "{{ SSL_STORE_PASSWORD }}" -keypass "{{ SSL_KEY_PASSWORD }}" -file rootCA.pem -noprompt
   args:
     chdir: /root/certs/
     creates: /root/certs/truststore.jks
@@ -50,7 +50,7 @@
 - name: Copy CSRs to be signed (if not already copied)
   copy: src=files/tmp/certs/{{ item[0] }}-{{ item[1].owner }}.csr dest=/root/certs/ 
   with_nested:
-    - groups.cluster
+    - "{{ groups.cluster }}"
     - "{{ SSL_SERVICES }}"
       
 - name: Sign CSRs
@@ -59,13 +59,13 @@
     chdir: /root/certs/
     creates: /{{ item[0] }}-{{ item[1].owner }}.crt
   with_nested:
-    - groups.cluster
+    - "{{ groups.cluster }}"
     - "{{ SSL_SERVICES }}"
     
 - name: Fetch signed certs (for importing in phase 3)
   fetch: src=/root/certs/{{ item[0] }}-{{ item[1].owner }}.crt dest=files/tmp/certs/ flat=yes
   with_nested:
-    - groups.cluster
+    - "{{ groups.cluster }}"
     - "{{ SSL_SERVICES }}"
 
 - name: Fetch public key of CA root certificate (for importing in phase 3)

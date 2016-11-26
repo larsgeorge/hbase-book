@@ -18,103 +18,92 @@
 
 <configuration>
   <property>
-    <name>dfs.datanode.data.dir</name>
-    <value>/data/hadoop/hdfs/data</value>
-  </property>
-  <property>
     <name>dfs.namenode.name.dir</name>
-    <value>/data/hadoop/hdfs/name</value>
+    <value>file://{{ HADOOP_DATA }}/nn</value>
   </property>
   <property>
-    <name>dfs.namenode.safemode.min.datanodes</name>
-    <value>1</value>
-  </property>
-  <!-- Impala configuration -->
-  <property>
-    <name>OFF-dfs.datanode.hdfs-blocks-metadata.enabled</name>
-    <value>true</value>
+    <name>dfs.datanode.data.dir</name>
+    <value>file://{{ HADOOP_DATA }}/dn</value>
   </property>
   <property>
-    <name>OFF-dfs.client.file-block-storage-locations.timeout.millis</name>
-    <value>10000</value>
+    <name>dfs.namenode.heartbeat.recheck-interval</name>
+    <value>15000</value>
   </property>
-  <property>
-    <name>OFF-dfs.client.read.shortcircuit</name>
-    <value>true</value>
-  </property>
-  <property>
-    <name>dfs.domain.socket.path</name>
-    <value>/var/opt/hadoop/run/dn_socket</value>
-  </property>
-  {%- if KERBEROS_ENABLED -%}
+  {%- if SECURITY_ENABLED -%}
   <property>
     <name>dfs.block.access.token.enable</name>
     <value>true</value>
   </property>
   <property>
     <name>dfs.namenode.keytab.file</name>
-    <value>/etc/opt/hadoop/conf/hdfs.keytab</value>
+    <value>{{ HADOOP_CONFIG }}/hdfs.keytab</value>
   </property>
   <property>
     <name>dfs.namenode.kerberos.principal</name>
-    <value>hdfs/_HOST@INTERNAL.LARSGEORGE.COM</value>
+    <value>hdfs/_HOST@{{ KRB_REALM }}</value>
   </property>
   <property>
     <name>dfs.namenode.kerberos.internal.spnego.principal</name>
-    <value>HTTP/_HOST@INTERNAL.LARSGEORGE.COM</value>
+    <value>HTTP/_HOST@{{ KRB_REALM }}</value>
   </property>
   <property>
     <name>dfs.secondary.namenode.keytab.file</name> 
-    <value>/etc/opt/hadoop/conf/hdfs.keytab</value>
+    <value>{{ HADOOP_CONFIG }}/hdfs.keytab</value>
   </property>
   <property>
     <name>dfs.secondary.namenode.kerberos.principal</name>
-    <value>hdfs/_HOST@INTERNAL.LARSGEORGE.COM</value>
+    <value>hdfs/_HOST@{{ KRB_REALM }}</value>
   </property>
   <property>
     <name>dfs.secondary.namenode.kerberos.internal.spnego.principal</name>
-    <value>HTTP/_HOST@INTERNAL.LARSGEORGE.COM</value>
+    <value>HTTP/_HOST@{{ KRB_REALM }}</value>
   </property>
   <property>
     <name>dfs.journalnode.keytab.file</name>
-    <value>/etc/opt/hadoop/conf/hdfs.keytab</value>
+    <value>{{ HADOOP_CONFIG }}/hdfs.keytab</value>
   </property>
   <property>
     <name>dfs.journalnode.kerberos.principal</name>
-    <value>hdfs/_HOST@INTERNAL.LARSGEORGE.COM</value>
+    <value>hdfs/_HOST@{{ KRB_REALM }}</value>
   </property>
   <property>
     <name>dfs.journalnode.kerberos.internal.spnego.principal</name>
-    <value>HTTP/_HOST@INTERNAL.LARSGEORGE.COM</value>
+    <value>HTTP/_HOST@{{ KRB_REALM }}</value>
   </property>
-  <!-- USING SASL INSTEAD, SEE dfs.http.policy BELOW
   <property>
     <name>dfs.datanode.address</name>
-    <value>0.0.0.0:1004</value>
+    <value>0.0.0.0:50010</value>
   </property>
   <property>
     <name>dfs.datanode.http.address</name>
-    <value>0.0.0.0:1006</value>
-  </property> 
-  -->
+    <value>0.0.0.0:50075</value>
+  </property>
+  <property>
+      <name>dfs.data.transfer.protection</name>
+      <value>privacy</value>
+    </property>
+  <property>
+    <name>dfs.http.policy</name>
+    <value>HTTPS_ONLY</value>
+  </property>
   <property>
     <name>dfs.datanode.keytab.file</name>
-    <value>/etc/opt/hadoop/conf/hdfs.keytab</value>
+    <value>{{ HADOOP_CONFIG }}/hdfs.keytab</value>
   </property>
     <property>
     <name>dfs.datanode.kerberos.principal</name>
-    <value>hdfs/_HOST@INTERNAL.LARSGEORGE.COM</value>
+    <value>hdfs/_HOST@{{ KRB_REALM }}</value>
   </property>
   <property>
     <name>dfs.web.authentication.kerberos.keytab</name>
-    <value>/etc/opt/hadoop/conf/hdfs.keytab</value>
+    <value>{{ HADOOP_CONFIG }}/hdfs.keytab</value>
   </property>
   <property>
     <name>dfs.web.authentication.kerberos.principal</name>
-    <value>HTTP/_HOST@INTERNAL.LARSGEORGE.COM</value>
+    <value>HTTP/_HOST@{{ KRB_REALM }}</value>
   </property>
   {%- endif -%}
-  {%- if SSL_ENABLED -%}
+  {%- if SECURITY_ENABLED -%}
   <property>
     <name>dfs.http.policy</name>
     <value>HTTPS_ONLY</value>

@@ -1,0 +1,65 @@
+---
+- name: ensure directory /etc/pki/rpm-gpg/
+  file: path=/etc/pki/rpm-gpg/ state=directory recurse=yes
+  tags:
+    - epel
+
+- name: copy GPG key
+  copy: src={{ gpgkey_file }} dest=/etc/pki/rpm-gpg/{{ gpgkey_file }} owner=root group=root mode=0644
+  tags:
+    - epel
+
+- name: ensure macro dir
+  file: path={{ macro_dir }} state=directory recurse=yes
+  when: macro_enabled
+  tags:
+    - epel
+
+- name: copy rpm macros file
+  copy: src={{ macro_file }} dest={{ macro_dir }}/{{ macro_file }} owner=root group=root mode=0644
+  when: macro_enabled
+  tags:
+    - epel
+
+- name: ensure preset dir
+  file: path={{ preset_dir }} state=directory recurse=yes
+  when: preset_enabled
+  tags:
+    - epel
+
+- name: copy preset file
+  copy: src={{ preset_file }} dest={{ preset_dir }}/{{ preset_file }} owner=root group=root mode=0644
+  when: preset_enabled
+  tags:
+    - epel
+
+- name: ensure doc directory exists
+  file: path={{ doc_dir }} state=directory recurse=yes
+  tags:
+    - epel
+
+- name: copy GPL to doc directory
+  copy: src=GPL dest={{ doc_dir }} owner=root group=root mode=0644
+  tags:
+    - epel
+
+- name: ensure directory /etc/yum.repos.d/
+  file: path=/etc/yum.repos.d/ state=directory recurse=yes
+  tags:
+    - epel
+
+- name: template epel.repo
+  template: src=epel.repo dest=/etc/yum.repos.d/epel.repo owner=root group=root mode=0644
+  tags:
+    - epel
+
+- name: template epel-testing.repo
+  template: src=epel-testing.repo dest=/etc/yum.repos.d/epel-testing.repo owner=root group=root mode=0644
+  tags:
+    - epel
+  
+- name: install epel-release
+  yum: name=epel-release state={{ epel_state }} enablerepo=epel
+  tags:
+    - epel
+

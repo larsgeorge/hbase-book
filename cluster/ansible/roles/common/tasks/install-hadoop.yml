@@ -16,76 +16,129 @@
 - name: Create Hadoop related directories (secure mode)
   file: path={{ item.path }} owner={{ item.owner }} group=hadoop mode={{ item.mode }} recurse=yes state=directory
   with_items:
-    - { path: '/data/hadoop/hdfs', owner: 'hdfs', mode: 700 }
-    - { path: '{{ VAR_RUN_BASE }}/hadoop', owner: 'hdfs', mode: 755 }
-    - { path: '{{ VAR_RUN_BASE }}/hbase', owner: 'hbase', mode: 755 }
-    - { path: '{{ VAR_RUN_BASE }}/zookeeper', owner: 'zookeeper', mode: 755 }
-    - { path: '{{ CONFIG_BASE }}/hadoop', owner: 'hdfs', mode: 775 }
-    - { path: '{{ CONFIG_BASE }}/hbase', owner: 'hbase', mode: 775 }
-    - { path: '{{ CONFIG_BASE }}/zookeeper', owner: 'zookeeper', mode: 775 }
+    - { path: '{{ HADOOP_DATA }}', owner: 'hdfs', mode: 700 }
+    - { path: '{{ HADOOP_DATA }}/nn', owner: 'hdfs', mode: 700 }
+#    - { path: '{{ VAR_RUN_BASE }}/hadoop/conf', owner: 'hdfs', mode: 755 }
+#    - { path: '{{ VAR_RUN_BASE }}/hbase/conf', owner: 'hbase', mode: 755 }
+#    - { path: '{{ VAR_RUN_BASE }}/zookeeper/conf', owner: 'zookeeper', mode: 755 }
+    - { path: '{{ HADOOP_CONFIG }}', owner: 'hdfs', mode: 775 }
+#    - { path: '{{ HBASE_CONFIG }}', owner: 'hbase', mode: 775 }
   when: SECURITY_ENABLED == true
 
 - name: Create Hadoop related directories (non-secure mode)
   file: path={{ item.path }} owner={{ item.owner }} group=hadoop mode={{ item.mode }} recurse=yes state=directory
   with_items:
-    - { path: '/data/hadoop/hdfs', owner: 'hadoop', mode: 775 }
-    - { path: '{{ VAR_RUN_BASE }}/hadoop', owner: 'hadoop', mode: 775 }
-    - { path: '{{ VAR_RUN_BASE }}/hbase', owner: 'hadoop', mode: 775 }
-    - { path: '{{ VAR_RUN_BASE }}/zookeeper', owner: 'zookeeper', mode: 775 }
-    - { path: '{{ CONFIG_BASE }}/hadoop', owner: 'hadoop', mode: 775 }
-    - { path: '{{ CONFIG_BASE }}/hbase', owner: 'hadoop', mode: 775 }
-    - { path: '{{ CONFIG_BASE }}/zookeeper', owner: 'zookeeper', mode: 775 }
+    - { path: '{{ HADOOP_DATA }}/nn', owner: 'hadoop', mode: 775 }
+    - { path: '{{ LOG_DIR }}', owner: 'hadoop', mode: 775 }
+#    - { path: '{{ VAR_RUN_BASE }}/hadoop/conf', owner: 'hadoop', mode: 775 }
+#    - { path: '{{ VAR_RUN_BASE }}/hbase/conf', owner: 'hadoop', mode: 775 }
+#    - { path: '{{ VAR_RUN_BASE }}/zookeeper/conf', owner: 'zookeeper', mode: 775 }
+    - { path: '{{ HADOOP_CONFIG }}', owner: 'hadoop', mode: 775 }
+#    - { path: '{{ HBASE_CONFIG }}', owner: 'hadoop', mode: 775 }
   when: SECURITY_ENABLED == false
-  
-# TODO:
-# - name: Copy and untar Hadoop
-# - name: Copy and untar HBase
-# - name: Copy and untar ZooKeeper
-# - name: Copy and untar Hue
+
+- name: Download Hadoop
+  get_url: url={{ HADOOP_DOWNLOAD_LINK }}/hadoop-{{ HADOOP_VERSION }}/hadoop-{{ HADOOP_VERSION }}.tar.gz dest=/tmp/hadoop-{{ HADOOP_VERSION }}.tar.gz mode=0644
+
+- name: Untar Hadoop
+  unarchive: src=/tmp/hadoop-{{ HADOOP_VERSION }}.tar.gz dest={{ PACKAGE_BASE }} owner=hadoop group=hadoop copy=no creates={{ PACKAGE_BASE }}/hadoop-{{ HADOOP_VERSION }}
+
+- name: Symlink Hadoop
+  file: src={{ PACKAGE_BASE }}/hadoop-{{ HADOOP_VERSION }} path={{ PACKAGE_BASE }}/hadoop state=link owner=hadoop group=hadoop
+
+- name: Download Hue
+  get_url: url={{ HUE_DOWNLOAD_LINK }}/{{ HUE_VERSION }}/hue-{{ HUE_VERSION }}.tgz dest=/tmp/hue-{{ HUE_VERSION }}.tgz mode=0644
+
+- name: Untar Hue
+  unarchive: src=/tmp/hue-{{ HUE_VERSION }}.tgz dest={{ PACKAGE_BASE }}/ copy=no owner=hadoop group=hadoop creates={{ PACKAGE_BASE }}/hue-{{ HUE_VERSION }}
+
+- name: Symlink Hue
+  file: src={{ PACKAGE_BASE }}/hue-{{ HUE_VERSION }} path={{ PACKAGE_BASE }}/hue state=link owner=hadoop group=hadoop
+
+- name: Install Hue build dependencies
+  apt: name={{ item }} state=present update_cache=yes
+  with_items:
+    - python2.7-dev
+    - make
+    - libkrb5-dev
+    - libxml2-dev
+    - libffi-dev
+    - libxslt-dev
+    - libsqlite3-dev
+    - libssl-dev
+    - libldap2-dev
+    - python-pip
+    - maven
+    - libffi-dev
+    - libmysqlclient-dev
+    - libsasl2-dev
+    - libsasl2-modules-gssapi-mit
+    - libldap2-dev
+    - python-setuptools
+    - libgmp3-dev
+    - libz-dev
+  when: ansible_os_family == 'Debian' and ansible_distribution_major_version == "14"
+
+#TODO: Add proper dependencies for Redhat and potentially different Ubuntu versions
+
+- name: Build Hue
+  command: make apps chdir={{ PACKAGE_BASE }}/hue creates={{ PACKAGE_BASE }}/hue/build
+  when: ansible_os_family == 'Debian' and ansible_distribution_major_version == "14"
 
 - name: Put Hadoop configuration in place
   template: src={{ item.src }} dest={{ item.dest }} owner=hdfs group=hadoop mode=0644
   with_items:
-    - { src: "etc/opt/hadoop/conf/slaves.j2", dest: "{{ CONFIG_BASE }}/hadoop/conf/slaves" }
-    - { src: "etc/opt/hadoop/conf/hadoop-env.sh.j2", dest: "{{ CONFIG_BASE }}/hadoop/conf/hadoop-env.sh" }
-    - { src: "etc/opt/hadoop/conf/yarn-env.sh.j2", dest: "{{ CONFIG_BASE }}/hadoop/conf/yarn-env.sh" }
-    - { src: "etc/opt/hadoop/conf/mapred-env.sh.j2", dest: "{{ CONFIG_BASE }}/hadoop/conf/mapred-env.sh" }
-    - { src: "etc/opt/hadoop/conf/core-site.xml.j2", dest: "{{ CONFIG_BASE }}/hadoop/conf/core-site.xml" }
-    - { src: "etc/opt/hadoop/conf/hdfs-site.xml.j2", dest: "{{ CONFIG_BASE }}/hadoop/conf/hdfs-site.xml" }
-    - { src: "etc/opt/hadoop/conf/yarn-site.xml.j2", dest: "{{ CONFIG_BASE }}/hadoop/conf/yarn-site.xml" }
-    - { src: "etc/opt/hadoop/conf/mapred-site.xml.j2", dest: "{{ CONFIG_BASE }}/hadoop/conf/mapred-site.xml" }
-    - { src: "etc/opt/hadoop/conf/ssl-client.xml.j2", dest: "{{ CONFIG_BASE }}/hadoop/conf/ssl-client.xml" }
-    - { src: "etc/opt/hadoop/conf/ssl-server.xml.j2", dest: "{{ CONFIG_BASE }}/hadoop/conf/ssl-server.xml" }
-    - { src: "etc/opt/hadoop/conf/container-executor.cfg.j2", dest: "{{ CONFIG_BASE }}/hadoop/conf/container-executor.cfg" }
+#    - { src: "etc/opt/hadoop/conf/slaves.j2", dest: "{{ HADOOP_CONFIG }}/slaves" }
+    - { src: "etc/opt/hadoop/conf/hadoop-env.sh.j2", dest: "{{ HADOOP_CONFIG }}/hadoop-env.sh" }
+    - { src: "etc/opt/hadoop/conf/yarn-env.sh.j2", dest: "{{ HADOOP_CONFIG }}/yarn-env.sh" }
+    - { src: "etc/opt/hadoop/conf/mapred-env.sh.j2", dest: "{{ HADOOP_CONFIG }}/mapred-env.sh" }
+    - { src: "etc/opt/hadoop/conf/core-site.xml.j2", dest: "{{ HADOOP_CONFIG }}/core-site.xml" }
+    - { src: "etc/opt/hadoop/conf/hdfs-site.xml.j2", dest: "{{ HADOOP_CONFIG }}/hdfs-site.xml" }
+    - { src: "etc/opt/hadoop/conf/yarn-site.xml.j2", dest: "{{ HADOOP_CONFIG }}/yarn-site.xml" }
+    - { src: "etc/opt/hadoop/conf/mapred-site.xml.j2", dest: "{{ HADOOP_CONFIG }}/mapred-site.xml" }
+    - { src: "etc/opt/hadoop/conf/ssl-client.xml.j2", dest: "{{ HADOOP_CONFIG }}/ssl-client.xml" }
+    - { src: "etc/opt/hadoop/conf/ssl-server.xml.j2", dest: "{{ HADOOP_CONFIG }}/ssl-server.xml" }
+    - { src: "etc/opt/hadoop/conf/container-executor.cfg.j2", dest: "{{ HADOOP_CONFIG }}/container-executor.cfg" }
+    - { src: "etc/opt/hadoop/conf/hadoop-policy.xml", dest: "{{ HADOOP_CONFIG }}/hadoop-policy.xml" }
+
 #  notify:
 #    - restart hadoop
 
 # Also: hadoop-policy.xml, httpfs-env.sh, httpfs-site.xml, log4j.properties
 
-- name: Put HBase configuration in place
-  template: src={{ item.src }} dest={{ item.dest }} owner=hbase group=hadoop mode=0644
-  with_items:
-    - { src: "etc/opt/hbase/conf/regionservers.j2", dest: "{{ CONFIG_BASE }}/hbase/conf/regionservers" }
-    - { src: "etc/opt/hbase/conf/backup-masters.j2", dest: "{{ CONFIG_BASE }}/hbase/conf/backup-masters" }
-    - { src: "etc/opt/hbase/conf/hbase-env.sh.j2", dest: "{{ CONFIG_BASE }}/hbase/conf/hbase-env.sh" }
-    - { src: "etc/opt/hbase/conf/hbase-site.xml.j2", dest: "{{ CONFIG_BASE }}/hbase/conf/hbase-site.xml" }
-    - { src: "etc/opt/hbase/conf/hadoop-metrics2-hbase.properties.j2", dest: "{{ CONFIG_BASE }}/hbase/conf/hadoop-metrics2-hbase.properties" }
-#  notify:
-#    - restart hbase
-  
 # Also: hbase-policy.xml, log4j.properties, hadoop-metrics2-hbase.properties
 
-- name: Put Zookeeper configuration in place
-  template: src={{ item.src }} dest={{ item.dest }} owner=zookeeper group=hadoop mode=0644
-  with_items:
-    - { src: "etc/opt/zookeeper/conf/zoo.cfg.j2", dest: "{{ CONFIG_BASE }}/zookeeper/conf/zoo.cfg" }
-#  notify:
-#    - restart zookeeper
-  
 # Also: log4j.properties
 # Zookeeper: http://www.cloudera.com/documentation/enterprise/latest/topics/cdh_sg_zookeeper_security.html
 
-- name: Copy init.d scripts
-  copy: src=etc/init.d/ dest=/etc/init.d/ owner=root group=root mode=755 backup=yes
-    
+#- name: Copy init.d scripts
+#  copy: src=etc/init.d/ dest=/etc/init.d/ owner=root group=root mode=755 backup=yes
 
+#- name: Format filesystem
+#  command: "{{ HADOOP_HOME }}/bin/hdfs namenode -format > {{ HADOOP_CONFIG }}/format_output creates={{ HADOOP_CONFIG }}/format_output"
+#  become: yes
+#  become_user: hadoop
+#  when: namenode
+
+- name: Template Systemd scripts
+  template: src=etc/systemd/system/{{ item.src }} dest=/etc/systemd/system/{{ item.dest }} owner=root group=root mode=755 backup=yes
+  with_items:
+    - { src: "namenode.service.j2", dest: "namenode.service"}
+    - { src: "datanode.service.j2", dest: "datanode.service"}
+    - { src: "nodemanager.service.j2", dest: "nodemanager.service"}
+    - { src: "resourcemanager.service.j2", dest: "resourcemanager.service"}
+    - { src: "historyserver.service.j2", dest: "historyserver.service"}
+
+- name: Start namenode, resourcemanager & historyserver daemons on elected host
+  service: name={{ item }} state=started enabled=yes
+  when: namenode
+  with_items:
+    - namenode
+    - resourcemanager
+    - historyserver
+
+- name: Start datanode & nodemanager daemons on each node node services
+  service: name={{ item }} state=restarted enabled=yes
+  with_items:
+    - datanode
+    - nodemanager

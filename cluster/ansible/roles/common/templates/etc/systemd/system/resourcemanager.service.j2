@@ -1,0 +1,16 @@
+[Unit]
+Description=YARN-Resourcemanager
+Before=
+After=network.target
+
+[Service]
+User=hadoop
+ExecStart={{ HADOOP_HOME }}/bin/yarn resourcemanager
+ExecStop=/bin/kill $MAINPID
+Restart=on-abort
+StandardOutput=journal
+EnvironmentFile=/etc/environment
+PIDFile={{ PID_DIR }}/resourcemanager.pid
+
+[Install]
+WantedBy=multi-user.target

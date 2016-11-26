@@ -1,0 +1,26 @@
+[epel]
+name=Extra Packages for Enterprise Linux {{ ansible_distribution_major_version }} - $basearch
+#baseurl=http://download.fedoraproject.org/pub/epel/{{ ansible_distribution_major_version }}/$basearch
+mirrorlist=https://mirrors.fedoraproject.org/metalink?repo=epel-{{ ansible_distribution_major_version }}&arch=$basearch
+failovermethod=priority
+enabled={{ epel_enabled }}
+gpgcheck=1
+gpgkey=file:///etc/pki/rpm-gpg/{{ gpgkey_file }}
+
+[epel-debuginfo]
+name=Extra Packages for Enterprise Linux {{ ansible_distribution_major_version }} - $basearch - Debug
+#baseurl=http://download.fedoraproject.org/pub/epel/{{ ansible_distribution_major_version }}/$basearch/debug
+mirrorlist=https://mirrors.fedoraproject.org/metalink?repo=epel-debug-{{ ansible_distribution_major_version }}&arch=$basearch
+failovermethod=priority
+enabled=0
+gpgkey=file:///etc/pki/rpm-gpg/{{ gpgkey_file }}
+gpgcheck=1
+
+[epel-source]
+name=Extra Packages for Enterprise Linux {{ ansible_distribution_major_version }} - $basearch - Source
+#baseurl=http://download.fedoraproject.org/pub/epel/{{ ansible_distribution_major_version }}/SRPMS
+mirrorlist=https://mirrors.fedoraproject.org/metalink?repo=epel-source-{{ ansible_distribution_major_version }}&arch=$basearch
+failovermethod=priority
+enabled=0
+gpgkey=file:///etc/pki/rpm-gpg/{{ gpgkey_file }}
+gpgcheck=1
