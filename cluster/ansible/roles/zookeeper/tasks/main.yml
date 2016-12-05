@@ -12,27 +12,23 @@
     - { path: '{{ LOG_DIR }}/zookeeper', owner: 'zookeeper', mode: 775 }
     - { path: '{{ ZOOKEEPER_DATA }}', owner: 'zookeeper', mode: 775 }
 
-- name: Download Zookeeper
-  get_url: url={{ ZOOKEEPER_DOWNLOAD_LINK }}/zookeeper-{{ ZOOKEEPER_VERSION }}/zookeeper-{{ ZOOKEEPER_VERSION }}.tar.gz dest=/tmp/zookeeper-{{ ZOOKEEPER_VERSION }}.tar.gz mode=0644
+#- name: Download Zookeeper
+#  get_url: url={{ ZOOKEEPER_DOWNLOAD_LINK }}/zookeeper-{{ ZOOKEEPER_VERSION }}/zookeeper-{{ ZOOKEEPER_VERSION }}.tar.gz dest=/tmp/zookeeper-{{ ZOOKEEPER_VERSION }}.tar.gz mode=0644
 
 - name: Untar Zookeeper
-  unarchive: src=/tmp/zookeeper-{{ ZOOKEEPER_VERSION }}.tar.gz dest={{ PACKAGE_BASE }} owner=zookeeper group=hadoop copy=no creates={{ PACKAGE_BASE }}/zookeeper-{{ ZOOKEEPER_VERSION }}
+  unarchive: src=files/downloads/zookeeper-{{ ZOOKEEPER_VERSION }}.tar.gz dest={{ PACKAGE_BASE }} owner=zookeeper group=hadoop copy=yes creates={{ PACKAGE_BASE }}/zookeeper-{{ ZOOKEEPER_VERSION }}
 
 - name: Symlink Zookeeper
   file: src={{ PACKAGE_BASE }}/zookeeper-{{ ZOOKEEPER_VERSION }} path={{ ZOOKEEPER_HOME }} state=link owner=zookeeper group=hadoop
 
 - name: Put Zookeeper configuration in place
   template: src={{ item.src }} dest={{ item.dest }} owner=zookeeper group=hadoop mode=0644
-  when: zookeeper
   with_items:
     - { src: "etc/zookeeper/zoo.cfg.j2", dest: "{{ ZOOKEEPER_CONFIG }}/zoo.cfg" }
     - { src: "etc/zookeeper/log4j.properties.j2", dest: "{{ ZOOKEEPER_CONFIG }}/log4j.properties" }
     - { src: "etc/zookeeper/jaas.conf.j2", dest: "{{ ZOOKEEPER_CONFIG }}/jaas.conf" }
     - { src: "etc/zookeeper/java.env.j2", dest: "{{ ZOOKEEPER_CONFIG }}/java.env" }
     - { src: "data/zookeeper/myid.j2", dest: "{{ ZOOKEEPER_DATA }}/myid" }
-
-# Also: log4j.properties
-# Zookeeper: http://www.cloudera.com/documentation/enterprise/latest/topics/cdh_sg_zookeeper_security.html
 
 - name: Template Systemd scripts
   template: src=etc/systemd/system/{{ item.src }} dest=/etc/systemd/system/{{ item.dest }} owner=root group=root mode=755 backup=yes

@@ -73,11 +73,11 @@
   </property>
   <property>
     <name>yarn.resourcemanager.keytab</name>
-    <value>{{ HADOOP_CONFIG }}/yarn.keytab</value>
+    <value>{{ KEYTAB_DIR }}/yarn.keytab</value>
   </property>
   <property>
     <name>yarn.resourcemanager.webapp.spnego-keytab-file</name>
-    <value>{{ HADOOP_CONFIG }}/yarn.keytab</value>
+    <value>{{ KEYTAB_DIR }}/yarn.keytab</value>
   </property>
   <property>
     <name>yarn.nodemanager.principal</name>
@@ -89,11 +89,11 @@
   </property>
   <property>
     <name>yarn.nodemanager.keytab</name>
-    <value>{{ HADOOP_CONFIG }}/yarn.keytab</value>
+    <value>{{ KEYTAB_DIR }}/yarn.keytab</value>
   </property>
   <property>
     <name>yarn.nodemanager.webapp.spnego-keytab-file</name>
-    <value>{{ HADOOP_CONFIG }}/yarn.keytab</value>
+    <value>{{ KEYTAB_DIR }}/yarn.keytab</value>
   </property>
   <property>
     <name>yarn.nodemanager.container-executor.class</name> 
@@ -101,7 +101,11 @@
   </property>
   <property>
     <name>yarn.nodemanager.linux-container-executor.group</name>
-    <value>yarn</value>
+    <value>hadoop</value>
+  </property>
+  <property>
+    <name>yarn.http.policy</name>
+    <value>HTTPS_ONLY</value>
   </property>
   {%- endif -%}
 </configuration>

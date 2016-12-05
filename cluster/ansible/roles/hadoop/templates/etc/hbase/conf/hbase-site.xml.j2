@@ -73,7 +73,7 @@
   {%- if SECURITY_ENABLED -%}
   <property>
     <name>hbase.regionserver.kerberos.principal</name>
-    <value>hbase/{{ inventory_hostname }}@{{ KRB_REALM }}</value>
+    <value>hbase/_HOST@{{ KRB_REALM }}</value>
   </property>
   <property>
     <name>hbase.regionserver.keytab.file</name>
@@ -81,7 +81,7 @@
   </property>
   <property>
     <name>hbase.master.kerberos.principal</name>
-    <value>hbase/{{ inventory_hostname }}@{{ KRB_REALM }}</value>
+    <value>hbase/_HOST@{{ KRB_REALM }}</value>
   </property>
   <property>
     <name>hbase.master.keytab.file</name>
@@ -98,6 +98,14 @@
   <property>
     <name>hbase.coprocessor.region.classes</name>
     <value>org.apache.hadoop.hbase.security.token.TokenProvider</value>
+  </property>
+  <property>
+    <name>hbase.ssl.enabled</name>
+    <value>true</value>
+  </property>
+  <property>
+    <name>hbase.http.policy</name>
+    <value>HTTPS_ONLY</value>
   </property>
   {% endif %}
 </configuration>

@@ -17,4 +17,6 @@ server.{{ loop.index }}={{ host }}.{{ CLUSTER_DOMAIN }}:2888:3888
 {%- if SECURITY_ENABLED %}
 authProvider.1=org.apache.zookeeper.server.auth.SASLAuthenticationProvider
 jaasLoginRenew=3600000
+kerberos.removeHostFromPrincipal=true
+kerberos.removeRealmFromPrincipal=true
 {% endif -%}

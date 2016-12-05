@@ -4,7 +4,7 @@ Before=
 After=network.target
 
 [Service]
-User=hadoop
+User=hbase
 ExecStart={{ HBASE_HOME }}/bin/hbase {% if HBASE_MODE == "slave" %}regionserver{% else %}master{% endif %} start{% if HBASE_MODE == "backup" %} -backup{% endif %}
 
 ExecStop=/bin/kill $MAINPID

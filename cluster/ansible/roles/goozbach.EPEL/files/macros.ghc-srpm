@@ -1,3 +1,0 @@
-# macro defining the archs that ghc runs on in epel
-%ghc_arches %{ix86} x86_64 ppc64
-%ghc_arches_with_ghci %{ix86} x86_64

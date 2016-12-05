@@ -16,6 +16,10 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.landrush.tld = "#{CLUSTER_DOMAIN}"
   config.vm.box = "centos/7"
 
+  config.vm.provision "file", source: "ansible/roles/common/files/hosts", destination: "/tmp/hosts", run: "always"
+
+  config.vm.provision "shell", inline: "/usr/bin/cp /tmp/hosts /etc/hosts", run: "always", privileged: "yes"
+
   # Master nodes
   (1..NUMBER_MASTER_NODES).each do |i|
     config.vm.define "master-#{i}" do |node|

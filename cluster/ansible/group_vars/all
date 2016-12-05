@@ -1,10 +1,56 @@
 ---
 
+# ======================
+# Configuration of demo
+# ---
+# The variable in this part can be changed to adapt the playbooks to your specific needs.
+# Anything further down should only be changed if you really know what you are doing!
+# ======================
+
+
+# Setting this to true causes the entire cluster to be started in secure mode, all services will require a kerberos
+# ticket to allow access and all http uis will only work over https
+# Please note:
+# Since a new CA is generated for this example your browser will warn you about an insecure connection, as your browser
+# will not trust this CA. To fix this you can either add an exception for these urls or import the rootCA.pem file from
+# the cluster/ansible/files/tmp/certs folder relative to your repository root.
 SECURITY_ENABLED: true
 
+# If set to true all services will be restarted whenever a config file change that affects this service is made.
 RESTART_ON_CHANGE: true
 
+# This setting affects the fqdns that your hosts will get on the internal network that Vagrant creates.
+# Hostnames will be master-[1..x].CLUSTER_DOMAIN  and slave-[1..y].CLUSTER_DOMAIN
 CLUSTER_DOMAIN: hbase.book
+
+# The versions of software that will be installed by the playbooks
+HADOOP_VERSION: 2.7.3
+HBASE_VERSION: 1.2.4
+HUE_VERSION: 3.10.0
+ZOOKEEPER_VERSION: 3.4.8
+SPARK_VERSION: 1.6.1
+
+# The paths that will be used to install software under and put configuration files in, feel free to change these if
+# you have a reason to do so, but there probably won't be a need to touch these.
+PACKAGE_BASE: "/opt"  # all installed software will be put in subdirectories of this folder
+CONFIG_BASE: "/etc" # config files will be placed in subdirectories of this folder
+VAR_RUN_BASE: "/var/opt"
+HADOOP_DATA: "/data/hadoop/hdfs" # the Hadoop data directory, all HDFS data will be stored in this directory
+ZOOKEEPER_DATA: "/data/zookeeper" # Zookeeper data will be stored here
+
+TMP_DIR: "/tmp"
+LOG_DIR: "/var/log/hadoop"
+PID_DIR: "/var/run"
+
+# This password will be used to secure all keystores and keys contained in them, we don't support
+# using different passwords for multiple servers/services at this time, since these playbooks are
+# not intended for production use.
+SSL_STORE_PASSWORD: sslsekret
+SSL_KEY_PASSWORD: sslsekret
+
+
+# ==== Don't change anything below this line - really! ====
+
 OS_USERS: [ 'hdfs', 'yarn', 'mapred', 'hbase', 'zookeeper', 'hue', 'hadoop' ]
 
 SSL_SERVICES:
@@ -12,33 +58,16 @@ SSL_SERVICES:
 #  - { owner: 'yarn', path: 'hadoop' } # YARN shares the "hadoop" configuration with HDFS
   - { owner: 'hbase', path: 'hbase' }
   - { owner: 'zookeeper', path: 'zookeeper' }
-SSL_STORE_PASSWORD: sslsekret
-SSL_KEY_PASSWORD: sslsekret
 
 KRB_REALM: "{{ CLUSTER_DOMAIN | upper }}"
 KRB_SERVER: master-1.hbase.book
 KRB_PRINCIPALS: [ 'hdfs', 'HTTP', 'yarn', 'hbase', 'zookeeper' ]
 KRB_SERVICES_WITH_HTTP: [ 'hdfs', 'yarn', 'hbase', 'zookeeper' ]
 
-# Versions
-HADOOP_VERSION: 2.7.2
-HBASE_VERSION: 1.2.4
-HUE_VERSION: 3.10.0
-ZOOKEEPER_VERSION: 3.4.8
-SPARK_VERSION: 1.6.1
 
 # Paths
 JAVA_HOME: /etc/alternatives/jre_1.7.0
 
-PACKAGE_BASE: "/opt"
-CONFIG_BASE: "/etc"
-VAR_RUN_BASE: "/var/opt"
-HADOOP_DATA: "/data/hadoop/hdfs"
-ZOOKEEPER_DATA: "/data/zookeeper"
-
-TMP_DIR: "/tmp"
-LOG_DIR: "/var/log/hadoop"
-PID_DIR: "/var/run"
 
 BASE_PACKAGES_RH_PRE7: [ 'snappy', 'ntp', 'ntpdate', 'java-1.7.0-openjdk', 'java-1.7.0-openjdk-devel', 'libselinux-python', 'unzip', 'tar' ]
 BASE_PACKAGES_RH_7: [ 'snappy', 'ntp', 'ntpdate', 'java-1.7.0-openjdk', 'java-1.7.0-openjdk-devel', 'libselinux-python', 'unzip', 'tar' ]
@@ -56,6 +85,7 @@ ZOOKEEPER_CONFIG: "{{ CONFIG_BASE }}/zookeeper"
 ZOOKEEPER_HOME: "{{ PACKAGE_BASE }}/zookeeper"
 HBASE_CONFIG: "{{ CONFIG_BASE }}/hbase/conf"
 HBASE_HOME: "{{ PACKAGE_BASE }}/hbase"
+KEYTAB_DIR: /etc/security/keytabs
 
 # Default values for variables, these will be overriden for master servers in Vagrantfile
 namenode: false
