@@ -1,8 +1,8 @@
 Server {
   com.sun.security.auth.module.Krb5LoginModule required
   useKeyTab=true
-  keyTab="{{ HADOOP_CONFIG }}/zookeeper.keytab"
+  keyTab="{{ KEYTAB_DIR }}/zookeeper.keytab"
   storeKey=true
   useTicketCache=false
-  principal="zookeeper/{{ inventory_hostname }}@{{ KRB_REALM }}";
+  principal="zookeeper/{{ inventory_hostname }}.{{ CLUSTER_DOMAIN }}@{{ KRB_REALM }}";
 };

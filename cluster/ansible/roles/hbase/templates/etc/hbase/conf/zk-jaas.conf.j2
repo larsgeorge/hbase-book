@@ -1,0 +1,7 @@
+Client {
+  com.sun.security.auth.module.Krb5LoginModule required
+  useKeyTab=true
+  useTicketCache=true
+  keyTab="{{ KEYTAB_DIR }}/hbase.ko eytab"
+  principal="hbase/_HOST@{{ KRB_REALM }}";
+};

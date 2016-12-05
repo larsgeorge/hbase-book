@@ -33,11 +33,11 @@
 #  local_action: get_url url={{ HBASE_DOWNLOAD_LINK }}/{{ HBASE_VERSION }}/hbase-{{ HBASE_VERSION }}-bin.tar.gz dest=downloads
 #  when: DOWNLOAD_ONCE
 
-- name: Download HBase
-  get_url: url={{ HBASE_DOWNLOAD_LINK }}/{{ HBASE_VERSION }}/hbase-{{ HBASE_VERSION }}-bin.tar.gz dest=/tmp/hbase-{{ HBASE_VERSION }}-bin.tar.gz mode=0644
+#- name: Download HBase
+#  get_url: url={{ HBASE_DOWNLOAD_LINK }}/{{ HBASE_VERSION }}/hbase-{{ HBASE_VERSION }}-bin.tar.gz dest=/tmp/hbase-{{ HBASE_VERSION }}-bin.tar.gz mode=0644
 
 - name: Untar HBase
-  unarchive: src=/tmp/hbase-{{ HBASE_VERSION }}-bin.tar.gz dest={{ PACKAGE_BASE }} owner=hadoop group=hadoop copy=no creates={{ PACKAGE_BASE }}/hbase-{{ HBASE_VERSION }}
+  unarchive: src=files/downloads/hbase-{{ HBASE_VERSION }}-bin.tar.gz dest={{ PACKAGE_BASE }} owner=hadoop group=hadoop copy=yes creates={{ PACKAGE_BASE }}/hbase-{{ HBASE_VERSION }}
 
 - name: Symlink hbase
   file: src={{ PACKAGE_BASE }}/hbase-{{ HBASE_VERSION }} path={{ HBASE_HOME }} state=link owner=hadoop group=hadoop
@@ -50,6 +50,9 @@
     - { src: "etc/hbase/conf/hbase-env.sh.j2", dest: "{{ HBASE_CONFIG }}/hbase-env.sh" }
     - { src: "etc/hbase/conf/hbase-site.xml.j2", dest: "{{ HBASE_CONFIG }}/hbase-site.xml" }
     - { src: "etc/hbase/conf/hadoop-metrics2-hbase.properties.j2", dest: "{{ HBASE_CONFIG }}/hadoop-metrics2-hbase.properties" }
+    - { src: "etc/hbase/conf/hbase-policy.xml.j2", dest: "{{ HBASE_CONFIG }}/hbase-policy.xml" }
+    - { src: "etc/hbase/conf/hbase.jaas.j2", dest: "{{ HBASE_CONFIG }}/hbase.jaas" }
+    - { src: "etc/hbase/conf/zk-jaas.conf.j2", dest: "{{ HBASE_CONFIG }}/zk-jaas.conf" }
 
 # Also: hbase-policy.xml, log4j.properties, hadoop-metrics2-hbase.properties
 

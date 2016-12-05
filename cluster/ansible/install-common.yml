@@ -1,6 +1,11 @@
 ---
 # Sub playbook to install all common components needed.
 
+- name: Apply common configuration to all nodes
+  hosts: all
+  roles:
+    - common
+
 - name: Set up Kerberos KDC
   hosts: kdc_server
   roles:
@@ -11,12 +16,10 @@
   roles:
     - { role: krb-client, when: SECURITY_ENABLED == true }
 
-- name: Apply common configuration to all nodes
+- name: Install Hadoop common components
   hosts: all
-
   roles:
-    - { role: goozbach.EPEL, when: ansible_os_family == 'RedHat' }
-    - common
+    - hadoop
 
 - name: Install zookeeper nodes
   hosts: zookeepers

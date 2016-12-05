@@ -88,11 +88,11 @@
   </property>
   <property>
     <name>mapreduce.jobhistory.keytab</name>
-    <value>{{ HADOOP_CONFIG }}/mapred.keytab</value>
+    <value>{{ KEYTAB_DIR }}/mapred.keytab</value>
   </property>
   <property>
     <name>mapreduce.jobhistory.webapp.spnego-keytab-file</name>
-    <value>{{ HADOOP_CONFIG }}/mapred.keytab</value>
+    <value>{{ KEYTAB_DIR }}/mapred.keytab</value>
   </property>
   {%- endif -%}
 </configuration>

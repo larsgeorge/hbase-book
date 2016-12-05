@@ -36,7 +36,7 @@
   </property>
   <property>
     <name>dfs.namenode.keytab.file</name>
-    <value>{{ HADOOP_CONFIG }}/hdfs.keytab</value>
+    <value>{{ KEYTAB_DIR }}/hdfs.keytab</value>
   </property>
   <property>
     <name>dfs.namenode.kerberos.principal</name>
@@ -48,7 +48,7 @@
   </property>
   <property>
     <name>dfs.secondary.namenode.keytab.file</name> 
-    <value>{{ HADOOP_CONFIG }}/hdfs.keytab</value>
+    <value>{{ KEYTAB_DIR }}/hdfs.keytab</value>
   </property>
   <property>
     <name>dfs.secondary.namenode.kerberos.principal</name>
@@ -60,7 +60,7 @@
   </property>
   <property>
     <name>dfs.journalnode.keytab.file</name>
-    <value>{{ HADOOP_CONFIG }}/hdfs.keytab</value>
+    <value>{{ KEYTAB_DIR }}/hdfs.keytab</value>
   </property>
   <property>
     <name>dfs.journalnode.kerberos.principal</name>
@@ -88,7 +88,7 @@
   </property>
   <property>
     <name>dfs.datanode.keytab.file</name>
-    <value>{{ HADOOP_CONFIG }}/hdfs.keytab</value>
+    <value>{{ KEYTAB_DIR }}/hdfs.keytab</value>
   </property>
     <property>
     <name>dfs.datanode.kerberos.principal</name>
@@ -96,14 +96,12 @@
   </property>
   <property>
     <name>dfs.web.authentication.kerberos.keytab</name>
-    <value>{{ HADOOP_CONFIG }}/hdfs.keytab</value>
+    <value>{{ KEYTAB_DIR }}/hdfs.keytab</value>
   </property>
   <property>
     <name>dfs.web.authentication.kerberos.principal</name>
     <value>HTTP/_HOST@{{ KRB_REALM }}</value>
   </property>
-  {%- endif -%}
-  {%- if SECURITY_ENABLED -%}
   <property>
     <name>dfs.http.policy</name>
     <value>HTTPS_ONLY</value>

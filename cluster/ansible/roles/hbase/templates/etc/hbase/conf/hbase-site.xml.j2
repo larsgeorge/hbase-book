@@ -73,19 +73,19 @@
    {%- if SECURITY_ENABLED -%}
     <property>
       <name>hbase.regionserver.kerberos.principal</name>
-      <value>hbase/{{ inventory_hostname }}@{{ KRB_REALM }}</value>
+      <value>hbase/_HOST@{{ KRB_REALM }}</value>
     </property>
     <property>
       <name>hbase.regionserver.keytab.file</name>
-      <value>{{ HADOOP_CONFIG }}/hbase.keytab</value>
+      <value>{{ KEYTAB_DIR }}/hbase.keytab</value>
     </property>
     <property>
       <name>hbase.master.kerberos.principal</name>
-      <value>hbase/{{ inventory_hostname }}@{{ KRB_REALM }}</value>
+      <value>hbase/_HOST@{{ KRB_REALM }}</value>
     </property>
     <property>
       <name>hbase.master.keytab.file</name>
-      <value>{{ HADOOP_CONFIG }}/hbase.keytab</value>
+      <value>{{ KEYTAB_DIR }}/hbase.keytab</value>
     </property>
     <property>
       <name>hbase.security.authentication</name>
@@ -98,6 +98,10 @@
     <property>
       <name>hbase.coprocessor.region.classes</name>
       <value>org.apache.hadoop.hbase.security.token.TokenProvider</value>
+    </property>
+    <property>
+      <name>hbase.zookeeper.property.authProvider.1</name>
+      <value>org.apache.zookeeper.server.auth.SASLAuthenticationProvider</value>
     </property>
     {% endif %}
 </configuration>

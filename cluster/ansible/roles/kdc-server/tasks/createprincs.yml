@@ -25,7 +25,7 @@
   with_nested: 
     - "{{ groups.all }}"
     - "{{ KRB_PRINCIPALS }}"
-  when: principal_list.stdout.find('{{ item[1] }}.{{ CLUSTER_DOMAIN }}/{{ item[0] }}@{{ KRB_REALM }}') == -1
+  when: principal_list.stdout.find('{{ item[1] }}/{{ item[0] }}.{{ CLUSTER_DOMAIN }}@{{ KRB_REALM }}') == -1
 
 - name: Export keytabs into root account
   file: path=/root/keytabs owner=root group=root mode=700 state=directory
@@ -43,7 +43,7 @@
   with_items: groups.historyserver
 
 - name: Download keytabs to orchestration server
-  fetch: src=/root/keytabs/{{ item[1] }}-{{ item[0] }}.keytab dest=/tmp/keytabs/ flat=yes failonmissing=yes
+  fetch: src=/root/keytabs/{{ item[1] }}-{{ item[0] }}.keytab dest=files/keytabs/ flat=yes failonmissing=yes
   with_nested:
     - "{{ groups.all }}"
     - "{{ KRB_SERVICES_WITH_HTTP }}"
