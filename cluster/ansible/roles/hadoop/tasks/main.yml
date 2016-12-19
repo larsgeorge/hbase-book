@@ -1,7 +1,7 @@
 ---
 # Purpose: Common Hadoop node related settings
-#
-# Notes: 
+
+# Notes:
 #   - Executed on all servers in the cluster
 #   - Installs also the Hadoop related tarballs etc.
 
@@ -65,11 +65,21 @@
 - name: Ensure correct permissions on container-executor binary
   file: path={{ HADOOP_HOME }}/bin/container-executor owner=root group=hadoop mode=6050
 
-#- name: Format namenode
-#  command: /opt/hadoop/bin/hdfs namenode -format > {{ HADOOP_CONFIG }}/nn_format_result creates={{ HADOOP_CONFIG }}/nn_format_result
-#  become: yes
-#  become_user: hdfs
+- name: Format namenode
+  shell: /opt/hadoop/bin/hdfs namenode -format -force >> {{ HADOOP_CONFIG }}/nn_format_result
+  args:
+    creates: "{{ HADOOP_CONFIG }}/nn_format_result"
+  become: yes
+  become_user: hdfs
+  when: namenode and SECURITY_ENABLED == true
 
+- name: Format namenode
+  shell: /opt/hadoop/bin/hdfs namenode -format -force >> {{ HADOOP_CONFIG }}/nn_format_result
+  args:
+    creates: "{{ HADOOP_CONFIG }}/nn_format_result"
+  become: yes
+  become_user: hadoop
+  when: namenode and SECURITY_ENABLED == false
 
 #  notify:
 #    - restart hadoop
@@ -84,11 +94,7 @@
 #- name: Copy init.d scripts
 #  copy: src=etc/init.d/ dest=/etc/init.d/ owner=root group=root mode=755 backup=yes
 
-#- name: Format filesystem
-#  command: "{{ HADOOP_HOME }}/bin/hdfs namenode -format > {{ HADOOP_CONFIG }}/format_output creates={{ HADOOP_CONFIG }}/format_output"
-#  become: yes
-#  become_user: hadoop
-#  when: namenode
+
 
 - name: Create services
   template: src=etc/systemd/system/{{ item.src }} dest=/etc/systemd/system/{{ item.dest }} owner=root group=root mode=755 backup=yes

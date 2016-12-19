@@ -4,7 +4,8 @@ Before=
 After=network.target
 
 [Service]
-User=hadoop
+User={% if SECURITY_ENABLED %}hdfs{% else %}hadoop{% endif %}
+
 ExecStart={{ HADOOP_HOME }}/bin/mapred historyserver
 ExecStop=/bin/kill $MAINPID
 Restart=on-abort
