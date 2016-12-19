@@ -14,7 +14,7 @@
 # Since a new CA is generated for this example your browser will warn you about an insecure connection, as your browser
 # will not trust this CA. To fix this you can either add an exception for these urls or import the rootCA.pem file from
 # the cluster/ansible/files/tmp/certs folder relative to your repository root.
-SECURITY_ENABLED: true
+SECURITY_ENABLED: false
 
 # If set to true all services will be restarted whenever a config file change that affects this service is made.
 RESTART_ON_CHANGE: true
@@ -27,7 +27,7 @@ CLUSTER_DOMAIN: hbase.book
 HADOOP_VERSION: 2.7.3
 HBASE_VERSION: 1.2.4
 HUE_VERSION: 3.10.0
-ZOOKEEPER_VERSION: 3.4.8
+ZOOKEEPER_VERSION: 3.4.9
 SPARK_VERSION: 1.6.1
 
 # The paths that will be used to install software under and put configuration files in, feel free to change these if

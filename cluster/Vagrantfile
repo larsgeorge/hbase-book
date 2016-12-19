@@ -16,8 +16,9 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.landrush.tld = "#{CLUSTER_DOMAIN}"
   config.vm.box = "centos/7"
 
+  # Crutch to fix vagrant being stupid and setting hostname as synonym for 127.0.0.1 in /etc/hosts
+  # Divided in two steps because there is no way to run file provisioner as root
   config.vm.provision "file", source: "ansible/roles/common/files/hosts", destination: "/tmp/hosts", run: "always"
-
   config.vm.provision "shell", inline: "/usr/bin/cp /tmp/hosts /etc/hosts", run: "always", privileged: "yes"
 
   # Master nodes
