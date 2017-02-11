@@ -105,16 +105,16 @@
     - { src: "resourcemanager.service.j2", dest: "resourcemanager.service"}
     - { src: "historyserver.service.j2", dest: "historyserver.service"}
 
-- name: Start namenode, resourcemanager & historyserver daemons on elected master node
-  service: name={{ item }} state=started enabled=yes
-  when: namenode
-  with_items:
-    - namenode
-    - resourcemanager
-    - historyserver
+#- name: Start namenode, resourcemanager & historyserver daemons on elected master node
+#  service: name={{ item }} state=started enabled=yes
+#  when: namenode
+#  with_items:
+#    - namenode
+#    - resourcemanager
+#    - historyserver
 
-- name: Start datanode & nodemanager daemons on each node services
-  service: name={{ item }} state=restarted enabled=yes
-  with_items:
-    - datanode
-    - nodemanager
+#- name: Start datanode & nodemanager daemons on each node services
+#  service: name={{ item }} state=restarted enabled=yes
+#  with_items:
+#    - datanode
+#    - nodemanager

@@ -35,5 +35,5 @@
   with_items:
     - { src: "zookeeper.service.j2", dest: "zookeeper.service" }
 
-- name: Start zookeeper servers
-  service: name=zookeeper state=restarted enabled=true
+#- name: Start zookeeper servers
+#  service: name=zookeeper state=restarted enabled=true

@@ -61,8 +61,8 @@
   with_items:
     - { src: "etc/systemd/system/hbase.service.j2", dest: "hbase.service"}
 
-- name: Start HBase
-  service: name=hbase state=restarted enabled=yes
+#- name: Start HBase
+#  service: name=hbase state=restarted enabled=yes
 
 
 #- name: Start namenode on elected host
