@@ -7,7 +7,7 @@
 
 hbase.sink.ganglia.class=org.apache.hadoop.metrics2.sink.ganglia.GangliaSink31
 hbase.sink.ganglia.servers=239.2.11.71:8649
-#hbase.sink.ganglia.servers={{ groups["slaves"][0] }}:8649
+#hbase.sink.ganglia.servers={{ groups["workers"][0] }}:8649
 hbase.sink.ganglia.period=10
 
 # Below are some examples of sinks that could be used

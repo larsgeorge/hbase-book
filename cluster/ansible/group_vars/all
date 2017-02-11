@@ -14,13 +14,13 @@
 # Since a new CA is generated for this example your browser will warn you about an insecure connection, as your browser
 # will not trust this CA. To fix this you can either add an exception for these urls or import the rootCA.pem file from
 # the cluster/ansible/files/tmp/certs folder relative to your repository root.
-SECURITY_ENABLED: false
+SECURITY_ENABLED: true
 
 # If set to true all services will be restarted whenever a config file change that affects this service is made.
 RESTART_ON_CHANGE: true
 
 # This setting affects the fqdns that your hosts will get on the internal network that Vagrant creates.
-# Hostnames will be master-[1..x].CLUSTER_DOMAIN  and slave-[1..y].CLUSTER_DOMAIN
+# Hostnames will be master-[1..x].CLUSTER_DOMAIN  and worker-[1..y].CLUSTER_DOMAIN
 CLUSTER_DOMAIN: hbase.book
 
 # The versions of software that will be installed by the playbooks

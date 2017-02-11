@@ -1,2 +1,7 @@
 127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4
 ::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
+10.10.0.10  master-1.hbase.book master-1
+10.10.0.11  master-2.hbase.book master-2
+10.10.0.20  worker-1.hbase.book worker-1
+10.10.0.21  worker-2.hbase.book worker-2
+10.10.0.22  worker-3.hbase.book worker-3
