@@ -1,0 +1,30 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>com.larsgeorge</groupId>
+    <artifactId>hbase-book</artifactId>
+    <version>2.0</version>
+    <relativePath>../pom.xml</relativePath>
+  </parent>
+
+  <groupId>com.larsgeorge</groupId>
+  <artifactId>hbase-book-ch12</artifactId>
+  <version>2.0</version>
+  <packaging>jar</packaging>
+
+  <name>HBase Book Chapter 12</name>
+
+  <dependencies>
+    <dependency>
+      <groupId>com.larsgeorge</groupId>
+      <artifactId>hbase-book-common</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.htrace</groupId>
+      <artifactId>htrace-zipkin</artifactId>
+      <version>3.1.0-incubating</version>
+    </dependency>
+  </dependencies>
+</project>
