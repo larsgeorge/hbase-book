@@ -40,7 +40,7 @@
 
     <hadoop.version>2.7.2</hadoop.version>
     <zookeeper.version>3.4.8</zookeeper.version>
-    <hbase.version>1.2.1</hbase.version>
+    <hbase.version>1.3.0</hbase.version>
   </properties>
 
   <build>
