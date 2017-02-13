@@ -2,15 +2,16 @@ package htrace;
 
 import java.io.IOException;
 
-import org.apache.hadoop.hbase.trace.HBaseHTraceConfiguration;
 import org.apache.htrace.Sampler;
 import org.apache.htrace.SamplerBuilder;
 import org.apache.htrace.Span;
 import org.apache.htrace.Trace;
 import org.apache.htrace.TraceScope;
+import org.apache.htrace.impl.ProbabilitySampler;
 
 import org.apache.hadoop.conf.Configuration;
 
+import org.apache.hadoop.hbase.trace.HBaseHTraceConfiguration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.TableName;
 import org.apache.hadoop.hbase.client.Admin;
@@ -25,7 +26,6 @@ import org.apache.hadoop.hbase.client.Table;
 import org.apache.hadoop.hbase.trace.SpanReceiverHost;
 import org.apache.hadoop.hbase.util.Bytes;
 
-import org.apache.htrace.impl.ProbabilitySampler;
 import util.HBaseHelper;
 
 // cc HTraceExample Shows the use of the HBase HTrace integration
