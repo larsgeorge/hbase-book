@@ -23,6 +23,13 @@ RESTART_ON_CHANGE: true
 # Hostnames will be master-[1..x].CLUSTER_DOMAIN  and worker-[1..y].CLUSTER_DOMAIN
 CLUSTER_DOMAIN: hbase.book
 
+# This controls where the tarballs for the installation are retrieved from
+# Setting this to true means that every machine downloads the tarball from the internet - this is useful for EC2 instances
+# for example.
+# Setting this to false makes the playboo upload the tarballs to the remote machines from the machine that runs ansible.
+# In this case you need to provide tarballs for the versions configured below in the files/downloads/ directory.
+REMOTE_FETCH_TARBALLS: true
+
 # The versions of software that will be installed by the playbooks
 HADOOP_VERSION: 2.7.3
 HBASE_VERSION: 1.2.4

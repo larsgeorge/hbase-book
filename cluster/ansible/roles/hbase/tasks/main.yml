@@ -33,11 +33,17 @@
 #  local_action: get_url url={{ HBASE_DOWNLOAD_LINK }}/{{ HBASE_VERSION }}/hbase-{{ HBASE_VERSION }}-bin.tar.gz dest=downloads
 #  when: DOWNLOAD_ONCE
 
-#- name: Download HBase
-#  get_url: url={{ HBASE_DOWNLOAD_LINK }}/{{ HBASE_VERSION }}/hbase-{{ HBASE_VERSION }}-bin.tar.gz dest=/tmp/hbase-{{ HBASE_VERSION }}-bin.tar.gz mode=0644
+- name: Download HBase
+  get_url: url={{ HBASE_DOWNLOAD_LINK }}/{{ HBASE_VERSION }}/hbase-{{ HBASE_VERSION }}-bin.tar.gz dest=/tmp/hbase-{{ HBASE_VERSION }}-bin.tar.gz mode=0644
+  when: REMOTE_FETCH_TARBALLS == true
+
+- name: Untar HBase
+  unarchive: src=/tmp/hbase-{{ HBASE_VERSION }}-bin.tar.gz dest={{ PACKAGE_BASE }} owner=hadoop group=hadoop copy=no creates={{ PACKAGE_BASE }}/hbase-{{ HBASE_VERSION }}
+  when: REMOTE_FETCH_TARBALLS == true
 
 - name: Untar HBase
   unarchive: src=files/downloads/hbase-{{ HBASE_VERSION }}-bin.tar.gz dest={{ PACKAGE_BASE }} owner=hadoop group=hadoop copy=yes creates={{ PACKAGE_BASE }}/hbase-{{ HBASE_VERSION }}
+  when: REMOTE_FETCH_TARBALLS == false
 
 - name: Symlink hbase
   file: src={{ PACKAGE_BASE }}/hbase-{{ HBASE_VERSION }} path={{ HBASE_HOME }} state=link owner=hadoop group=hadoop

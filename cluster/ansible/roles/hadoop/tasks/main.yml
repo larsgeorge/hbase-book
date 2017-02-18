@@ -29,14 +29,20 @@
 #    - { path: '{{ HBASE_CONFIG }}', owner: 'hadoop', mode: 775 }
   when: SECURITY_ENABLED == false
 
-#- name: Download Hadoop
-#  get_url: url={{ HADOOP_DOWNLOAD_LINK }}/hadoop-{{ HADOOP_VERSION }}/hadoop-{{ HADOOP_VERSION }}.tar.gz dest=/tmp/hadoop-{{ HADOOP_VERSION }}.tar.gz mode=0644
+- name: Download Hadoop
+  get_url: url={{ HADOOP_DOWNLOAD_LINK }}/hadoop-{{ HADOOP_VERSION }}/hadoop-{{ HADOOP_VERSION }}.tar.gz dest=/tmp/hadoop-{{ HADOOP_VERSION }}.tar.gz mode=0644
+  when: REMOTE_FETCH_TARBALLS == true
+
+- name: Untar Hadoop
+  unarchive: src=/tmp/hadoop-{{ HADOOP_VERSION }}.tar.gz dest={{ PACKAGE_BASE }} owner=root group=hadoop copy=no creates={{ PACKAGE_BASE }}/hadoop-{{ HADOOP_VERSION }}
+  when: REMOTE_FETCH_TARBALLS == true
 
 #- name: Download Hadoop to local machine
 #  local_action: get_url url={{ HADOOP_DOWNLOAD_LINK }}/hadoop-{{ HADOOP_VERSION }}/hadoop-{{ HADOOP_VERSION }}.tar.gz dest=files/download/hadoop-{{ HADOOP_VERSION }}.tar.gz mode=0644
 
 - name: Untar Hadoop
   unarchive: src=files/downloads/hadoop-{{ HADOOP_VERSION }}.tar.gz dest={{ PACKAGE_BASE }} owner=root group=hadoop copy=yes creates={{ PACKAGE_BASE }}/hadoop-{{ HADOOP_VERSION }}
+  when: REMOTE_FETCH_TARBALLS == false
 
 - name: Symlink Hadoop
   file: src={{ PACKAGE_BASE }}/hadoop-{{ HADOOP_VERSION }} path={{ PACKAGE_BASE }}/hadoop state=link owner=hadoop group=hadoop
