@@ -25,12 +25,6 @@
 # so try to keep things idempotent unless you want to take an even deeper look
 # into the startup scripts (bin/hbase, etc.)
 
-{%- if SECURITY_ENABLED -%}
-export HBASE_OPTS="-Djava.security.auth.login.config={{ HBASE_CONFIG}}/zk-jaas.conf"
-export HBASE_MASTER_OPTS="-Djava.security.auth.login.config={{ HBASE_CONFIG}}/zk-jaas.conf"
-export HBASE_REGIONSERVER_OPTS="-Djava.security.auth.login.config={{ HBASE_CONFIG}}/hbase.jaas"
-{% endif %}
-
 # The java implementation to use.  Java 1.7+ required.
 # export JAVA_HOME=/usr/java/jdk1.6.0/
 export JAVA_HOME={{ JAVA_HOME }}
@@ -151,5 +145,10 @@ export HBASE_MANAGES_ZK=false
 # The reason for changing default to RFA is to avoid the boundary case of filling out disk space as 
 # DRFA doesn't put any cap on the log size. Please refer to HBase-5655 for more context.
 
+{%- if SECURITY_ENABLED -%}
+export HBASE_OPTS="$HBASE_OPTS -Djava.security.auth.login.config={{ HBASE_CONFIG }}/hbase-jaas.conf"
+export HBASE_MASTER_OPTS="$HBASE_MASTER_OPTS -Djava.security.auth.login.config={{ HBASE_CONFIG }}/hbase-jaas.conf"
+export HBASE_REGIONSERVER_OPTS="$HBASE_REGIONSERVER_OPTS -Djava.security.auth.login.config={{ HBASE_CONFIG }}/hbase-jaas.conf"
+{% endif %}
 
 

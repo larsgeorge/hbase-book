@@ -13,10 +13,10 @@
 - debug: var=principal_list.stdout_lines
 
 - name: Add UPNs
-  command: kadmin.local -q 'addprinc -pw krbsekret larsgeorge/admin@{{ KRB_REALM }}'
-  when: principal_list.stdout.find('larsgeorge/admin@{{ KRB_REALM }}') == -1
-- command: kadmin.local -q 'addprinc -pw krbsekret larsgeorge@{{ KRB_REALM }}'
-  when: principal_list.stdout.find('larsgeorge@{{ KRB_REALM }}') == -1
+  command: kadmin.local -q 'addprinc -pw krbsekret {{ KRB_ADMIN }}/admin@{{ KRB_REALM }}'
+  when: principal_list.stdout.find('{{ KRB_ADMIN }}/admin@{{ KRB_REALM }}') == -1
+- command: kadmin.local -q 'addprinc -pw krbsekret {{ KRB_ADMIN }}@{{ KRB_REALM }}'
+  when: principal_list.stdout.find('{{ KRB_ADMIN }}@{{ KRB_REALM }}') == -1
 - command: kadmin.local -q 'addprinc -pw krbsekret krbtgt/{{ KRB_REALM }}@{{ KRB_REALM }}'
   when: principal_list.stdout.find('krbtgt/{{ KRB_REALM }}@{{ KRB_REALM }}') == -1
 

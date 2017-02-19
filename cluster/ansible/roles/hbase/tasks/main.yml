@@ -4,17 +4,16 @@
 # Notes:
 #   - Executed on all servers in the cluster
 
-
-
-- name: Create Hadoop related directories (secure mode)
+- name: Create HBase related directories (secure mode)
   file: path={{ item.path }} owner={{ item.owner }} group=hadoop mode={{ item.mode }} recurse=yes state=directory
   with_items:
     - { path: '{{ VAR_RUN_BASE }}/hbase/logs', owner: 'hbase', mode: 755 }
     - { path: '{{ VAR_RUN_BASE }}/hbase/pid', owner: 'hbase', mode: 755 }
     - { path: '{{ HBASE_CONFIG }}', owner: 'hbase', mode: 775 }
+    - { path: '{{ HBASE_TEMP }}', owner: 'hdfs', mode: 775 }
   when: SECURITY_ENABLED == true
 
-- name: Create Hadoop related directories (non-secure mode)
+- name: Create HBase related directories (non-secure mode)
   file: path={{ item.path }} owner={{ item.owner }} group=hadoop mode={{ item.mode }} recurse=yes state=directory
   with_items:
     - { path: '{{ VAR_RUN_BASE }}/hbase/logs', owner: 'hadoop', mode: 775 }
@@ -50,8 +49,7 @@
     - { src: "etc/hbase/conf/hbase-site.xml.j2", dest: "{{ HBASE_CONFIG }}/hbase-site.xml" }
     - { src: "etc/hbase/conf/hadoop-metrics2-hbase.properties.j2", dest: "{{ HBASE_CONFIG }}/hadoop-metrics2-hbase.properties" }
     - { src: "etc/hbase/conf/hbase-policy.xml.j2", dest: "{{ HBASE_CONFIG }}/hbase-policy.xml" }
-    - { src: "etc/hbase/conf/hbase.jaas.j2", dest: "{{ HBASE_CONFIG }}/hbase.jaas" }
-    - { src: "etc/hbase/conf/zk-jaas.conf.j2", dest: "{{ HBASE_CONFIG }}/zk-jaas.conf" }
+    - { src: "etc/hbase/conf/hbase-jaas.conf.j2", dest: "{{ HBASE_CONFIG }}/hbase-jaas.conf" }
 
 # Also: hbase-policy.xml, log4j.properties, hadoop-metrics2-hbase.properties
 
