@@ -1,0 +1,15 @@
+Server {
+  com.sun.security.auth.module.Krb5LoginModule required
+  useKeyTab=true
+  storeKey=true
+  useTicketCache=false
+  keyTab="{{ KEYTAB_DIR }}/hbase.keytab"
+  principal="hbase/{{ inventory_hostname }}.{{ CLUSTER_DOMAIN }}@{{ KRB_REALM }}";
+};
+Client {
+  com.sun.security.auth.module.Krb5LoginModule required
+  useKeyTab=true
+  useTicketCache=false
+  keyTab="{{ KEYTAB_DIR }}/hbase.keytab"
+  principal="hbase/{{ inventory_hostname }}.{{ CLUSTER_DOMAIN }}@{{ KRB_REALM }}";
+};
