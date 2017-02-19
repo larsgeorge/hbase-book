@@ -5,13 +5,12 @@ After=network.target
 
 [Service]
 User={% if SECURITY_ENABLED %}hdfs{% else %}hadoop{% endif %}
-
 ExecStart={{ HADOOP_HOME }}/bin/yarn resourcemanager
 ExecStop=/bin/kill $MAINPID
 Restart=on-abort
 StandardOutput=journal
 EnvironmentFile=/etc/environment
-PIDFile={{ PID_DIR }}/resourcemanager.pid
+PIDFile={{ VAR_RUN_BASE }}/hadoop/pid/resourcemanager.pid
 
 [Install]
 WantedBy=multi-user.target

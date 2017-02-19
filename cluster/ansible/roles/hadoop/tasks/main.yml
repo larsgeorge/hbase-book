@@ -10,23 +10,22 @@
   with_items:
     - { path: '{{ HADOOP_DATA }}', owner: 'hdfs', mode: 755 }
     - { path: '{{ HADOOP_DATA }}/nn', owner: 'hdfs', mode: 700 }
-#    - { path: '{{ VAR_RUN_BASE }}/hadoop/conf', owner: 'hdfs', mode: 755 }
-#    - { path: '{{ VAR_RUN_BASE }}/hbase/conf', owner: 'hbase', mode: 755 }
-#    - { path: '{{ VAR_RUN_BASE }}/zookeeper/conf', owner: 'zookeeper', mode: 755 }
+    - { path: '{{ VAR_RUN_BASE }}/hadoop/logs', owner: 'hdfs', mode: 755 }
+    - { path: '{{ VAR_RUN_BASE }}/hadoop/pid', owner: 'hdfs', mode: 755 }
+    - { path: '{{ VAR_RUN_BASE }}/yarn/logs', owner: 'yarn', mode: 755 }
+    - { path: '{{ VAR_RUN_BASE }}/yarn/pid', owner: 'yarn', mode: 755 }
     - { path: '{{ HADOOP_CONFIG }}', owner: 'hdfs', mode: 775 }
-#    - { path: '{{ HBASE_CONFIG }}', owner: 'hbase', mode: 775 }
   when: SECURITY_ENABLED == true
 
 - name: Create Hadoop related directories (non-secure mode)
   file: path={{ item.path }} owner={{ item.owner }} group=hadoop mode={{ item.mode }} recurse=yes state=directory
   with_items:
     - { path: '{{ HADOOP_DATA }}/nn', owner: 'hadoop', mode: 775 }
-    - { path: '{{ LOG_DIR }}', owner: 'hadoop', mode: 775 }
-#    - { path: '{{ VAR_RUN_BASE }}/hadoop/conf', owner: 'hadoop', mode: 775 }
-#    - { path: '{{ VAR_RUN_BASE }}/hbase/conf', owner: 'hadoop', mode: 775 }
-#    - { path: '{{ VAR_RUN_BASE }}/zookeeper/conf', owner: 'zookeeper', mode: 775 }
+    - { path: '{{ VAR_RUN_BASE }}/yarn/logs', owner: 'hadoop', mode: 775 }
+    - { path: '{{ VAR_RUN_BASE }}/yarn/pid', owner: 'hadoop', mode: 775 }
+    - { path: '{{ VAR_RUN_BASE }}/hadoop/logs', owner: 'hadoop', mode: 775 }
+    - { path: '{{ VAR_RUN_BASE }}/hadoop/pid', owner: 'hadoop', mode: 775 }
     - { path: '{{ HADOOP_CONFIG }}', owner: 'hadoop', mode: 775 }
-#    - { path: '{{ HBASE_CONFIG }}', owner: 'hadoop', mode: 775 }
   when: SECURITY_ENABLED == false
 
 - name: Download Hadoop
@@ -52,7 +51,6 @@
 - name: Put Hadoop configuration in place
   template: src={{ item.src }} dest={{ item.dest }} owner=hdfs group=hadoop mode=0644
   with_items:
-#    - { src: "etc/hadoop/conf/slaves.j2", dest: "{{ HADOOP_CONFIG }}/slaves" }
     - { src: "etc/hadoop/conf/hadoop-env.sh.j2", dest: "{{ HADOOP_CONFIG }}/hadoop-env.sh" }
     - { src: "etc/hadoop/conf/yarn-env.sh.j2", dest: "{{ HADOOP_CONFIG }}/yarn-env.sh" }
     - { src: "etc/hadoop/conf/mapred-env.sh.j2", dest: "{{ HADOOP_CONFIG }}/mapred-env.sh" }

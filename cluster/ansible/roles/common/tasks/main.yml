@@ -66,7 +66,7 @@
     - 'HADOOP_CONF_DIR={{ HADOOP_CONFIG }}'
     - 'HBASE_HOME={{ HBASE_HOME }}'
     - 'HBASE_CONF_DIR={{ HBASE_CONFIG }}'
-    - 'ZOO_LOG_DIR={{ LOG_DIR }}/zookeeper'
+    - 'ZOO_LOG_DIR={{ VAR_RUN_BASE }}/zookeeper/logs'
 
 - name: Set PATH in bash profile
   lineinfile: dest=.bash_profile line="{{ item }}" state=present

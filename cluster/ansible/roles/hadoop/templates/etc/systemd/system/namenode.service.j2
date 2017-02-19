@@ -11,7 +11,7 @@ ExecStop=/bin/kill $MAINPID
 Restart=on-abort
 StandardOutput=journal
 EnvironmentFile=/etc/environment
-PIDFile={{ PID_DIR }}/namenode.pid
+PIDFile={{ VAR_RUN_BASE }}/hadoop/pid/namenode.pid
 
 [Install]
 WantedBy=multi-user.target

@@ -10,7 +10,7 @@ ExecStop=/bin/kill $MAINPID
 Restart=on-abort
 StandardOutput=journal
 EnvironmentFile=/etc/environment
-PIDFile={{ PID_DIR }}/nodemanager.pid
+PIDFile={{ VAR_RUN_BASE }}/hadoop/pid/nodemanager.pid
 
 [Install]
 WantedBy=multi-user.target

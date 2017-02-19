@@ -33,7 +33,7 @@ export HBASE_REGIONSERVER_OPTS="-Djava.security.auth.login.config={{ HBASE_CONFI
 
 # The java implementation to use.  Java 1.7+ required.
 # export JAVA_HOME=/usr/java/jdk1.6.0/
-export JAVA_HOME=/etc/alternatives/jre
+export JAVA_HOME={{ JAVA_HOME }}
 export JAVA_LIBRARY_PATH=/usr/local/lib
 
 # Extra Java CLASSPATH elements.  Optional.
@@ -132,8 +132,7 @@ export HBASE_LOG_DIR={{ VAR_RUN_BASE }}/hbase/logs
 # export HBASE_NICENESS=10
 
 # The directory where pid files are stored. /tmp by default.
-# export HBASE_PID_DIR=/var/hadoop/pids
-export HBASE_PID_DIR={{ VAR_RUN_BASE }}/hbase/run
+export HBASE_PID_DIR={{ VAR_RUN_BASE }}/hbase/pid
 
 # Seconds to sleep between slave commands.  Unset by default.  This
 # can be useful in large clusters, where, e.g., slave rsyncs can

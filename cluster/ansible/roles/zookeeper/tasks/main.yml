@@ -9,7 +9,8 @@
   file: path={{ item.path }} owner={{ item.owner }} group=hadoop mode={{ item.mode }} recurse=yes state=directory
   with_items:
     - { path: '{{ ZOOKEEPER_CONFIG }}', owner: 'zookeeper', mode: 775 }
-    - { path: '{{ LOG_DIR }}/zookeeper', owner: 'zookeeper', mode: 775 }
+    - { path: '{{ VAR_RUN_BASE }}/zookeeper/logs', owner: 'zookeeper', mode: 775 }
+    - { path: '{{ VAR_RUN_BASE }}/zookeeper/pid', owner: 'zookeeper', mode: 775 }
     - { path: '{{ ZOOKEEPER_DATA }}', owner: 'zookeeper', mode: 775 }
 
 - name: Download Zookeeper
@@ -40,6 +41,3 @@
   template: src=etc/systemd/system/{{ item.src }} dest=/etc/systemd/system/{{ item.dest }} owner=root group=root mode=755 backup=yes
   with_items:
     - { src: "zookeeper.service.j2", dest: "zookeeper.service" }
-
-#- name: Start zookeeper servers
-#  service: name=zookeeper state=restarted enabled=true

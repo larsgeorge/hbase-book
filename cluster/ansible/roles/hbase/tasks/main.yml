@@ -9,23 +9,16 @@
 - name: Create Hadoop related directories (secure mode)
   file: path={{ item.path }} owner={{ item.owner }} group=hadoop mode={{ item.mode }} recurse=yes state=directory
   with_items:
-#    - { path: '{{ HADOOP_DATA }}', owner: 'hdfs', mode: 700 }
-#    - { path: '{{ VAR_RUN_BASE }}/hadoop/conf', owner: 'hdfs', mode: 755 }
-#    - { path: '{{ VAR_RUN_BASE }}/hbase/conf', owner: 'hbase', mode: 755 }
-#    - { path: '{{ VAR_RUN_BASE }}/zookeeper/conf', owner: 'zookeeper', mode: 755 }
-#    - { path: '{{ HADOOP_CONFIG }}', owner: 'hdfs', mode: 775 }
+    - { path: '{{ VAR_RUN_BASE }}/hbase/logs', owner: 'hbase', mode: 755 }
+    - { path: '{{ VAR_RUN_BASE }}/hbase/pid', owner: 'hbase', mode: 755 }
     - { path: '{{ HBASE_CONFIG }}', owner: 'hbase', mode: 775 }
   when: SECURITY_ENABLED == true
 
 - name: Create Hadoop related directories (non-secure mode)
   file: path={{ item.path }} owner={{ item.owner }} group=hadoop mode={{ item.mode }} recurse=yes state=directory
   with_items:
-#    - { path: '{{ HADOOP_DATA }}', owner: 'hadoop', mode: 775 }
-#    - { path: '{{ LOG_DIR }}', owner: 'hadoop', mode: 775 }
-#    - { path: '{{ VAR_RUN_BASE }}/hadoop/conf', owner: 'hadoop', mode: 775 }
-#    - { path: '{{ VAR_RUN_BASE }}/hbase/conf', owner: 'hadoop', mode: 775 }
-#    - { path: '{{ VAR_RUN_BASE }}/zookeeper/conf', owner: 'zookeeper', mode: 775 }
-#    - { path: '{{ HADOOP_CONFIG }}', owner: 'hadoop', mode: 775 }
+    - { path: '{{ VAR_RUN_BASE }}/hbase/logs', owner: 'hadoop', mode: 775 }
+    - { path: '{{ VAR_RUN_BASE }}/hbase/pid', owner: 'hadoop', mode: 775 }
     - { path: '{{ HBASE_CONFIG }}', owner: 'hadoop', mode: 775 }
   when: SECURITY_ENABLED == false
 
@@ -66,25 +59,3 @@
   template: src={{ item.src }} dest=/etc/systemd/system/{{ item.dest }} owner=root group=root mode=755 backup=yes
   with_items:
     - { src: "etc/systemd/system/hbase.service.j2", dest: "hbase.service"}
-
-#- name: Start HBase
-#  service: name=hbase state=restarted enabled=yes
-
-
-#- name: Start namenode on elected host
-#  service: name={{ item }} state=started enabled=yes
-#  when: namenode
-#  with_items:
-#    - namenode
-#    - resourcemanager
-#    - historyserver
-
-#- name: Start zookeeper servers
-#  service: name=zookeeper state=started enabled=true
-#  when: zookeeper
-
-#- name: Start per node services
-#  service: name={{ item }} state=restarted enabled=yes
-#  with_items:
-#    - datanode
-#    - nodemanager
