@@ -1,68 +1,48 @@
-# ==== Adjust these values to configure your cluster details
-NUMBER_MASTER_NODES = 2 # Number of master nodes to provision
-MEMORY_MASTER_NODES = 3 # Amount of memory each master node should get (don't go below xxxx here)
-
-NUMBER_SLAVE_NODES = 2 # Number of slave nodes to provision
-MEMORY_SLAVE_NODES = 3 # Amount of memory per slave node (don't go below xxxx here)
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
 
 CLUSTER_DOMAIN = "hbase.book"
-# ===== Don't change anything below this line ===
 
-# Vagrantfile API/syntax version. Don't touch unless you know what you're doing!
-VAGRANTFILE_API_VERSION = "2"
-
-Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
-  config.landrush.enabled = true
-  config.landrush.tld = "#{CLUSTER_DOMAIN}"
+Vagrant.configure("2") do |config|
   config.vm.box = "centos/7"
 
-  # Crutch to fix vagrant being stupid and setting hostname as synonym for 127.0.0.1 in /etc/hosts
-  # Divided in two steps because there is no way to run file provisioner as root
-  config.vm.provision "file", source: "ansible/roles/common/files/hosts", destination: "/tmp/hosts", run: "always"
-  config.vm.provision "shell", inline: "/usr/bin/cp /tmp/hosts /etc/hosts", run: "always", privileged: "yes"
-
-  # Master nodes
-  (1..NUMBER_MASTER_NODES).each do |i|
-    config.vm.define "master-#{i}" do |node|
-      node.vm.hostname = "master-#{i}.#{CLUSTER_DOMAIN}"
-      node.vm.network :private_network, type: "dhcp"
-      node.vm.provider "virtualbox" do |v|
-        v.name = "HBase Book - Master #{i}"
-      end
+  config.vm.define "master-1" do |node|
+    node.vm.hostname = "master-1.#{CLUSTER_DOMAIN}"
+    node.vm.network :private_network, ip: "10.10.0.10"
+    node.vm.provider "virtualbox" do |v|
+      v.name = "HBase Book - Master 1"
     end
   end
 
-  # Slave nodes
-  (1..NUMBER_SLAVE_NODES).each do |i|
-    config.vm.define "slave-#{i}" do |node|
-      node.vm.hostname = "slave-#{i}.#{CLUSTER_DOMAIN}"
-      node.vm.network :private_network, type: "dhcp"
-      node.vm.provider "virtualbox" do |v|
-        v.name = "HBase Book - Slave #{i}"
-      end
-      if i == NUMBER_SLAVE_NODES
-        node.vm.provision :ansible do |ansible|
-          ansible.playbook = "ansible/site.yml"
-          ansible.sudo = true
-          ansible.limit = "all"
-          ansible.host_vars = {
-              "master-1" => { "namenode" => true }
-          }
-          ansible.groups = {
-              "masters" => ["master-[1:#{NUMBER_MASTER_NODES}]"],
-              "slaves" => ["slave-[1:#{NUMBER_SLAVE_NODES}]"],
-              "cluster:children" => ["masters", "slaves"],
-              "hbase_slaves:children" => ["slaves"],
-              "hbase_master" => ["master-1"],
-              "kdc_server" => ["master-1"],
-              "hbase_backup_masters" => ["master-[2:#{NUMBER_MASTER_NODES}]"],
-              "zookeepers:children" => ["masters"],
-              "all:children" => ["cluster"]
-          }
-        end
-      end
+  config.vm.define "master-2" do |node|
+    node.vm.hostname = "master-2.#{CLUSTER_DOMAIN}"
+    node.vm.network :private_network, ip: "10.10.0.11"
+    node.vm.provider "virtualbox" do |v|
+      v.name = "HBase Book - Master 2"
     end
   end
 
+  config.vm.define "worker-1" do |node|
+    node.vm.hostname = "worker-1.#{CLUSTER_DOMAIN}"
+    node.vm.network :private_network, ip: "10.10.0.20"
+    node.vm.provider "virtualbox" do |v|
+      v.name = "HBase Book - Worker 1"
+    end
+  end
 
+  config.vm.define "worker-2" do |node|
+    node.vm.hostname = "worker-2.#{CLUSTER_DOMAIN}"
+    node.vm.network :private_network, ip: "10.10.0.21"
+    node.vm.provider "virtualbox" do |v|
+      v.name = "HBase Book - Worker 2"
+    end
+  end
+
+  config.vm.define "worker-3" do |node|
+    node.vm.hostname = "worker-3.#{CLUSTER_DOMAIN}"
+    node.vm.network :private_network, ip: "10.10.0.22"
+    node.vm.provider "virtualbox" do |v|
+      v.name = "HBase Book - Worker 3"
+    end
+  end
 end

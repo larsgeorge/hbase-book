@@ -4,28 +4,20 @@
 # Notes:
 #   - Executed on all servers in the cluster
 
-
-
-- name: Create Hadoop related directories (secure mode)
+- name: Create HBase related directories (secure mode)
   file: path={{ item.path }} owner={{ item.owner }} group=hadoop mode={{ item.mode }} recurse=yes state=directory
   with_items:
-#    - { path: '{{ HADOOP_DATA }}', owner: 'hdfs', mode: 700 }
-#    - { path: '{{ VAR_RUN_BASE }}/hadoop/conf', owner: 'hdfs', mode: 755 }
-#    - { path: '{{ VAR_RUN_BASE }}/hbase/conf', owner: 'hbase', mode: 755 }
-#    - { path: '{{ VAR_RUN_BASE }}/zookeeper/conf', owner: 'zookeeper', mode: 755 }
-#    - { path: '{{ HADOOP_CONFIG }}', owner: 'hdfs', mode: 775 }
+    - { path: '{{ VAR_RUN_BASE }}/hbase/logs', owner: 'hbase', mode: 755 }
+    - { path: '{{ VAR_RUN_BASE }}/hbase/pid', owner: 'hbase', mode: 755 }
     - { path: '{{ HBASE_CONFIG }}', owner: 'hbase', mode: 775 }
+    - { path: '{{ HBASE_TEMP_DIR }}', owner: 'hdfs', mode: 775 }
   when: SECURITY_ENABLED == true
 
-- name: Create Hadoop related directories (non-secure mode)
+- name: Create HBase related directories (non-secure mode)
   file: path={{ item.path }} owner={{ item.owner }} group=hadoop mode={{ item.mode }} recurse=yes state=directory
   with_items:
-#    - { path: '{{ HADOOP_DATA }}', owner: 'hadoop', mode: 775 }
-#    - { path: '{{ LOG_DIR }}', owner: 'hadoop', mode: 775 }
-#    - { path: '{{ VAR_RUN_BASE }}/hadoop/conf', owner: 'hadoop', mode: 775 }
-#    - { path: '{{ VAR_RUN_BASE }}/hbase/conf', owner: 'hadoop', mode: 775 }
-#    - { path: '{{ VAR_RUN_BASE }}/zookeeper/conf', owner: 'zookeeper', mode: 775 }
-#    - { path: '{{ HADOOP_CONFIG }}', owner: 'hadoop', mode: 775 }
+    - { path: '{{ VAR_RUN_BASE }}/hbase/logs', owner: 'hadoop', mode: 775 }
+    - { path: '{{ VAR_RUN_BASE }}/hbase/pid', owner: 'hadoop', mode: 775 }
     - { path: '{{ HBASE_CONFIG }}', owner: 'hadoop', mode: 775 }
   when: SECURITY_ENABLED == false
 
@@ -33,11 +25,17 @@
 #  local_action: get_url url={{ HBASE_DOWNLOAD_LINK }}/{{ HBASE_VERSION }}/hbase-{{ HBASE_VERSION }}-bin.tar.gz dest=downloads
 #  when: DOWNLOAD_ONCE
 
-#- name: Download HBase
-#  get_url: url={{ HBASE_DOWNLOAD_LINK }}/{{ HBASE_VERSION }}/hbase-{{ HBASE_VERSION }}-bin.tar.gz dest=/tmp/hbase-{{ HBASE_VERSION }}-bin.tar.gz mode=0644
+- name: Download HBase
+  get_url: url={{ HBASE_DOWNLOAD_LINK }}/{{ HBASE_VERSION }}/hbase-{{ HBASE_VERSION }}-bin.tar.gz dest=/tmp/hbase-{{ HBASE_VERSION }}-bin.tar.gz mode=0644
+  when: REMOTE_FETCH_TARBALLS == true
+
+- name: Untar HBase
+  unarchive: src=/tmp/hbase-{{ HBASE_VERSION }}-bin.tar.gz dest={{ PACKAGE_BASE }} owner=hadoop group=hadoop copy=no creates={{ PACKAGE_BASE }}/hbase-{{ HBASE_VERSION }}
+  when: REMOTE_FETCH_TARBALLS == true
 
 - name: Untar HBase
   unarchive: src=files/downloads/hbase-{{ HBASE_VERSION }}-bin.tar.gz dest={{ PACKAGE_BASE }} owner=hadoop group=hadoop copy=yes creates={{ PACKAGE_BASE }}/hbase-{{ HBASE_VERSION }}
+  when: REMOTE_FETCH_TARBALLS == false
 
 - name: Symlink hbase
   file: src={{ PACKAGE_BASE }}/hbase-{{ HBASE_VERSION }} path={{ HBASE_HOME }} state=link owner=hadoop group=hadoop
@@ -51,34 +49,36 @@
     - { src: "etc/hbase/conf/hbase-site.xml.j2", dest: "{{ HBASE_CONFIG }}/hbase-site.xml" }
     - { src: "etc/hbase/conf/hadoop-metrics2-hbase.properties.j2", dest: "{{ HBASE_CONFIG }}/hadoop-metrics2-hbase.properties" }
     - { src: "etc/hbase/conf/hbase-policy.xml.j2", dest: "{{ HBASE_CONFIG }}/hbase-policy.xml" }
-    - { src: "etc/hbase/conf/hbase.jaas.j2", dest: "{{ HBASE_CONFIG }}/hbase.jaas" }
-    - { src: "etc/hbase/conf/zk-jaas.conf.j2", dest: "{{ HBASE_CONFIG }}/zk-jaas.conf" }
+    - { src: "etc/hbase/conf/hbase-jaas.conf.j2", dest: "{{ HBASE_CONFIG }}/hbase-jaas.conf" }
 
 # Also: hbase-policy.xml, log4j.properties, hadoop-metrics2-hbase.properties
 
+# Create HBase root directory and set access - needs a `hdfs` principal ticket
+
+- name: Use kinit to get `hdfs` ticket
+  shell: kinit -kt /etc/security/keytabs/hdfs.keytab hdfs/master-1.hbase.book@HBASE.BOOK
+  when: inventory_hostname == "{{ groups['hbase_master'][0] }}"
+
+- name: Determine pre-existing HBase root directory
+  shell: "{{ HADOOP_HOME }}/bin/hdfs dfs -ls /"
+  register: hdfs_list_root
+  changed_when: false 
+  when: inventory_hostname == "{{ groups['hbase_master'][0] }}"
+
+- debug: var=hdfs_list_root.stdout_lines
+  when: inventory_hostname == "{{ groups['hbase_master'][0] }}"
+  
+- name: Create HBase root directory
+  shell: "{{ HADOOP_HOME }}/bin/hdfs dfs -mkdir {{ HBASE_ROOT_DIR }}"
+  when: inventory_hostname == "{{ groups['hbase_master'][0] }}" and hdfs_list_root.stdout.find('{{ HBASE_ROOT_DIR }}') == -1
+
+- name: Set HBase root directory access
+  shell: "{{ HADOOP_HOME }}/bin/hdfs dfs -chown hbase:hadoop {{ HBASE_ROOT_DIR }}"
+  when: inventory_hostname == "{{ groups['hbase_master'][0] }}" and hdfs_list_root.stdout.find('{{ HBASE_ROOT_DIR }}') == -1
+
+# Configure service script
+  
 - name: Template HBase Master startup scripts
   template: src={{ item.src }} dest=/etc/systemd/system/{{ item.dest }} owner=root group=root mode=755 backup=yes
   with_items:
     - { src: "etc/systemd/system/hbase.service.j2", dest: "hbase.service"}
-
-- name: Start HBase
-  service: name=hbase state=restarted enabled=yes
-
-
-#- name: Start namenode on elected host
-#  service: name={{ item }} state=started enabled=yes
-#  when: namenode
-#  with_items:
-#    - namenode
-#    - resourcemanager
-#    - historyserver
-
-#- name: Start zookeeper servers
-#  service: name=zookeeper state=started enabled=true
-#  when: zookeeper
-
-#- name: Start per node services
-#  service: name={{ item }} state=restarted enabled=yes
-#  with_items:
-#    - datanode
-#    - nodemanager

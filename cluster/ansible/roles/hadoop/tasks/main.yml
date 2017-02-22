@@ -10,33 +10,38 @@
   with_items:
     - { path: '{{ HADOOP_DATA }}', owner: 'hdfs', mode: 755 }
     - { path: '{{ HADOOP_DATA }}/nn', owner: 'hdfs', mode: 700 }
-#    - { path: '{{ VAR_RUN_BASE }}/hadoop/conf', owner: 'hdfs', mode: 755 }
-#    - { path: '{{ VAR_RUN_BASE }}/hbase/conf', owner: 'hbase', mode: 755 }
-#    - { path: '{{ VAR_RUN_BASE }}/zookeeper/conf', owner: 'zookeeper', mode: 755 }
+    - { path: '{{ VAR_RUN_BASE }}/hadoop/logs', owner: 'hdfs', mode: 755 }
+    - { path: '{{ VAR_RUN_BASE }}/hadoop/pid', owner: 'hdfs', mode: 755 }
+    - { path: '{{ VAR_RUN_BASE }}/yarn/logs', owner: 'yarn', mode: 755 }
+    - { path: '{{ VAR_RUN_BASE }}/yarn/pid', owner: 'yarn', mode: 755 }
     - { path: '{{ HADOOP_CONFIG }}', owner: 'hdfs', mode: 775 }
-#    - { path: '{{ HBASE_CONFIG }}', owner: 'hbase', mode: 775 }
   when: SECURITY_ENABLED == true
 
 - name: Create Hadoop related directories (non-secure mode)
   file: path={{ item.path }} owner={{ item.owner }} group=hadoop mode={{ item.mode }} recurse=yes state=directory
   with_items:
     - { path: '{{ HADOOP_DATA }}/nn', owner: 'hadoop', mode: 775 }
-    - { path: '{{ LOG_DIR }}', owner: 'hadoop', mode: 775 }
-#    - { path: '{{ VAR_RUN_BASE }}/hadoop/conf', owner: 'hadoop', mode: 775 }
-#    - { path: '{{ VAR_RUN_BASE }}/hbase/conf', owner: 'hadoop', mode: 775 }
-#    - { path: '{{ VAR_RUN_BASE }}/zookeeper/conf', owner: 'zookeeper', mode: 775 }
+    - { path: '{{ VAR_RUN_BASE }}/yarn/logs', owner: 'hadoop', mode: 775 }
+    - { path: '{{ VAR_RUN_BASE }}/yarn/pid', owner: 'hadoop', mode: 775 }
+    - { path: '{{ VAR_RUN_BASE }}/hadoop/logs', owner: 'hadoop', mode: 775 }
+    - { path: '{{ VAR_RUN_BASE }}/hadoop/pid', owner: 'hadoop', mode: 775 }
     - { path: '{{ HADOOP_CONFIG }}', owner: 'hadoop', mode: 775 }
-#    - { path: '{{ HBASE_CONFIG }}', owner: 'hadoop', mode: 775 }
   when: SECURITY_ENABLED == false
 
-#- name: Download Hadoop
-#  get_url: url={{ HADOOP_DOWNLOAD_LINK }}/hadoop-{{ HADOOP_VERSION }}/hadoop-{{ HADOOP_VERSION }}.tar.gz dest=/tmp/hadoop-{{ HADOOP_VERSION }}.tar.gz mode=0644
+- name: Download Hadoop
+  get_url: url={{ HADOOP_DOWNLOAD_LINK }}/hadoop-{{ HADOOP_VERSION }}/hadoop-{{ HADOOP_VERSION }}.tar.gz dest=/tmp/hadoop-{{ HADOOP_VERSION }}.tar.gz mode=0644
+  when: REMOTE_FETCH_TARBALLS == true
+
+- name: Untar Hadoop
+  unarchive: src=/tmp/hadoop-{{ HADOOP_VERSION }}.tar.gz dest={{ PACKAGE_BASE }} owner=root group=hadoop copy=no creates={{ PACKAGE_BASE }}/hadoop-{{ HADOOP_VERSION }}
+  when: REMOTE_FETCH_TARBALLS == true
 
 #- name: Download Hadoop to local machine
 #  local_action: get_url url={{ HADOOP_DOWNLOAD_LINK }}/hadoop-{{ HADOOP_VERSION }}/hadoop-{{ HADOOP_VERSION }}.tar.gz dest=files/download/hadoop-{{ HADOOP_VERSION }}.tar.gz mode=0644
 
 - name: Untar Hadoop
   unarchive: src=files/downloads/hadoop-{{ HADOOP_VERSION }}.tar.gz dest={{ PACKAGE_BASE }} owner=root group=hadoop copy=yes creates={{ PACKAGE_BASE }}/hadoop-{{ HADOOP_VERSION }}
+  when: REMOTE_FETCH_TARBALLS == false
 
 - name: Symlink Hadoop
   file: src={{ PACKAGE_BASE }}/hadoop-{{ HADOOP_VERSION }} path={{ PACKAGE_BASE }}/hadoop state=link owner=hadoop group=hadoop
@@ -46,7 +51,6 @@
 - name: Put Hadoop configuration in place
   template: src={{ item.src }} dest={{ item.dest }} owner=hdfs group=hadoop mode=0644
   with_items:
-#    - { src: "etc/hadoop/conf/slaves.j2", dest: "{{ HADOOP_CONFIG }}/slaves" }
     - { src: "etc/hadoop/conf/hadoop-env.sh.j2", dest: "{{ HADOOP_CONFIG }}/hadoop-env.sh" }
     - { src: "etc/hadoop/conf/yarn-env.sh.j2", dest: "{{ HADOOP_CONFIG }}/yarn-env.sh" }
     - { src: "etc/hadoop/conf/mapred-env.sh.j2", dest: "{{ HADOOP_CONFIG }}/mapred-env.sh" }
@@ -94,8 +98,6 @@
 #- name: Copy init.d scripts
 #  copy: src=etc/init.d/ dest=/etc/init.d/ owner=root group=root mode=755 backup=yes
 
-
-
 - name: Create services
   template: src=etc/systemd/system/{{ item.src }} dest=/etc/systemd/system/{{ item.dest }} owner=root group=root mode=755 backup=yes
   with_items:
@@ -105,16 +107,16 @@
     - { src: "resourcemanager.service.j2", dest: "resourcemanager.service"}
     - { src: "historyserver.service.j2", dest: "historyserver.service"}
 
-- name: Start namenode, resourcemanager & historyserver daemons on elected master node
-  service: name={{ item }} state=started enabled=yes
-  when: namenode
-  with_items:
-    - namenode
-    - resourcemanager
-    - historyserver
+#- name: Start namenode, resourcemanager & historyserver daemons on elected master node
+#  service: name={{ item }} state=started enabled=yes
+#  when: namenode
+#  with_items:
+#    - namenode
+#    - resourcemanager
+#    - historyserver
 
-- name: Start datanode & nodemanager daemons on each node services
-  service: name={{ item }} state=restarted enabled=yes
-  with_items:
-    - datanode
-    - nodemanager
+#- name: Start datanode & nodemanager daemons on each node services
+#  service: name={{ item }} state=restarted enabled=yes
+#  with_items:
+#    - datanode
+#    - nodemanager

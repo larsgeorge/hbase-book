@@ -10,7 +10,7 @@ ExecStop=/bin/kill $MAINPID
 Restart=on-abort
 StandardOutput=journal
 EnvironmentFile={{ ZOOKEEPER_CONFIG }}/java.env
-PIDFile={{ PID_DIR }}/zookeeper.pid
+PIDFile={{ VAR_RUN_BASE }}/zookeeper/pid/zookeeper.pid
 
 [Install]
 WantedBy=multi-user.target

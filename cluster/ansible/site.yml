@@ -8,3 +8,6 @@
   
 - name: Install security
   include: install-security.yml
+
+- name: Start services
+  include: start-services.yml

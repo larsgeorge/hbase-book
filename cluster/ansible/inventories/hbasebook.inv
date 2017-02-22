@@ -1,0 +1,44 @@
+master-1 ansible_host=10.0.20.1
+master-2 ansible_host=10.0.20.2
+master-3 ansible_host=10.0.20.3
+worker-1 ansible_host=10.0.20.10
+worker-2 ansible_host=10.0.20.11
+worker-3 ansible_host=10.0.20.12
+
+[masters]
+master-[1:3]
+
+[workers]
+worker-[1:3]
+
+[hbase_master]
+master-1
+
+[hbase_backup_masters]
+master-[2:3]
+
+[hbase_workers:children]
+workers
+
+[historyserver]
+master-1
+
+[kdc_server]
+master-2
+
+[cluster:children]
+masters
+workers
+
+[zookeepers:children]
+masters
+
+[monitoring_collection:children]
+masters
+workers
+
+[monitoring_aggregation]
+master-3
+
+[monitoring_frontend]
+master-3

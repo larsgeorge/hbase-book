@@ -2,3 +2,4 @@
 *.iml
 target/
 .idea/
+/cluster/ansible/files/

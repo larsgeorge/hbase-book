@@ -1,3 +1,5 @@
 ---
 
 ZOOKEEPER_ID: 1
+
+namenode: true
