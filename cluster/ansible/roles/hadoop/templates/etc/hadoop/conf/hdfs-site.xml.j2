@@ -78,8 +78,20 @@
     <value>0.0.0.0:50075</value>
   </property>
   <property>
-    <name>OFF-dfs.data.transfer.protection</name>
-    <value>privacy</value>
+    <name>dfs.data.transfer.protection</name>
+    <value>authentication</value>
+  </property>
+  <property>
+    <name>dfs.encrypt.data.transfer</name>
+    <value>true</value>
+  </property>
+  <property>
+    <name>dfs.encrypt.data.transfer.cipher.suites</name>
+    <value>AES/CTR/NoPadding</value>
+  </property>
+  <property>
+    <name>dfs.encrypt.data.transfer.cipher.key.bitlength</name>
+    <value>256</value>
   </property>
   <property>
     <name>dfs.http.policy</name>
@@ -100,10 +112,6 @@
   <property>
     <name>dfs.web.authentication.kerberos.principal</name>
     <value>HTTP/_HOST@{{ KRB_REALM }}</value>
-  </property>
-  <property>
-    <name>dfs.http.policy</name>
-    <value>HTTPS_ONLY</value>
   </property>
   {% endif -%}
 </configuration>
