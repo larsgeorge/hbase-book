@@ -1,0 +1,31 @@
+---
+# Sub playbook to stop all services on the relevant machines
+
+- hosts: master-1
+  tasks:
+    - name: Stop namenode
+      service: name=namenode state=stopped
+
+    - name: Stop resourcemanager
+      service: name=resourcemanager state=stopped
+
+- hosts: zookeepers
+  tasks:
+    - name: Stop zookeeper
+      service: name=zookeeper state=stopped
+
+- hosts: workers
+  tasks:
+    - name: Stop datanode
+      service: name=datanode state=stopped
+
+    - name: Stop nodemanager
+      service: name=nodemanager state=stopped
+
+    - name: Stop HBase regionserver
+      service: name=hbase state=stopped
+
+- hosts: cluster
+  tasks:
+    - name: Stop HBase
+      service: name=hbase state=stopped
