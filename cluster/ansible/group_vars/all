@@ -44,7 +44,9 @@ CONFIG_BASE: "/etc" # config files will be placed in subdirectories of this fold
 VAR_RUN_BASE: "/var/opt"
 HADOOP_DATA: "/data/hadoop/hdfs" # the Hadoop data directory, all HDFS data will be stored in this directory
 ZOOKEEPER_DATA: "/data/zookeeper" # Zookeeper data will be stored here
-HBASE_TEMP: "/data/tmp"
+
+HBASE_ROOT_DIR: "/hbase"
+HBASE_TEMP_DIR: "/data/tmp"
 
 TMP_DIR: "/tmp"
 LOG_DIR: "/var/log/hadoop"

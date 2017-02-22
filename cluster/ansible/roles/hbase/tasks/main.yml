@@ -10,7 +10,7 @@
     - { path: '{{ VAR_RUN_BASE }}/hbase/logs', owner: 'hbase', mode: 755 }
     - { path: '{{ VAR_RUN_BASE }}/hbase/pid', owner: 'hbase', mode: 755 }
     - { path: '{{ HBASE_CONFIG }}', owner: 'hbase', mode: 775 }
-    - { path: '{{ HBASE_TEMP }}', owner: 'hdfs', mode: 775 }
+    - { path: '{{ HBASE_TEMP_DIR }}', owner: 'hdfs', mode: 775 }
   when: SECURITY_ENABLED == true
 
 - name: Create HBase related directories (non-secure mode)
@@ -53,6 +53,31 @@
 
 # Also: hbase-policy.xml, log4j.properties, hadoop-metrics2-hbase.properties
 
+# Create HBase root directory and set access - needs a `hdfs` principal ticket
+
+- name: Use kinit to get `hdfs` ticket
+  shell: kinit -kt /etc/security/keytabs/hdfs.keytab hdfs/master-1.hbase.book@HBASE.BOOK
+  when: inventory_hostname == "{{ groups['hbase_master'][0] }}"
+
+- name: Determine pre-existing HBase root directory
+  shell: "{{ HADOOP_HOME }}/bin/hdfs dfs -ls /"
+  register: hdfs_list_root
+  changed_when: false 
+  when: inventory_hostname == "{{ groups['hbase_master'][0] }}"
+
+- debug: var=hdfs_list_root.stdout_lines
+  when: inventory_hostname == "{{ groups['hbase_master'][0] }}"
+  
+- name: Create HBase root directory
+  shell: "{{ HADOOP_HOME }}/bin/hdfs dfs -mkdir {{ HBASE_ROOT_DIR }}"
+  when: inventory_hostname == "{{ groups['hbase_master'][0] }}" and hdfs_list_root.stdout.find('{{ HBASE_ROOT_DIR }}') == -1
+
+- name: Set HBase root directory access
+  shell: "{{ HADOOP_HOME }}/bin/hdfs dfs -chown hbase:hadoop {{ HBASE_ROOT_DIR }}"
+  when: inventory_hostname == "{{ groups['hbase_master'][0] }}" and hdfs_list_root.stdout.find('{{ HBASE_ROOT_DIR }}') == -1
+
+# Configure service script
+  
 - name: Template HBase Master startup scripts
   template: src={{ item.src }} dest=/etc/systemd/system/{{ item.dest }} owner=root group=root mode=755 backup=yes
   with_items:

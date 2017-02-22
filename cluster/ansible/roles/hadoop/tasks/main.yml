@@ -98,8 +98,6 @@
 #- name: Copy init.d scripts
 #  copy: src=etc/init.d/ dest=/etc/init.d/ owner=root group=root mode=755 backup=yes
 
-
-
 - name: Create services
   template: src=etc/systemd/system/{{ item.src }} dest=/etc/systemd/system/{{ item.dest }} owner=root group=root mode=755 backup=yes
   with_items:
