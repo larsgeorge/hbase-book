@@ -1,0 +1,7 @@
+---
+# Sub playbook to install all HBase components needed.
+
+- name: Install HBase
+  hosts: cluster
+  roles:
+    - hbase

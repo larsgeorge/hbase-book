@@ -1,0 +1,7 @@
+stop-all.yml---
+# Sub playbook to stop all ZooKeeper services on the relevant machines
+
+- hosts: zookeepers
+  tasks:
+    - name: Stop zookeeper
+      service: name=zookeeper state=stopped

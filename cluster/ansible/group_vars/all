@@ -1,44 +1,52 @@
 ---
 
 # ======================
-# Configuration of demo
+# Configuration of a HBase Cluster
 # ---
-# The variable in this part can be changed to adapt the playbooks to your specific needs.
-# Anything further down should only be changed if you really know what you are doing!
+# The variable in this part can be changed to adapt the playbooks to your
+# specific needs. Anything further down should only be changed if you really
+# know what you are doing!
 # ======================
 
-
-# Setting this to true causes the entire cluster to be started in secure mode, all services will require a kerberos
-# ticket to allow access and all http uis will only work over https
-# Please note:
-# Since a new CA is generated for this example your browser will warn you about an insecure connection, as your browser
-# will not trust this CA. To fix this you can either add an exception for these urls or import the rootCA.pem file from
-# the cluster/ansible/files/tmp/certs folder relative to your repository root.
+# Setting this to true causes the entire cluster to be started in secure mode,
+# all services will require a kerberos ticket to allow access and all http uis
+# will only work over https. Please note: Since a new CA is generated for this
+# example your browser will warn you about an insecure connection, as your
+# browser will not trust this CA. To fix this you can either add an exception
+# for these urls or import the rootCA.pem file from the
+# cluster/ansible/files/tmp/certs folder relative to your repository root.
 SECURITY_ENABLED: true
 
-# If set to true all services will be restarted whenever a config file change that affects this service is made.
+# If set to true all services will be restarted whenever a config file change
+# that affects this service is made. TBD.
 RESTART_ON_CHANGE: true
 
-# This setting affects the fqdns that your hosts will get on the internal network that Vagrant creates.
-# Hostnames will be master-[1..x].CLUSTER_DOMAIN  and worker-[1..y].CLUSTER_DOMAIN
+# This setting affects the fqdns that your hosts will get on the internal
+# network that Vagrant (if used at all) creates. Hostnames will be
+# "master-[1..x].CLUSTER_DOMAIN" and "worker-[1..y].CLUSTER_DOMAIN".
 CLUSTER_DOMAIN: hbase.book
 
-# This controls where the tarballs for the installation are retrieved from
-# Setting this to true means that every machine downloads the tarball from the internet - this is useful for EC2 instances
-# for example.
-# Setting this to false makes the playboo upload the tarballs to the remote machines from the machine that runs ansible.
-# In this case you need to provide tarballs for the versions configured below in the files/downloads/ directory.
+# This controls where the tarballs for the installation are retrieved from.
+# Setting this to true means that every machine downloads the tarball from the
+# internet - this is useful for EC2 instances for example. Setting this to
+# false makes the playbook upload the tarballs to the remote machines from the
+# machine that runs ansible. In this case you need to provide tarballs for the
+# versions configured below in the files/downloads/ directory.
 REMOTE_FETCH_TARBALLS: false
 
-# The versions of software that will be installed by the playbooks
+# Defines if the monitoring packages based on Ganglia are also installed.
+MONITORING_ENABLED: false
+
+# The versions of software that will be installed by the playbooks.
 HADOOP_VERSION: 2.7.3
 HBASE_VERSION: 1.3.0
 HUE_VERSION: 3.10.0
 ZOOKEEPER_VERSION: 3.4.9
 SPARK_VERSION: 1.6.1
 
-# The paths that will be used to install software under and put configuration files in, feel free to change these if
-# you have a reason to do so, but there probably won't be a need to touch these.
+# The paths that will be used to install software under and put configuration
+# files in, feel free to change these if you have a reason to do so, but there
+# probably won't be a need to touch these.
 PACKAGE_BASE: "/opt"  # all installed software will be put in subdirectories of this folder
 CONFIG_BASE: "/etc" # config files will be placed in subdirectories of this folder
 VAR_RUN_BASE: "/var/opt"
@@ -52,9 +60,10 @@ TMP_DIR: "/tmp"
 LOG_DIR: "/var/log/hadoop"
 PID_DIR: "/var/run"
 
-# This password will be used to secure all keystores and keys contained in them, we don't support
-# using different passwords for multiple servers/services at this time, since these playbooks are
-# not intended for production use.
+# This password will be used to secure all keystores and keys contained in
+# them, we don't support using different passwords for multiple servers/
+# services at this time, since these playbooks are not intended for production
+# use.
 SSL_STORE_PASSWORD: sslsekret
 SSL_KEY_PASSWORD: sslsekret
 

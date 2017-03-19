@@ -1,0 +1,12 @@
+---
+# Sub playbook to install all Kerberos components needed.
+
+- name: Set up Kerberos KDC
+  hosts: kdc_server
+  roles:
+    - { role: kdc-server, when: SECURITY_ENABLED == true }
+
+- name: Install Kerberos Clients
+  hosts: cluster
+  roles:
+    - { role: krb-client, when: SECURITY_ENABLED == true }

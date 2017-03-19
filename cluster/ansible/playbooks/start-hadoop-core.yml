@@ -1,5 +1,5 @@
 ---
-# Sub playbook to start all services on the relevant machines
+# Sub playbook to start all Hadoop services on the relevant machines
 
 - hosts: master-1
   tasks:
@@ -9,11 +9,6 @@
     - name: Start resourcemanager
       service: name=resourcemanager state=started
 
-- hosts: zookeepers
-  tasks:
-    - name: Start zookeeper
-      service: name=zookeeper state=started
-
 - hosts: workers
   tasks:
     - name: Start datanode
@@ -21,11 +16,3 @@
 
     - name: Start nodemanager
       service: name=nodemanager state=started
-
-    - name: Start HBase regionserver
-      service: name=hbase state=started
-
-- hosts: cluster
-  tasks:
-    - name: Start HBase
-      service: name=hbase state=started

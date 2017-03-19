@@ -1,0 +1,28 @@
+---
+# Purpose: Create HBase root path in HDFS as privileged user
+#
+# Notes:
+#   - Executed on single master server only.
+
+# Create HBase root directory and set access - needs a `hdfs` principal ticket
+
+- name: Use kinit to get `hdfs` ticket
+  shell: kinit -kt /etc/security/keytabs/hdfs.keytab hdfs/master-1.hbase.book@HBASE.BOOK
+  when: inventory_hostname == "{{ groups['hbase_master'][0] }}"
+
+- name: Determine pre-existing HBase root directory
+  shell: "{{ HADOOP_HOME }}/bin/hdfs dfs -ls /"
+  register: hdfs_list_root
+  changed_when: false
+  when: inventory_hostname == "{{ groups['hbase_master'][0] }}"
+
+- debug: var=hdfs_list_root.stdout_lines
+  when: inventory_hostname == "{{ groups['hbase_master'][0] }}"
+
+- name: Create HBase root directory
+  shell: "{{ HADOOP_HOME }}/bin/hdfs dfs -mkdir {{ HBASE_ROOT_DIR }}"
+  when: inventory_hostname == "{{ groups['hbase_master'][0] }}" and hdfs_list_root.stdout.find('{{ HBASE_ROOT_DIR }}') == -1
+
+- name: Set HBase root directory access
+  shell: "{{ HADOOP_HOME }}/bin/hdfs dfs -chown hbase:hadoop {{ HBASE_ROOT_DIR }}"
+  when: inventory_hostname == "{{ groups['hbase_master'][0] }}" and hdfs_list_root.stdout.find('{{ HBASE_ROOT_DIR }}') == -1

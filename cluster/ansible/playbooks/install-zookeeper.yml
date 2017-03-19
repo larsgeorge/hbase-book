@@ -1,14 +1,16 @@
 ---
-# Sub playbook to install all common components needed.
+# Sub playbook to install all ZooKeeper components needed.
 
 - name: Apply common configuration to all nodes
   hosts: all
   roles:
     - common
+
 - name: Set up Kerberos KDC
   hosts: kdc_server
   roles:
     - { role: kdc-server, when: SECURITY_ENABLED == true }
+
 - name: Install Kerberos Clients
   hosts: cluster
   roles:
@@ -23,6 +25,7 @@
   hosts: zookeepers
   roles:
     - zookeeper
+
 - name: Install Hbase
   hosts: cluster
   roles:

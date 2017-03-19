@@ -1,0 +1,11 @@
+---
+# Sub playbook to start all services on the relevant machines
+
+- name: Stop HBase services
+  include: stop-hbase.yml
+
+- name: Stop Hadoop Core services
+  include: stop-hadoop-core.yml
+
+- name: Stop ZooKeeper services
+  include: stop-zookeeper.yml

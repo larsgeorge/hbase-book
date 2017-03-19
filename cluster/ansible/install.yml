@@ -1,0 +1,10 @@
+---
+# Main playbook to install all components needed.
+- name: Apply common configuration to all nodes
+  include: playbooks/install-all.yml
+
+- name: Install security
+  include: playbooks/install-security.yml
+
+- name: Start services
+  include: playbooks/start-all.yml

@@ -1,0 +1,9 @@
+---
+# Sub playbook to install all common components needed.
+
+# TODO: Need to split into separate common modules for each major component.
+
+- name: Apply common configuration to all nodes
+  hosts: all
+  roles:
+    - common
