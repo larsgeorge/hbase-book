@@ -27,7 +27,7 @@
     <name>dfs.namenode.heartbeat.recheck-interval</name>
     <value>15000</value>
   </property>
-  {%- if SECURITY_ENABLED %}
+  {% if SECURITY_ENABLED %}
   <!-- security related properties -->
   <property>
     <name>dfs.block.access.token.enable</name>
@@ -46,7 +46,7 @@
     <value>HTTP/_HOST@{{ KRB_REALM }}</value>
   </property>
   <property>
-    <name>dfs.secondary.namenode.keytab.file</name> 
+    <name>dfs.secondary.namenode.keytab.file</name>
     <value>{{ KEYTAB_DIR }}/hdfs.keytab</value>
   </property>
   <property>
@@ -113,5 +113,5 @@
     <name>dfs.web.authentication.kerberos.principal</name>
     <value>HTTP/_HOST@{{ KRB_REALM }}</value>
   </property>
-  {% endif -%}
+  {% endif %}
 </configuration>

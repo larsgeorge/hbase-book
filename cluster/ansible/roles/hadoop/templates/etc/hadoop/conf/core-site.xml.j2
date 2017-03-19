@@ -25,7 +25,7 @@
     <name>hadoop.tmp.dir</name>
     <value>{{ TMP_DIR }}/hadoop-${user.name}</value>
   </property>
-  {%- if SECURITY_ENABLED %}
+  {% if SECURITY_ENABLED %}
   <!-- security related properties -->
   <property>
     <name>hadoop.security.authentication</name>
@@ -40,5 +40,5 @@
     <name>hadoop.security.authorization</name>
     <value>false</value>
   </property>
-  {% endif -%}
+  {% endif %}
 </configuration>

@@ -67,7 +67,7 @@
     <name>phoenix.schema.isNamespaceMappingEnabled</name>
     <value>true</value>
   </property>
-  {%- if SECURITY_ENABLED %}
+  {% if SECURITY_ENABLED %}
   <property>
     <name>hbase.regionserver.kerberos.principal</name>
     <value>hbase/_HOST@{{ KRB_REALM }}</value>
@@ -111,5 +111,5 @@
     <name>hadoop.security.authorization</name>
     <value>false</value>
   </property>
-  {% endif -%}
+  {% endif %}
 </configuration>
