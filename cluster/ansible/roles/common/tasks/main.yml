@@ -4,6 +4,8 @@
 # Notes:
 #   - Executed on all servers in the cluster
 
+tags: common
+
 # Set os prerequisites
 
 # ==== Stop firewall ====

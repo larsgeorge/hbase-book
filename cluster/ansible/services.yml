@@ -1,0 +1,113 @@
+---
+# Sub playbook to restart all services on the relevant machines
+#
+# Notes:
+# - Use the "start" tag to start only, or "stop" to stop only
+# - Add "zookeeper", "hadoop", and "hbase" tags to target only named service
+#
+# Examples:
+# - Restart ZooKeeper only:
+#   $ ansible-playbook service.yml --tags "zookeeper"
+# - Stop only HBase
+#   $ ansible-playbook service.yml --tags "stop,hbase"
+
+# Zookeeper
+
+- hosts: zookeepers
+  tasks:
+    - name: Stop ZooKeeper
+      service: name=zookeeper state=stopped
+  tags: 
+    - zookeeper
+    - stop
+
+- hosts: zookeepers		
+  tasks:		
+    - name: Start ZooKeeper		
+      service: name=zookeeper state=started
+  tags: 
+    - zookeeper
+    - start
+
+# Hadoop Core
+ 
+- hosts: master-1
+  tasks:
+    - name: Start namenode
+      service: name=namenode state=started
+
+    - name: Start resourcemanager
+      service: name=resourcemanager state=started
+  tags: 
+    - hadoop
+    - hadoop-masters
+    - stop
+
+- hosts: workers
+  tasks:
+    - name: Start datanode
+      service: name=datanode state=started
+
+    - name: Start nodemanager
+      service: name=nodemanager state=started
+  tags: 
+    - hadoop
+    - hadoop-workers
+    - stop
+
+# HBase
+
+- hosts: hbase-master
+  tasks:
+    - name: Create HBase root directory in HDFS with privileged user
+      include: ../roles/hbase/tasks/create-hbase-root.yml
+      when: SECURITY_ENABLED == true
+  tags: 
+    - hbase
+    - hbase-masters
+    - stop
+
+- hosts: workers
+  tasks:
+    - name: Start HBase region server
+      service: name=hbase state=started
+  tags: 
+    - hadoop
+    - hadoop-masters
+    - stop
+
+
+- hosts: cluster
+  tasks:
+    - name: Start HBase masters
+      service: name=hbase state=started---
+
+
+
+- hosts: master-1
+  tasks:
+    - name: Stop namenode
+      service: name=namenode state=stopped
+
+    - name: Stop resourcemanager
+      service: name=resourcemanager state=stopped
+
+- hosts: workers
+  tasks:
+    - name: Stop datanode
+      service: name=datanode state=stopped
+
+    - name: Stop nodemanager
+      service: name=nodemanager state=stopped
+---
+# Sub playbook to stop all HBase services on the relevant machines
+
+- hosts: workers
+  tasks:
+    - name: Stop HBase regionserver
+      service: name=hbase state=stopped
+
+- hosts: cluster
+  tasks:
+    - name: Stop HBase masters
+      service: name=hbase state=stoppedstop-all.yml---

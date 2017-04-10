@@ -1,10 +1,114 @@
 ---
 # Main playbook to install all components needed.
+
+# TODO: Need to split into separate common modules for each major component.
+
 - name: Apply common configuration to all nodes
-  include: playbooks/install-all.yml
+  hosts: all
+  roles:
+    - common
 
-- name: Install security
-  include: playbooks/install-security.yml
+- name: Set up Kerberos KDC
+  hosts: kdc_server
+  roles:
+    - { role: kdc-server, when: SECURITY_ENABLED == true }
 
-- name: Start services
-  include: playbooks/start-all.yml
+- name: Install Kerberos Clients
+  hosts: cluster
+  roles:
+    - { role: krb-client, when: SECURITY_ENABLED == true }
+    
+- name: Install Hadoop common components
+  hosts: all
+  roles:
+    - hadoop
+
+- name: Install zookeeper nodes
+  hosts: zookeepers
+  roles:
+    - zookeeper
+
+- name: Install HBase
+  hosts: cluster
+  roles:
+    - hbase
+
+# Monitoring
+
+- name: Install monitoring collection daemons
+  hosts: monitoring_collection
+  when: MONITORING_ENABLED == true
+
+  roles:
+    - monitoring-collection
+
+- name: Install monitoring aggregation daemons
+  hosts: monitoring_aggregation
+  when: MONITORING_ENABLED == true
+
+  roles:
+    - monitoring-aggregation
+
+- name: Install monitoring frontend
+  hosts: monitoring_frontend
+  when: MONITORING_ENABLED == true
+
+  roles:
+    - monitoring-frontend
+
+# Security
+
+- name: SSL Phase 1 (Prepare Servers)
+  hosts: all
+  roles:
+    - { role: ssl-phase-1, when: SECURITY_ENABLED == true }
+
+- name: SSL Phase 2 (Sign CSRs)
+  hosts: kdc_server
+  roles:
+    - { role: ssl-phase-2, when: SECURITY_ENABLED == true }
+
+- name: SSL Phase 3 (Install CSRs and Truststores)
+  hosts: all
+  roles:
+    - { role: ssl-phase-3, when: SECURITY_ENABLED == true }
+    
+
+# Start services
+
+- hosts: zookeepers
+  tasks:
+    - name: Start zookeeper
+      service: name=zookeeper state=started
+
+- hosts: master-1
+  tasks:
+    - name: Start namenode
+      service: name=namenode state=started
+
+    - name: Start resourcemanager
+      service: name=resourcemanager state=started
+
+- hosts: workers
+  tasks:
+    - name: Start datanode
+      service: name=datanode state=started
+
+    - name: Start nodemanager
+      service: name=nodemanager state=started
+
+- hosts: hbase-master
+  tasks:
+    - name: Create HBase root directory in HDFS with privileged user
+      include: ../roles/hbase/tasks/create-hbase-root.yml
+      when: SECURITY_ENABLED == true
+
+- hosts: workers
+  tasks:
+    - name: Start HBase region server
+      service: name=hbase state=started
+
+- hosts: cluster
+  tasks:
+    - name: Start HBase masters
+      service: name=hbase state=started

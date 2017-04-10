@@ -1,7 +1,0 @@
----
-# Sub playbook to install all Hadoop components needed.
-
-- name: Install Hadoop common components
-  hosts: all
-  roles:
-    - hadoop
