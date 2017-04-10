@@ -1,7 +1,7 @@
 ---
 # Purpose: Monitoring collection related settings
 #
-# Notes: 
+# Notes:
 #   - Executed (usually) on all servers in the cluster
 #   - Installs agents/daemons that collect the system metrics
 
@@ -9,6 +9,7 @@
   yum: name={{ item }} state=present # update_cache=yes
   with_items:
     - ganglia-gmond
+  when: MONITORING_ENABLED == true
 
 # cluster {
 #   name = "unspecified"
@@ -25,6 +26,7 @@
   template: src={{ item.src }} dest={{ item.dest }} owner=root group=root mode=0644
   with_items:
     - { src: "etc/ganglia/gmond.conf.j2", dest: "/etc/ganglia/gmond.conf" }
+  when: MONITORING_ENABLED == true
   notify:
     - Restart monitoring collection daemons
 
@@ -34,5 +36,6 @@
 
 - name: Start monitoring collection services
   service: name={{ item }} state=started enabled=yes
+  when: MONITORING_ENABLED == true
   with_items:
     - gmond
