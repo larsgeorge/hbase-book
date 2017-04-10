@@ -5,6 +5,7 @@ After=network.target
 
 [Service]
 User={% if SECURITY_ENABLED %}hdfs{% else %}hadoop{% endif %}
+
 ExecStart={{ HADOOP_HOME }}/bin/yarn resourcemanager
 ExecStop=/bin/kill $MAINPID
 Restart=on-abort

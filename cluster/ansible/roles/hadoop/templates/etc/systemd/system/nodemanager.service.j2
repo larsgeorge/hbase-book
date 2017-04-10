@@ -4,7 +4,8 @@ Before=
 After=network.target
 
 [Service]
-User=root
+User={% if SECURITY_ENABLED %}hdfs{% else %}hadoop{% endif %}
+
 ExecStart={{ HADOOP_HOME }}/bin/yarn nodemanager
 ExecStop=/bin/kill $MAINPID
 Restart=on-abort
