@@ -83,6 +83,8 @@
 
 # Hadoop Core
 
+# TODO: Create `/user`, `/user/hbasebook` (owner: `hbasebook`), and `tmp` (777)
+
 - hosts: master-1
   tags:
     - hadoop
