@@ -1,0 +1,16 @@
+[Unit]
+Description=HBase RegionServer
+Before=
+After=network.target
+
+[Service]
+User=hbase
+EnvironmentFile=/etc/environment
+ExecStart={{ HBASE_HOME }}/bin/hbase regionserver start
+ExecStop=/bin/kill $MAINPID
+Restart=on-abort
+StandardOutput=journal
+PIDFile={{ PID_DIR }}/hbase-regionserver.pid
+
+[Install]
+WantedBy=multi-user.target

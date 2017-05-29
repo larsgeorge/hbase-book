@@ -1,0 +1,18 @@
+---
+# Purpose: Install HBase Master
+#
+# Notes:
+#   - Executed on all dedicated servers in the cluster
+
+# Configure service script
+
+- name: Template HBase Master startup scripts
+  template:
+    src={{ item.src }}
+    dest=/etc/systemd/system/{{ item.dest }}
+    owner=root
+    group=root
+    mode=755
+    backup=yes
+  with_items:
+    - { src: 'etc/systemd/system/hbase-master.service.j2', dest: 'hbase-master.service'}

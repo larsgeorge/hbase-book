@@ -168,3 +168,12 @@
   tasks:
     - name: Start HBase masters
       service: name=hbase state=started
+
+- hosts: hbase_rest
+  tags:
+    - hbase
+    - hbase-rest
+    - start
+  tasks:
+    - name: Start HBase REST gateways
+      service: name=hbase-rest state=started

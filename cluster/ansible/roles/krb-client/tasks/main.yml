@@ -1,16 +1,22 @@
 ---
 # Purpose: Add Kerberos rerlated traits to the nodes
 #
-# Notes: 
+# Notes:
 #   - Executed on all servers in the cluster
 - name: Create Hadoop related directories (secure mode)
-  file: path={{ KEYTAB_DIR }} owner=root group=root mode=755 recurse=yes state=directory
+  file:
+    path={{ KEYTAB_DIR }}
+    state=directory
+    owner=root
+    group=root
+    mode=755
+    recurse=yes
 
 - name: Install JCE libraries
-  copy: 
+  copy:
     src=UnlimitedJCEPolicy/
-    dest=/etc/alternatives/jre/lib/security/ 
-    owner=root 
+    dest=/etc/alternatives/jre/lib/security/
+    owner=root
     group=root
     mode=644
     backup=yes
@@ -22,7 +28,7 @@
     - libselinux-python
 
 - name: Copy and configure client krb5.conf
-  template: 
+  template:
     src=etc/krb5.conf.j2
     dest=/etc/krb5.conf
     mode=0644
@@ -30,6 +36,8 @@
     group=root
 
 - name: Upload keytabs
-  copy: dest={{ KEYTAB_DIR }}/{{ item }}.keytab src=files/keytabs/{{ item }}-{{ inventory_hostname }}.keytab
+  copy:
+    src=files/keytabs/{{ item }}-{{ inventory_hostname }}.keytab
+    dest={{ KEYTAB_DIR }}/{{ item }}.keytab
   with_items:
     - "{{ KRB_SERVICES_WITH_HTTP }}"

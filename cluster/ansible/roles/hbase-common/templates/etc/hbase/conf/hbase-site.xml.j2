@@ -108,12 +108,67 @@
   </property>
   <property>
     <!-- enables service-level-authentication on RPC layer -->
+    <!-- MUST be set for impersonation to work! -->
     <name>hadoop.security.authorization</name>
-    <value>false</value>
+    <value>true</value>
   </property>
   <property>
     <!-- enables SSL for the web based UIs -->
     <name>hbase.ssl.enabled</name>
+    <value>true</value>
+  </property>
+
+  <!-- REST gateway related settings -->
+  <!-- SSL -->
+  <property>
+    <name>hbase.rest.ssl.enabled</name>
+    <value>true</value>
+  </property>
+  <property>
+    <name>hbase.rest.ssl.keystore.store</name>
+    <value>{{ KEYSTORE_DIR }}/{{ inventory_hostname}}.jks</value>
+  </property>
+  <property>
+    <name>hbase.rest.ssl.keystore.password</name>
+    <value>{{ SSL_STORE_PASSWORD }}</value>
+  </property>
+  <property>
+    <name>hbase.rest.ssl.keystore.keypassword</name>
+    <value>{{ SSL_STORE_PASSWORD }}</value>
+  </property>
+  <!-- Kerberos to HBase Servers-->
+  <property>
+    <name>hbase.rest.keytab.file</name>
+    <value>{{ KEYTAB_DIR }}/hbase-rest.keytab</value>
+  </property>
+  <property>
+    <name>hbase.rest.kerberos.principal</name>
+    <value>hbase-rest/_HOST@{{ KRB_REALM }}</value>
+  </property>
+  <!-- SPNEGO for Client Access -->
+  <property>
+    <name>hbase.rest.authentication.type</name>
+    <value>kerberos</value>
+  </property>
+  <property>
+    <name>hbase.rest.authentication.kerberos.principal</name>
+    <value>HTTP/_HOST@{{ KRB_REALM }}</value>
+  </property>
+  <property>
+    <name>hbase.rest.authentication.kerberos.keytab</name>
+    <value>{{ KEYTAB_DIR }}/hbase-rest.keytab</value>
+  </property>
+  <!-- Impersonation -->
+  <property>
+    <name>hadoop.proxyuser.hbase-rest.groups</name>
+    <value>hbasebook</value>
+  </property>
+  <property>
+    <name>hadoop.proxyuser.hbase-rest.hosts</name>
+    <value>master-1.hbase.book</value>
+  </property>
+  <property>
+    <name>hbase.rest.support.proxyuser</name>
     <value>true</value>
   </property>
   {% endif %}

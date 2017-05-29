@@ -69,31 +69,31 @@ SSL_KEY_PASSWORD: sslsekret
 
 # ==== Don't change anything below this line - really! ====
 
-OS_USERS: [ 'hdfs', 'yarn', 'mapred', 'hbase', 'zookeeper', 'hue', 'hadoop' ]
+# List with all OS user accounts that need to be created
+OS_USERS: [ 'hdfs', 'yarn', 'mapred', 'hbase', 'hbase-rest', 'zookeeper', 'hue', 'hadoop' ]
 
-SSL_SERVICES:
-  - { owner: 'hdfs', path: 'hadoop' }
-#  - { owner: 'yarn', path: 'hadoop' } # YARN shares the "hadoop" configuration with HDFS
-  - { owner: 'hbase', path: 'hbase' }
-  - { owner: 'zookeeper', path: 'zookeeper' }
-
+# This group defines all Kerberos related accounts that need a principal
 KRB_ADMIN: "hbasebook"
 KRB_REALM: "{{ CLUSTER_DOMAIN | upper }}"
 KRB_SERVER: "{{ groups['kdc_server'][0] }}"
-KRB_PRINCIPALS: [ 'hdfs', 'HTTP', 'yarn', 'hbase', 'zookeeper' ]
-KRB_SERVICES_WITH_HTTP: [ 'hdfs', 'yarn', 'hbase', 'zookeeper' ]
+KRB_PRINCIPALS: [ 'hdfs', 'HTTP', 'yarn', 'hbase', 'hbase-rest', 'zookeeper' ]
+KRB_SERVICES_WITH_HTTP: [ 'hdfs', 'yarn', 'hbase', 'hbase-rest', 'zookeeper' ]
 
 # Paths
 JAVA_HOME: /etc/alternatives/jre_1.7.0
 
+# Define the packages that are needed on all machines
 BASE_PACKAGES_RH_PRE7: [ 'snappy', 'ntp', 'ntpdate', 'java-1.7.0-openjdk', 'java-1.7.0-openjdk-devel', 'libselinux-python', 'unzip', 'tar' ]
 BASE_PACKAGES_RH_7: [ 'snappy', 'ntp', 'ntpdate', 'java-1.7.0-openjdk', 'java-1.7.0-openjdk-devel', 'libselinux-python', 'unzip', 'tar' ]
 BASE_PACKAGES_DEBIAN: [ 'libsnappy-dev', 'ntp', 'ntpdate', 'openjdk-7-jdk', 'python-selinux', 'unzip', 'tar' ]
 
+# Set the download locations for tarballs
 HADOOP_DOWNLOAD_LINK: 'http://ftp.halifax.rwth-aachen.de/apache/hadoop/common'
 ZOOKEEPER_DOWNLOAD_LINK: 'http://ftp.halifax.rwth-aachen.de/apache/zookeeper'
 HBASE_DOWNLOAD_LINK: 'http://ftp.halifax.rwth-aachen.de/apache/hbase'
 HUE_DOWNLOAD_LINK: 'https://dl.dropboxusercontent.com/u/730827/hue/releases'
+
+DOWNLOAD_ONCE: true
 
 # Path variables derived from base paths above - Do not touch
 HADOOP_CONFIG: "{{ CONFIG_BASE }}/hadoop/conf"
@@ -101,11 +101,38 @@ HADOOP_HOME: "{{ PACKAGE_BASE }}/hadoop"
 ZOOKEEPER_CONFIG: "{{ CONFIG_BASE }}/zookeeper"
 ZOOKEEPER_HOME: "{{ PACKAGE_BASE }}/zookeeper"
 HBASE_CONFIG: "{{ CONFIG_BASE }}/hbase/conf"
+HBASE_CONFIG_REST: "{{ CONFIG_BASE }}/hbase-rest/conf"
 HBASE_HOME: "{{ PACKAGE_BASE }}/hbase"
+
+PATHS_BY_OWNER:
+  hadoop:
+    home:   "{{ PACKAGE_BASE }}/hadoop"
+    config: "{{ CONFIG_BASE }}/hadoop/conf"
+  hdfs:
+    home:   "{{ PACKAGE_BASE }}/hadoop"
+    config: "{{ CONFIG_BASE }}/hadoop/conf"
+  zookeeper:
+    home:   "{{ PACKAGE_BASE }}/zookeeper"
+    config: "{{ CONFIG_BASE }}/zookeeper"
+  hbase:
+    home:   "{{ PACKAGE_BASE }}/hbase"
+    config: "{{ CONFIG_BASE }}/hbase/conf"
+    logs:   "{{ VAR_RUN_BASE }}/hbase/logs"
+    pid:    "{{ VAR_RUN_BASE }}/hbase/pid"
+  hbase-rest:
+    home:   "{{ PACKAGE_BASE }}/hbase"
+    config: "{{ CONFIG_BASE }}/hbase-rest/conf"
+    logs:   "{{ VAR_RUN_BASE }}/hbase-rest/logs"
+    pid:    "{{ VAR_RUN_BASE }}/hbase-rest/pid"
+
+# Note: See http://pyyaml.org/wiki/PyYAMLDocumentation#YAMLtagsandPythontypes for
+#  reference to how Ansible builds blocks through YAML
+
+# Security related paths
 KEYTAB_DIR: /etc/security/keytabs
+KEYSTORE_STAGING_DIR: /root/certs
+KEYSTORE_DIR: /etc/security/keystores
 
 # Default values for variables, these will be overriden for master servers in Vagrantfile
 namenode: false
 zookeeper: false
-
-DOWNLOAD_ONCE: true

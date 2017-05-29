@@ -45,14 +45,38 @@
   roles:
     - zookeeper
 
-- name: Install HBase
+- name: Install HBase common components
   hosts: cluster
   tags:
     - common
     - hbase
     - hbase-common
   roles:
+    - hbase-common
+
+- name: Install HBase Masters
+  hosts: masters
+  tags:
     - hbase
+    - hbase-master
+  roles:
+    - hbase-master
+
+- name: Install HBase RegionServers
+  hosts: workers
+  tags:
+    - hbase
+    - hbase-regionserver
+  roles:
+    - hbase-regionserver
+
+- name: Install HBase REST Gateways
+  hosts: hbase_rest
+  tags:
+    - hbase
+    - hbase-rest
+  roles:
+    - hbase-rest
 
 # Monitoring
 

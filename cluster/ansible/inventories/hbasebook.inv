@@ -20,6 +20,9 @@ master-[2:3]
 [hbase_workers:children]
 workers
 
+[hbase_rest]
+master-3
+
 [historyserver]
 master-1
 

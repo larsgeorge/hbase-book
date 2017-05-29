@@ -1,0 +1,17 @@
+[Unit]
+Description=HBase REST Gateway
+Before=
+After=network.target
+
+[Service]
+User=hbase-rest
+EnvironmentFile=/etc/environment
+Environment=HBASE_CONF_DIR=/etc/hbase-rest/conf
+ExecStart={{ HBASE_HOME }}/bin/hbase rest start
+ExecStop=/bin/kill $MAINPID
+Restart=on-abort
+StandardOutput=journal
+PIDFile={{ PID_DIR }}/hbase-rest.pid
+
+[Install]
+WantedBy=multi-user.target
