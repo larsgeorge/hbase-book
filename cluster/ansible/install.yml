@@ -46,7 +46,7 @@
     - zookeeper
 
 - name: Install HBase common components
-  hosts: cluster
+  hosts: hbase_servers
   tags:
     - common
     - hbase
@@ -55,10 +55,18 @@
     - hbase-common
 
 - name: Install HBase Masters
-  hosts: masters
+  hosts: hbase_master
   tags:
     - hbase
     - hbase-master
+  roles:
+    - hbase-master
+
+- name: Install HBase Backup Masters
+  hosts: hbase_backup_masters
+  tags:
+    - hbase
+    - hbase-backup-masters
   roles:
     - hbase-master
 

@@ -17,11 +17,20 @@ master-1
 [hbase_backup_masters]
 master-[2:3]
 
+[hbase_masters]
+master-[1:3]
+
 [hbase_workers:children]
 workers
 
 [hbase_rest]
 master-3
+
+[hbase_servers:children]
+hbase_master
+hbase_backup_masters
+hbase_workers
+hbase_rest
 
 [historyserver]
 master-1
