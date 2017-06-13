@@ -22,7 +22,7 @@
     - stop
   tasks:
     - name: Stop HBase regionserver
-      service: name=hbase state=stopped
+      service: name=hbase-regionserver state=stopped
 
 - hosts: masters
   tags:
@@ -31,7 +31,7 @@
     - stop
   tasks:
     - name: Stop HBase masters
-      service: name=hbase state=stopped
+      service: name=hbase-master state=stopped
 
 # Hadoop Core
 
@@ -158,7 +158,7 @@
     - start
   tasks:
     - name: Start HBase region servers
-      service: name=hbase state=started
+      service: name=hbase-regionserver state=started
 
 - hosts: masters
   tags:
@@ -167,7 +167,7 @@
     - start
   tasks:
     - name: Start HBase masters
-      service: name=hbase state=started
+      service: name=hbase-master state=started
 
 - hosts: hbase_rest
   tags:
