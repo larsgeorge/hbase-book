@@ -26,11 +26,15 @@ workers
 [hbase_rest]
 master-3
 
+[hbase_thrift]
+master-2
+
 [hbase_servers:children]
 hbase_master
 hbase_backup_masters
 hbase_workers
 hbase_rest
+hbase_thrift
 
 [historyserver]
 master-1

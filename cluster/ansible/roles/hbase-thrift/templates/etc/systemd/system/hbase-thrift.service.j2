@@ -1,0 +1,16 @@
+[Unit]
+Description=HBase Thrift Gateway
+Before=
+After=network.target
+
+[Service]
+User=hbase-thrift
+EnvironmentFile=/etc/environment
+ExecStart={{ HBASE_HOME }}/bin/hbase {% if HBASE_THRIFT_VERSION == "2" %}thrift2{% else %}thrift{% endif %} start
+ExecStop=/bin/kill $MAINPID
+Restart=on-abort
+StandardOutput=journal
+PIDFile={{ PID_DIR }}/hbase-thrift.pid
+
+[Install]
+WantedBy=multi-user.target

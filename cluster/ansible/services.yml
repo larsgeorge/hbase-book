@@ -15,6 +15,24 @@
 
 # HBase
 
+- hosts: hbase_thrift
+  tags:
+    - hbase
+    - hbase-thrift
+    - stop
+  tasks:
+    - name: Stop HBase Thrift gateways
+      service: name=hbase-thrift state=stopped
+
+- hosts: hbase_rest
+  tags:
+    - hbase
+    - hbase-rest
+    - stop
+  tasks:
+    - name: Stop HBase REST gateways
+      service: name=hbase-rest state=stopped
+
 - hosts: workers
   tags:
     - hbase
@@ -177,3 +195,12 @@
   tasks:
     - name: Start HBase REST gateways
       service: name=hbase-rest state=started
+
+- hosts: hbase_thrift
+  tags:
+    - hbase
+    - hbase-thrift
+    - start
+  tasks:
+    - name: Start HBase Thrift gateways
+      service: name=hbase-thrift state=started

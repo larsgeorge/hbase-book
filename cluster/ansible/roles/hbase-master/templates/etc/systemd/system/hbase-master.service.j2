@@ -1,3 +1,4 @@
+#jinja2: trim_blocks:False
 [Unit]
 Description=HBase Master
 Before=
@@ -6,7 +7,7 @@ After=network.target
 [Service]
 User=hbase
 EnvironmentFile=/etc/environment
-ExecStart={{ HBASE_HOME }}/bin/hbase master start{%+ if HBASE_MODE == "backup" %} -backup{% endif %}
+ExecStart={{ HBASE_HOME }}/bin/hbase master start{% if HBASE_MODE == "backup" %} -backup{% endif %}
 ExecStop=/bin/kill $MAINPID
 Restart=on-abort
 StandardOutput=journal

@@ -67,17 +67,20 @@ PID_DIR: "/var/run"
 SSL_STORE_PASSWORD: sslsekret
 SSL_KEY_PASSWORD: sslsekret
 
+# Set the Thrift implementation version to start (can be "1" or "2")
+HBASE_THRIFT_VERSION: 2
+
 # ==== Don't change anything below this line - really! ====
 
 # List with all OS user accounts that need to be created
-OS_USERS: [ 'hdfs', 'yarn', 'mapred', 'hbase', 'hbase-rest', 'zookeeper', 'hue', 'hadoop' ]
+OS_USERS: [ 'hdfs', 'yarn', 'mapred', 'hbase', 'hbase-rest', 'hbase-thrift', 'zookeeper', 'hue', 'hadoop' ]
 
 # This group defines all Kerberos related accounts that need a principal
 KRB_ADMIN: "hbasebook"
 KRB_REALM: "{{ CLUSTER_DOMAIN | upper }}"
 KRB_SERVER: "{{ groups['kdc_server'][0] }}"
-KRB_PRINCIPALS: [ 'hdfs', 'HTTP', 'yarn', 'hbase', 'hbase-rest', 'zookeeper' ]
-KRB_SERVICES_WITH_HTTP: [ 'hdfs', 'yarn', 'hbase', 'hbase-rest', 'zookeeper' ]
+KRB_PRINCIPALS: [ 'hdfs', 'HTTP', 'yarn', 'hbase', 'hbase-rest', 'hbase-thrift', 'zookeeper' ]
+KRB_SERVICES_WITH_HTTP: [ 'hdfs', 'yarn', 'hbase', 'hbase-rest', 'hbase-thrift', 'zookeeper' ]
 
 # Paths
 JAVA_HOME: /etc/alternatives/jre_1.7.0
@@ -101,7 +104,6 @@ HADOOP_HOME: "{{ PACKAGE_BASE }}/hadoop"
 ZOOKEEPER_CONFIG: "{{ CONFIG_BASE }}/zookeeper"
 ZOOKEEPER_HOME: "{{ PACKAGE_BASE }}/zookeeper"
 HBASE_CONFIG: "{{ CONFIG_BASE }}/hbase/conf"
-HBASE_CONFIG_REST: "{{ CONFIG_BASE }}/hbase-rest/conf"
 HBASE_HOME: "{{ PACKAGE_BASE }}/hbase"
 
 PATHS_BY_OWNER:

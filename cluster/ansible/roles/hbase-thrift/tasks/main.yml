@@ -1,0 +1,18 @@
+---
+# Purpose: Install HBase Thrift Gateway
+#
+# Notes:
+#   - Executed on specific servers in the cluster
+
+# Configure service script
+
+- name: Install HBase Thrift startup scripts
+  template:
+    src={{ item.src }}
+    dest=/etc/systemd/system/{{ item.dest }}
+    owner=root
+    group=root
+    mode=755
+    backup=yes
+  with_items:
+    - { src: "etc/systemd/system/hbase-thrift.service.j2", dest: "hbase-thrift.service"}

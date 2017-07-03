@@ -86,6 +86,14 @@
   roles:
     - hbase-rest
 
+- name: Install HBase Thrift Gateways
+  hosts: hbase_thrift
+  tags:
+    - hbase
+    - hbase-thrift
+  roles:
+    - hbase-thrift
+
 # Monitoring
 
 - name: Install monitoring collection daemons
