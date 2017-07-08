@@ -20,6 +20,8 @@
     - hbase
     - hbase-thrift
     - stop
+    - stop-hbase
+    - stop-hbase-thrift
   tasks:
     - name: Stop HBase Thrift gateways
       service: name=hbase-thrift state=stopped
@@ -29,6 +31,8 @@
     - hbase
     - hbase-rest
     - stop
+    - stop-hbase
+    - stop-hbase-rest
   tasks:
     - name: Stop HBase REST gateways
       service: name=hbase-rest state=stopped
@@ -38,6 +42,8 @@
     - hbase
     - hbase-workers
     - stop
+    - stop-hbase
+    - stop-hbase-workers
   tasks:
     - name: Stop HBase regionserver
       service: name=hbase-regionserver state=stopped
@@ -47,6 +53,8 @@
     - hbase
     - hbase-masters
     - stop
+    - stop-hbase
+    - stop-hbase-masters
   tasks:
     - name: Stop HBase masters
       service: name=hbase-master state=stopped
@@ -58,6 +66,8 @@
     - hadoop
     - hadoop-masters
     - stop
+    - stop-hadoop
+    - stop-hadoop-masters
   tasks:
     - name: Stop HDFS namenode
       service: name=namenode state=stopped
@@ -70,6 +80,8 @@
     - hadoop
     - hadoop-workers
     - stop
+    - stop-hadoop
+    - stop-hadoop-workers
   tasks:
     - name: Stop HDFS datanodes
       service: name=datanode state=stopped
@@ -83,6 +95,7 @@
   tags:
     - zookeeper
     - stop
+    - stop-zookeeper
   tasks:
     - name: Stop ZooKeeper
       service: name=zookeeper state=stopped
@@ -95,6 +108,7 @@
   tags:
     - zookeeper
     - start
+    - start-zookeeper
   tasks:
     - name: Start ZooKeeper
       service: name=zookeeper state=started
@@ -108,6 +122,8 @@
     - hadoop
     - hadoop-masters
     - start
+    - start-hadoop
+    - start-hadoop-masters
   tasks:
     - name: Start HDFS namenode
       service: name=namenode state=started
@@ -120,6 +136,8 @@
     - hadoop
     - hadoop-workers
     - start
+    - start-hadoop
+    - start-hadoop-workers
   tasks:
     - name: Start HDFS datanodes
       service: name=datanode state=started
@@ -140,6 +158,8 @@
     - hbase-masters
     - create-hbase-root
     - start
+    - start-hbase
+    - start-hbase-masters
   tasks:
     - name: Use kinit to get `hdfs` ticket
       shell: kinit -kt /etc/security/keytabs/hdfs.keytab hdfs/master-1.hbase.book@HBASE.BOOK
@@ -174,6 +194,8 @@
     - hbase
     - hbase-workers
     - start
+    - start-hbase
+    - start-hbase-workers
   tasks:
     - name: Start HBase region servers
       service: name=hbase-regionserver state=started
@@ -183,6 +205,8 @@
     - hbase
     - hbase-masters
     - start
+    - start-hbase
+    - start-hbase-masters
   tasks:
     - name: Start HBase masters
       service: name=hbase-master state=started
@@ -192,6 +216,8 @@
     - hbase
     - hbase-rest
     - start
+    - start-hbase
+    - start-hbase-rest
   tasks:
     - name: Start HBase REST gateways
       service: name=hbase-rest state=started
@@ -201,6 +227,8 @@
     - hbase
     - hbase-thrift
     - start
+    - start-hbase
+    - start-hbase-thrift
   tasks:
     - name: Start HBase Thrift gateways
       service: name=hbase-thrift state=started
