@@ -212,5 +212,18 @@
     <name>hbase.thrift.kerberos.principal</name>
     <value>hbase-thrift/_HOST@{{ KRB_REALM }}</value>
   </property>
+  <!-- Impersonation -->
+  <property>
+    <name>hadoop.proxyuser.hbase-thrift.groups</name>
+    <value>*</value>
+  </property>
+  <property>
+    <name>hadoop.proxyuser.hbase-thrift.hosts</name>
+    <value>*</value>
+  </property>
+  <property>
+    <name>hbase.thrift.support.proxyuser</name>
+    <value>true</value>
+  </property>
   {% endif %}
 </configuration>

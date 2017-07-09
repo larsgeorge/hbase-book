@@ -99,7 +99,6 @@ public class SecureThriftExample {
 
     client.createTable(ByteBuffer.wrap(TABLE), columns);
 
-    /*
     ArrayList<Mutation> mutations = new ArrayList<Mutation>();
     mutations.add(new Mutation(false, ByteBuffer.wrap(COLUMN),
       ByteBuffer.wrap(VALUE), true));
@@ -138,7 +137,7 @@ public class SecureThriftExample {
       }
     }
     client.scannerClose(scannerId);
-    */
+
     System.out.println("Done.");
     saslTransport.close();
   }
