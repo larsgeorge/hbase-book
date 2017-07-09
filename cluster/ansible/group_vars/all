@@ -68,7 +68,7 @@ SSL_STORE_PASSWORD: sslsekret
 SSL_KEY_PASSWORD: sslsekret
 
 # Set the Thrift implementation version to start (can be "1" or "2")
-HBASE_THRIFT_VERSION: 2
+HBASE_THRIFT_VERSION: 1
 
 # ==== Don't change anything below this line - really! ====
 

@@ -173,36 +173,37 @@
   </property>
 
   <!-- Thrift gateway related settings -->
-  <!-- HTTP mode and TLS -->
+  <!-- QOP _must_ be set to enable SASL transport -->
+  <property>
+    <name>hbase.thrift.security.qop</name>
+    <value>auth-conf</value>
+  </property>
+  <!-- Alternatively, set HTTP mode and TLS -->
   <property>
     <name>hbase.regionserver.thrift.http</name>
-    <value>true</value>
+    <value>false</value>
   </property>
   <property>
+    <!-- Only read when HTTP mode is set to true -->
     <name>hbase.thrift.ssl.enabled</name>
     <value>true</value>
   </property>
   <property>
+    <!-- Only read when HTTP mode is set to true -->
     <name>hbase.thrift.ssl.keystore.store</name>
     <value>{{ KEYSTORE_DIR }}/{{ inventory_hostname}}.jks</value>
   </property>
   <property>
+    <!-- Only read when HTTP mode is set to true -->
     <name>hbase.thrift.ssl.keystore.password</name>
     <value>{{ SSL_STORE_PASSWORD }}</value>
   </property>
   <property>
+    <!-- Only read when HTTP mode is set to true -->
     <name>hbase.thrift.ssl.keystore.keypassword</name>
     <value>{{ SSL_STORE_PASSWORD }}</value>
   </property>
   <!-- Kerberos to HBase Servers-->
-  <property>
-    <name>hadoop.security.authentication</name>
-    <value>kerberos</value>
-  </property>
-  <property>
-    <name>hbase.security.authentication</name>
-    <value>kerberos</value>
-  </property>
   <property>
     <name>hbase.thrift.keytab.file</name>
     <value>{{ KEYTAB_DIR }}/hbase-thrift.keytab</value>
@@ -211,19 +212,5 @@
     <name>hbase.thrift.kerberos.principal</name>
     <value>hbase-thrift/_HOST@{{ KRB_REALM }}</value>
   </property>
-  <!-- SPNEGO for Client Access -->
-  <property>
-    <name>hbase.thrift.authentication.type</name>
-    <value>kerberos</value>
-  </property>
-  <property>
-    <name>hbase.thrift.authentication.kerberos.principal</name>
-    <value>HTTP/_HOST@{{ KRB_REALM }}</value>
-  </property>
-  <property>
-    <name>hbase.thrift.authentication.kerberos.keytab</name>
-    <value>{{ KEYTAB_DIR }}/hbase-rest.keytab</value>
-  </property>
-
   {% endif %}
 </configuration>
