@@ -22,46 +22,10 @@
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.apache.hadoop</groupId>
-      <artifactId>hadoop-mapreduce-client-core</artifactId>
-      <version>2.6.0</version>
+      <groupId>org.apache.thrift</groupId>
+      <artifactId>libthrift</artifactId>
+      <version>0.9.2</version>
       <exclusions>
-        <exclusion>
-          <artifactId>hadoop-yarn-common</artifactId>
-          <groupId>org.apache.hadoop</groupId>
-        </exclusion>
-        <exclusion>
-          <artifactId>avro</artifactId>
-          <groupId>org.apache.avro</groupId>
-        </exclusion>
-        <exclusion>
-          <artifactId>slf4j-log4j12</artifactId>
-          <groupId>org.slf4j</groupId>
-        </exclusion>
-        <exclusion>
-          <artifactId>guice-servlet</artifactId>
-          <groupId>com.google.inject.extensions</groupId>
-        </exclusion>
-        <exclusion>
-          <artifactId>netty</artifactId>
-          <groupId>io.netty</groupId>
-        </exclusion>
-        <exclusion>
-          <artifactId>hadoop-yarn-common</artifactId>
-          <groupId>org.apache.hadoop</groupId>
-        </exclusion>
-        <exclusion>
-          <artifactId>protobuf-java</artifactId>
-          <groupId>com.google.protobuf</groupId>
-        </exclusion>
-        <exclusion>
-          <artifactId>avro</artifactId>
-          <groupId>org.apache.avro</groupId>
-        </exclusion>
-        <exclusion>
-          <artifactId>avro</artifactId>
-          <groupId>org.apache.avro</groupId>
-        </exclusion>
         <exclusion>
           <artifactId>slf4j-api</artifactId>
           <groupId>org.slf4j</groupId>
@@ -71,19 +35,28 @@
           <groupId>org.slf4j</groupId>
         </exclusion>
         <exclusion>
-          <artifactId>hadoop-annotations</artifactId>
-          <groupId>org.apache.hadoop</groupId>
+          <artifactId>junit</artifactId>
+          <groupId>junit</groupId>
         </exclusion>
         <exclusion>
-          <artifactId>guice-servlet</artifactId>
-          <groupId>com.google.inject.extensions</groupId>
+          <artifactId>httpclient</artifactId>
+          <groupId>org.apache.httpcomponents</groupId>
         </exclusion>
         <exclusion>
-          <artifactId>netty</artifactId>
-          <groupId>io.netty</groupId>
+          <artifactId>commons-lang</artifactId>
+          <groupId>commons-lang</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>servlet-api</artifactId>
+          <groupId>javax.servlet</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>httpcore</artifactId>
+          <groupId>org.apache.httpcomponents</groupId>
         </exclusion>
       </exclusions>
     </dependency>
+
     <dependency>
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
