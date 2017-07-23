@@ -1,3 +1,4 @@
+#jinja2: trim_blocks:False
 <?xml version="1.0"?>
 <?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
 <!--
@@ -68,6 +69,12 @@
     <value>true</value>
   </property>
   {% if SECURITY_ENABLED %}
+  <!-- Security related settings -->
+  <!-- Enable Kerberos authentication for backend processes -->
+  <property>
+    <name>hbase.security.authentication</name>
+    <value>kerberos</value>
+  </property>
   <property>
     <name>hbase.regionserver.kerberos.principal</name>
     <value>hbase/_HOST@{{ KRB_REALM }}</value>
@@ -85,35 +92,43 @@
     <value>{{ KEYTAB_DIR }}/hbase.keytab</value>
   </property>
   <property>
-    <name>hbase.security.authentication</name>
-    <value>kerberos</value>
-  </property>
-  <property>
-    <!-- enables HDFS client authz -->
+    <!-- Enables HDFS client authz -->
     <name>hadoop.security.authentication</name>
     <value>kerberos</value>
   </property>
   <property>
-    <!-- enables HBase ACLs -->
+    <!-- Enables HBase ACLs -->
     <name>hbase.security.authorization</name>
     <value>true</value>
   </property>
+  <!--property>
+    <name>hbase.coprocessor.master.classes</name>
+    <value>org.apache.hadoop.hbase.security.access.AccessController</value>
+  </property>
   <property>
     <name>hbase.coprocessor.region.classes</name>
-    <value>org.apache.hadoop.hbase.security.token.TokenProvider</value>
+    <value>org.apache.hadoop.hbase.security.access.AccessController, org.apache.hadoop.hbase.security.token.TokenProvider</value>
   </property>
+  <property>
+    <name>hbase.coprocessor.regionserver.classes</name>
+    <value>org.apache.hadoop.hbase.security.access.AccessController</value>
+  </property>
+  <property>
+    <name>hbase.security.exec.permission.checks</name>
+    <value>true</value>
+  </property-->
   <property>
     <name>hbase.zookeeper.property.authProvider.1</name>
     <value>org.apache.zookeeper.server.auth.SASLAuthenticationProvider</value>
   </property>
+  <!-- Enables service-level-authentication on RPC layer -->
   <property>
-    <!-- Enables service-level-authentication on RPC layer -->
     <!-- MUST be set for impersonation to work! -->
     <name>hadoop.security.authorization</name>
     <value>true</value>
   </property>
+  <!-- Enables SSL for the web based UIs (including gateway servers) -->
   <property>
-    <!-- Enables SSL for the web based UIs (including gateway servers) -->
     <name>hbase.ssl.enabled</name>
     <value>true</value>
   </property>
@@ -212,7 +227,7 @@
     <name>hbase.thrift.kerberos.principal</name>
     <value>hbase-thrift/_HOST@{{ KRB_REALM }}</value>
   </property>
-  <!-- Impersonation -->
+  <!-- Impersonation, must be configured -->
   <property>
     <name>hadoop.proxyuser.hbase-thrift.groups</name>
     <value>*</value>
@@ -222,6 +237,7 @@
     <value>*</value>
   </property>
   <property>
+    <!-- Optional: Allow "doAs" parameter for Thrift HTTP mode -->
     <name>hbase.thrift.support.proxyuser</name>
     <value>true</value>
   </property>
