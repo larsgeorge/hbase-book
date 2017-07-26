@@ -47,12 +47,13 @@ public class SecureThriftExample {
     "testFamily2:testColumn2");
   private static final byte[] VALUE = Bytes.toBytes("testValue");
 
-  static String hostname;
+  static String hostname, principal;
   static int port;
 
   public static void main(String[] args) throws Exception {
     hostname = args.length > 0 ? args[0] : "master-2.hbase.book";
-    port = args.length == 2 ? Integer.parseInt(args[1]) : 9090;
+    port = args.length >= 2 ? Integer.parseInt(args[1]) : 9090;
+    principal = args.length >= 3 ? args[2] : "hbase-thrift";
 
     final SecureThriftExample client = new SecureThriftExample();
     Subject.doAs(getSubject(), new PrivilegedExceptionAction<Void>() {
@@ -77,11 +78,9 @@ public class SecureThriftExample {
     saslProperties.put(Sasl.QOP, "auth-conf,auth-int,auth");
     TTransport saslTransport = new TSaslClientTransport(
       "GSSAPI", null,
-      "hbase-thrift", // Thrift server user name, should be an authorized proxy user.
+      principal, // Thrift server user name, should be an authorized proxy user.
       hostname, // Thrift server domain
-      saslProperties,
-      null,
-      transport);
+      saslProperties, null, transport);
 
     TProtocol protocol = new TBinaryProtocol(saslTransport, true, true);
     Hbase.Client client = new Hbase.Client(protocol);
