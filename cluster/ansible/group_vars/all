@@ -1,12 +1,19 @@
 ---
 
-# ======================
+# ============================================================================
 # Configuration of a HBase Cluster
 # ---
-# The variable in this part can be changed to adapt the playbooks to your
+# The variables in this part can be changed to adapt the playbooks to your
 # specific needs. Anything further down should only be changed if you really
 # know what you are doing!
-# ======================
+# ============================================================================
+
+# The versions of software that will be installed by the playbooks.
+HADOOP_VERSION: 2.7.3
+HBASE_VERSION: 1.3.0
+HUE_VERSION: 3.10.0
+ZOOKEEPER_VERSION: 3.4.9
+SPARK_VERSION: 1.6.1
 
 # Setting this to true causes the entire cluster to be started in secure mode,
 # all services will require a kerberos ticket to allow access and all http uis
@@ -37,13 +44,6 @@ REMOTE_FETCH_TARBALLS: false
 # Defines if the monitoring packages based on Ganglia are also installed.
 MONITORING_ENABLED: false
 
-# The versions of software that will be installed by the playbooks.
-HADOOP_VERSION: 2.7.3
-HBASE_VERSION: 1.3.0
-HUE_VERSION: 3.10.0
-ZOOKEEPER_VERSION: 3.4.9
-SPARK_VERSION: 1.6.1
-
 # The paths that will be used to install software under and put configuration
 # files in, feel free to change these if you have a reason to do so, but there
 # probably won't be a need to touch these.
@@ -72,8 +72,15 @@ HBASE_THRIFT_VERSION: 1
 
 # ==== Don't change anything below this line - really! ====
 
-# List with all OS user accounts that need to be created
-OS_USERS: [ 'hdfs', 'yarn', 'mapred', 'hbase', 'hbase-rest', 'hbase-thrift', 'zookeeper', 'hue', 'hadoop' ]
+# List with all technical OS accounts, share the "hadoop" group
+HADOOP_USERS: [ 'hdfs', 'yarn', 'mapred', 'hbase', 'hbase-rest', 'hbase-thrift', 'zookeeper', 'hue', 'hadoop' ]
+
+# List with all non-technical OS user accounts, mainly used for testing
+END_USERS:
+  - { user: hbasebook, group: hbasebook, extra_groups: [] }
+  - { user: foobar, group: foobar, extra_groups: [] }
+  - { user: app1user1, group: app1user1, extra_groups: [ app1group ] }
+  - { user: app1user2, group: app1user2, extra_groups: [ app1group ] }
 
 # This group defines all Kerberos related accounts that need a principal
 KRB_ADMIN: "hbasebook"

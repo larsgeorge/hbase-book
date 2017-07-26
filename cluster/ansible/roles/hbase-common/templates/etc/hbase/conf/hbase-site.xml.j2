@@ -101,13 +101,16 @@
     <name>hbase.security.authorization</name>
     <value>true</value>
   </property>
-  <!--property>
+  <property>
     <name>hbase.coprocessor.master.classes</name>
-    <value>org.apache.hadoop.hbase.security.access.AccessController</value>
+    <value>org.apache.hadoop.hbase.security.access.AccessController,
+      org.apache.hadoop.hbase.security.visibility.VisibilityController</value>
   </property>
   <property>
     <name>hbase.coprocessor.region.classes</name>
-    <value>org.apache.hadoop.hbase.security.access.AccessController, org.apache.hadoop.hbase.security.token.TokenProvider</value>
+    <value>org.apache.hadoop.hbase.security.access.AccessController,
+      org.apache.hadoop.hbase.security.visibility.VisibilityController,
+      org.apache.hadoop.hbase.security.token.TokenProvider</value>
   </property>
   <property>
     <name>hbase.coprocessor.regionserver.classes</name>
@@ -116,7 +119,7 @@
   <property>
     <name>hbase.security.exec.permission.checks</name>
     <value>true</value>
-  </property-->
+  </property>
   <property>
     <name>hbase.zookeeper.property.authProvider.1</name>
     <value>org.apache.zookeeper.server.auth.SASLAuthenticationProvider</value>

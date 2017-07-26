@@ -1,18 +1,18 @@
 ---
 # Purpose: Creates the Kerberos principals needed
 #
-# Notes: 
+# Notes:
 #   - Executed on KDC server as it requires kadmin.local
 #   - The principal database must already exit
 
 - name: Determine existing principals
   shell: kadmin.local -q 'listprincs'
   register: principal_list
-  changed_when: false 
+  changed_when: false
 
 - debug: var=principal_list.stdout_lines
 
-- name: Add UPNs
+- name: Add administrator and kerberos principals
   command: kadmin.local -q 'addprinc -pw krbsekret {{ KRB_ADMIN }}/admin@{{ KRB_REALM }}'
   when: principal_list.stdout.find('{{ KRB_ADMIN }}/admin@{{ KRB_REALM }}') == -1
 - command: kadmin.local -q 'addprinc -pw krbsekret {{ KRB_ADMIN }}@{{ KRB_REALM }}'
@@ -20,9 +20,15 @@
 - command: kadmin.local -q 'addprinc -pw krbsekret krbtgt/{{ KRB_REALM }}@{{ KRB_REALM }}'
   when: principal_list.stdout.find('krbtgt/{{ KRB_REALM }}@{{ KRB_REALM }}') == -1
 
-- name: Add SPNs
+- name: Add user principals
+  command: kadmin.local -q 'addprinc -pw {{ item.user }} {{ item.user }}@{{ KRB_REALM }}'
+  with_items:
+    - "{{ END_USERS }}"
+  when: principal_list.stdout.find('{{ item.user }}@{{ KRB_REALM }}') == -1
+
+- name: Add service principals
   command: kadmin.local -q 'add_principal -randkey {{ item[1] }}/{{ item[0] }}.{{ CLUSTER_DOMAIN }}@{{ KRB_REALM }}'
-  with_nested: 
+  with_nested:
     - "{{ groups.all }}"
     - "{{ KRB_PRINCIPALS }}"
   when: principal_list.stdout.find('{{ item[1] }}/{{ item[0] }}.{{ CLUSTER_DOMAIN }}@{{ KRB_REALM }}') == -1
@@ -36,14 +42,24 @@
   with_nested:
     - "{{ groups.all }}"
     - "{{ KRB_SERVICES_WITH_HTTP }}"
-# but for the history server there is only a single principal in the keytab
+  # but for the history server there is only a single principal in the keytab
 - command: kadmin.local -q 'xst -k /root/keytabs/mapred-{{ item }}.keytab -norandkey -q mapred/{{ item }}@{{ KRB_REALM }}'
   args:
     creates: /root/keytabs/mapred-{{ item }}.keytab
-  with_items: groups.historyserver
+  with_items:
+    - groups.historyserver
+  # finally also export the normal user principals
+- command: kadmin.local -q 'xst -k /root/keytabs/{{ item.user }}.keytab -norandkey -q {{ item.user }}@{{ KRB_REALM }}'
+  args:
+    creates: /root/keytabs/{{ item.user }}.keytab
+  with_items:
+    - "{{ END_USERS }}"
 
 - name: Download keytabs to orchestration server
   fetch: src=/root/keytabs/{{ item[1] }}-{{ item[0] }}.keytab dest=files/keytabs/ flat=yes failonmissing=yes
   with_nested:
     - "{{ groups.all }}"
     - "{{ KRB_SERVICES_WITH_HTTP }}"
+- fetch: src=/root/keytabs/{{ item.user }}.keytab dest=files/keytabs/ flat=yes failonmissing=yes
+  with_items:
+    - "{{ END_USERS }}"

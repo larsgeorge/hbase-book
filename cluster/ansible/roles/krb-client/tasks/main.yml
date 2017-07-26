@@ -41,3 +41,8 @@
     dest={{ KEYTAB_DIR }}/{{ item }}.keytab
   with_items:
     - "{{ KRB_SERVICES_WITH_HTTP }}"
+- copy:
+    src=files/keytabs/{{ item.user }}.keytab
+    dest={{ KEYTAB_DIR }}/{{ item.user }}.keytab
+  with_items:
+    - "{{ END_USERS }}"

@@ -109,8 +109,30 @@
 - name: Overwrite vagrant changes to /etc/hosts
   copy: src=hosts dest=/etc/hosts owner=root group=root
 
-- name: Create Hadoop system user accounts
+- name: Create Hadoop system user accounts and shared hadoop group
   group: name=hadoop state=present
 - user: name={{ item }} group=hadoop createhome=no shell=/bin/false state=present
   with_items:
-    - "{{ OS_USERS }}"
+    - "{{ HADOOP_USERS }}"
+
+- name: Create user accounts with groups
+  group:
+    name: "{{ item.group }}"
+    state: present
+  with_items:
+    - "{{ END_USERS }}"
+- group:
+    name: "{{ item.1 }}"
+    state: present
+  with_subelements:
+    - "{{ END_USERS }}"
+    - extra_groups
+- user:
+    name: "{{ item.user }}"
+    group: "{{ item.group }}"
+    groups: "{{ item.extra_groups | join(', ') }}"
+    createhome: no
+    shell: "{{ (item.user == 'hbasebook') | ternary('/bin/bash', '/bin/false') }}"
+    state: present
+  with_items:
+    - "{{ END_USERS }}"
