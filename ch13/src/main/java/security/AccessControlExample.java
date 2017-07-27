@@ -39,8 +39,9 @@ public class AccessControlExample {
 
   private static TableName tableName;
 
-  // vv AccessControlExample
-  static class AuthenticatedUser implements AutoCloseable {
+  // cc AccessControlExampleAuthUser Convenience class that wraps authenticated users and their connections.
+  // vv AccessControlExampleAuthUser
+  static class AuthenticatedUser implements AutoCloseable { // co AccessControlExampleAuthUser-01-Class Dedicated class to handle separate connections for authenticated users.
 
     private UserGroupInformation ugi;
     private Configuration conf;
@@ -48,12 +49,12 @@ public class AccessControlExample {
 
     public AuthenticatedUser(String user, String path)
       throws IOException, InterruptedException {
-      ugi = loginUserWithKeyTab(user, path); // co AccessControlExample-01-LoginKeytab Login the user with a given keytab.
+      ugi = loginUserWithKeyTab(user, path); // co AccessControlExampleAuthUser-02-LoginKeytab Login the user with a given keytab.
       ugi.doAs(new PrivilegedExceptionAction<Void>() {
         @Override
         public Void run() throws Exception {
           conf = HBaseConfiguration.create();
-          connection = ConnectionFactory.createConnection(conf); // co AccessControlExample-02-CreateConn Create the connection in the context of the authorized user.
+          connection = ConnectionFactory.createConnection(conf); // co AccessControlExampleAuthUser-03-CreateConn Create the connection in the context of the authorized user.
           return null;
         }
       });
@@ -68,7 +69,7 @@ public class AccessControlExample {
       return connection;
     }
     /*...*/
-    // ^^ AccessControlExample
+    // ^^ AccessControlExampleAuthUser
 
     public Configuration getConfiguration() {
       return conf;
@@ -83,7 +84,7 @@ public class AccessControlExample {
     }
     // vv AccessControlExample
 
-    public <T> T doAs(PrivilegedAction<T> action) {
+    public <T> T doAs(PrivilegedAction<T> action) { // co AccessControlExampleAuthUser-04-doAsHelper Convenience methods to execute priviledged calls.
       return ugi.doAs(action);
     }
 
@@ -99,7 +100,7 @@ public class AccessControlExample {
       connection = null;
     }
     /*...*/
-    // ^^ AccessControlExample
+    // ^^ AccessControlExampleAuthUser
 
     public void grant(final String user, final Permission.Action... action)
       throws Exception {
@@ -107,7 +108,7 @@ public class AccessControlExample {
         @Override
         public Void run() throws Exception {
           try {
-            AccessControlClient.grant(connection, user, action); // co AccessControlExample-03-GrantHelper Call the access control client method in the context of the authenticated user.
+            AccessControlClient.grant(connection, user, action);
           } catch (Throwable throwable) {
             throw new RuntimeException(throwable);
           }
@@ -117,7 +118,7 @@ public class AccessControlExample {
     }
     // vv AccessControlExample
 
-    public void grant(final TableName tableName, final String user,
+    public void grant(final TableName tableName, final String user,  // co AccessControlExampleAuthUser-05-GrantHelper Call the access control client method in the context of the authenticated user.
       final String family, final String qualifier,
       final Permission.Action... action)
       throws Exception {
@@ -137,7 +138,7 @@ public class AccessControlExample {
       });
     }
 
-    public void grant(final TableName tableName, final String user,
+    public void grant(final TableName tableName, final String user,  // co AccessControlExampleAuthUser-06-GrantCells Helper method that allows to grant permissions to cells.
       final Scan scan, final Permission.Action... action)
       throws Exception {
       doAs(new PrivilegedExceptionAction<Void>() {
@@ -150,7 +151,7 @@ public class AccessControlExample {
           int rows = 0, cells = 0;
           for (Result row : scanner) {
             for (Cell cell : row.listCells()) {
-              Put put = new Put(cell.getRowArray(), cell.getRowOffset(),
+              Put put = new Put(cell.getRowArray(), cell.getRowOffset(),  // co AccessControlExampleAuthUser-07-GrantCellsLoop Iterate over all existing cells and add given ACLs, copy the cells as-is otherwise.
                 cell.getRowLength());
               put.add(cell);
               put.setACL(perms);
@@ -167,7 +168,7 @@ public class AccessControlExample {
       });
     }
     /*...*/
-    // ^^ AccessControlExample
+    // ^^ AccessControlExampleAuthUser
 
     public void grant(final String namespace, final String user,
       final String family, final String qualifier,
@@ -202,7 +203,7 @@ public class AccessControlExample {
     }
     // vv AccessControlExample
 
-    public void revoke(final TableName tableName, final String user,
+    public void revoke(final TableName tableName, final String user,  // co AccessControlExampleAuthUser-08-Revoke Helper method to revoke previously granted permissions.
       final String family, final String qualifier,
       final Permission.Action... action)
       throws Exception {
@@ -222,7 +223,7 @@ public class AccessControlExample {
       });
     }
     /*...*/
-    // ^^ AccessControlExample
+    // ^^ AccessControlExampleAuthUser
 
     public void revoke(final String namespace, final String user,
       final String family, final String qualifier,
@@ -240,15 +241,16 @@ public class AccessControlExample {
         }
       });
     }
-    // vv AccessControlExample
+    // vv AccessControlExampleAuthUser
 
-    public List<UserPermission> getUserPermissions(final String tableRegex)
+    public List<UserPermission> getUserPermissions(final String tableRegex)  // co AccessControlExampleAuthUser-09-GetPerms Returns the permissions assigned to the matching tables. Only shows what applies to the current user (and may return an empty list).
       throws Throwable {
       return doAs(new PrivilegedExceptionAction<List<UserPermission>>() {
         @Override
         public List<UserPermission> run() throws Exception {
           try {
-            return AccessControlClient.getUserPermissions(connection, tableRegex);
+            return AccessControlClient.getUserPermissions(connection,
+              tableRegex);
           } catch (Throwable throwable) {
             throw new RuntimeException(throwable);
           }
@@ -256,7 +258,7 @@ public class AccessControlExample {
       });
     }
     /*...*/
-    // ^^ AccessControlExample
+    // ^^ AccessControlExampleAuthUser
 
     public void printUserPermissions(final String tableRegex)
       throws Exception {
@@ -267,7 +269,7 @@ public class AccessControlExample {
             List<UserPermission> ups = ups = AccessControlClient.
               getUserPermissions(connection, tableRegex);
             System.out.println("User permissions (" +
-              (tableRegex != null ? tableRegex : "hbase:acl") + ":");
+              (tableRegex != null ? tableRegex : "hbase:acl") + "):");
             int count = 0;
             for (UserPermission perm : ups) {
               System.out.println("  " + perm);
@@ -339,10 +341,10 @@ public class AccessControlExample {
         }
       });
     }
-    // vv AccessControlExample
+    // vv AccessControlExampleAuthUser
   }
+  // ^^ AccessControlExampleAuthUser
 
-  // ^^ AccessControlExample
   static Subject getSubject() throws Exception {
     LoginContext context = new LoginContext("", new Subject(), null,
       new javax.security.auth.login.Configuration() {
@@ -374,7 +376,7 @@ public class AccessControlExample {
 
   // vv AccessControlExample
   public static void main(String[] args) throws Throwable {
-    final AuthenticatedUser superuser = new AuthenticatedUser( // co AccessControlExample-04-LoginUsers Login the three user roles: superuser, global admin, and application user.
+    final AuthenticatedUser superuser = new AuthenticatedUser( // co AccessControlExample-01-LoginUsers Login the three user roles: superuser, global admin, and application user.
       "hbase/master-1.hbase.book@HBASE.BOOK", "/tmp/hbase.keytab");
     AuthenticatedUser admin = new AuthenticatedUser(
       "hbasebook@HBASE.BOOK", "/tmp/hbasebook.keytab");
@@ -403,21 +405,21 @@ public class AccessControlExample {
 
     System.out.println("Superuser: Checking cluster settings...");
     // vv AccessControlExample
-    superuser.doAs(new PrivilegedExceptionAction<Void>() { // co AccessControlExample-05-DoAsSuperuser Run the next commands as the superuser.
+    superuser.doAs(new PrivilegedExceptionAction<Void>() { // co AccessControlExample-02-DoAsSuperuser Run the next commands as the superuser.
       @Override
       public Void run() throws Exception {
-        Connection connection = superuser.getConnection(); // co AccessControlExample-06-GetConn Get dedicated connection for authenticated user.
+        Connection connection = superuser.getConnection(); // co AccessControlExample-03-GetConn Get dedicated connection for authenticated user.
         Admin admin = connection.getAdmin();
         Table table = connection.getTable(tableName);
 
-        List<SecurityCapability> sc = admin.getSecurityCapabilities(); // co AccessControlExample-07-ListCaps List the security capabilities as reported from the Master.
+        List<SecurityCapability> sc = admin.getSecurityCapabilities(); // co AccessControlExample-04-ListCaps List the security capabilities as reported from the Master.
         for (SecurityCapability cap : sc) {
           System.out.println(cap);
         }
 
         System.out.println("Report AccessController features...");
         System.out.println("Access Controller Running: " +
-          AccessControlClient.isAccessControllerRunning(connection)); // co AccessControlExample-08-PrintAccCtlOpts Report the features enabled regarding access control.
+          AccessControlClient.isAccessControllerRunning(connection)); // co AccessControlExample-05-PrintAccCtlOpts Report the features enabled regarding access control.
         System.out.println("Authorization Enabled: " +
           AccessControlClient.isAuthorizationEnabled(connection));
         System.out.println("Cell Authorization Enabled: " +
@@ -425,7 +427,7 @@ public class AccessControlExample {
 
         List<UserPermission> ups = null;
         try {
-          ups = AccessControlClient.getUserPermissions(connection, ".*"); // co AccessControlExample-09-PrintPerms Print the current permissions for all tables.
+          ups = AccessControlClient.getUserPermissions(connection, ".*"); // co AccessControlExample-06-PrintPerms Print the current permissions for all tables.
           System.out.println("User permissions:");
           for (UserPermission perm : ups) {
             System.out.println("  " + perm);
@@ -453,7 +455,7 @@ public class AccessControlExample {
     // ^^ AccessControlExample
     System.out.println("Application: Attempting to scan table, should fail...");
     // vv AccessControlExample
-    app1.scan(tableName, new Scan()); // co AccessControlExample-10-ScanFail The scan will fail with an access denied message because the application user has no access permissions granted.
+    app1.scan(tableName, new Scan()); // co AccessControlExample-07-ScanFail The scan will fail with an access denied message because the application user has no access permissions granted.
     // ^^ AccessControlExample
     System.out.println("Admin: Grant table read access to application...");
     // vv AccessControlExample
@@ -463,12 +465,12 @@ public class AccessControlExample {
     // ^^ AccessControlExample
     System.out.println("Application: Attempting to scan table again...");
     // vv AccessControlExample
-    app1.scan(tableName, new Scan()); // co AccessControlExample-11-ScanSuccessThe second scan will work and only return one column from the otherwise unrestricted scan.
+    app1.scan(tableName, new Scan()); // co AccessControlExample-08-ScanSuccessThe second scan will work and only return one column from the otherwise unrestricted scan.
 
     // ^^ AccessControlExample
     System.out.println("Admin: Grant table write access to application...");
     // vv AccessControlExample
-    admin.grant(tableName, app1.getShortUserName(), "colfam1", "col-acl", // co AccessControlExample-12-ColQual Grant write access to the application for a single new column (which does not exist yet).
+    admin.grant(tableName, app1.getShortUserName(), "colfam1", "col-acl", // co AccessControlExample-09-ColQual Grant write access to the application for a single new column (which does not exist yet).
       Permission.Action.WRITE);
     // ^^ AccessControlExample
     System.out.println("Application: Write into table...");
@@ -476,11 +478,11 @@ public class AccessControlExample {
     Put put = new Put(Bytes.toBytes("row-1"));
     put.addColumn(Bytes.toBytes("colfam1"), Bytes.toBytes("col-acl"),
       Bytes.toBytes("val-acl"));
-    app1.put(tableName, put); // co AccessControlExample-13-WriteColumn Insert a value into the granted column.
+    app1.put(tableName, put); // co AccessControlExample-10-WriteColumn Insert a value into the granted column.
     // ^^ AccessControlExample
     System.out.println("Application: Scanning table, value not visible...");
     // vv AccessControlExample
-    app1.scan(tableName, new Scan(Bytes.toBytes("row-1"), // co AccessControlExample-14-ScanColumn Scanning the table does not show the write-only column, and a direct read of the column fails with an access denied error.
+    app1.scan(tableName, new Scan(Bytes.toBytes("row-1"), // co AccessControlExample-11-ScanColumn Scanning the table does not show the write-only column, and a direct read of the column fails with an access denied error.
       Bytes.toBytes("row-10")));
     // ^^ AccessControlExample
     System.out.println("Application: Attempting to directly access column, will fail...");
@@ -494,7 +496,7 @@ public class AccessControlExample {
     // vv AccessControlExample
     Scan scan = new Scan(Bytes.toBytes("row-1"),
       Bytes.toBytes("row-10"));
-    scan.addColumn(Bytes.toBytes("colfam1"), Bytes.toBytes("col-acl"));
+    scan.addColumn(Bytes.toBytes("colfam1"), Bytes.toBytes("col-acl")); // co AccessControlExample-12-GrantCellLvl Grant read access to the application for just the newly added column and access it subsequently.
     admin.grant(tableName, app1.getShortUserName(), scan,
       Permission.Action.READ);
     // ^^ AccessControlExample
@@ -506,13 +508,14 @@ public class AccessControlExample {
     // ^^ AccessControlExample
     System.out.println("Admin: Revoking all access for application...");
     // vv AccessControlExample
-    admin.revoke(tableName, app1.getShortUserName(), "colfam1", "col-1",
+    admin.revoke(tableName, app1.getShortUserName(), "colfam1", "col-1", // co AccessControlExample-13-RevokeAll Revoke the access permissions previously granted to the application.
       Permission.Action.values());
     admin.revoke(tableName, app1.getShortUserName(), "colfam1", "col-acl",
       Permission.Action.values());
     // ^^ AccessControlExample
     System.out.println("Application: Attempting to scan, should fail...");
     // vv AccessControlExample
-    app1.scan(tableName, new Scan());
+    app1.scan(tableName, new Scan()); // co AccessControlExample-14-ScanFail Final test if revoking the permissions had an effect. The scan will fail with an access denied error.
   }
+  // ^^ AccessControlExample
 }
