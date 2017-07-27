@@ -77,7 +77,7 @@ HADOOP_USERS: [ 'hdfs', 'yarn', 'mapred', 'hbase', 'hbase-rest', 'hbase-thrift',
 
 # List with all non-technical OS user accounts, mainly used for testing
 END_USERS:
-  - { user: hbasebook, group: hbasebook, extra_groups: [] }
+  - { user: hbasebook, group: hbasebook, extra_groups: [ hadoop ] }
   - { user: foobar, group: foobar, extra_groups: [] }
   - { user: app1user1, group: app1user1, extra_groups: [ app1group ] }
   - { user: app1user2, group: app1user2, extra_groups: [ app1group ] }
