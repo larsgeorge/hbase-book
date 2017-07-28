@@ -102,6 +102,11 @@
     <value>true</value>
   </property>
   <property>
+    <!-- Enable full cell-level ACL evaluation -->
+    <name>hbase.security.access.early_out</name>
+    <value>false</value>
+  </property>
+  <property>
     <name>hbase.coprocessor.master.classes</name>
     <value>org.apache.hadoop.hbase.security.access.AccessController,
       org.apache.hadoop.hbase.security.visibility.VisibilityController</value>
