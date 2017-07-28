@@ -36,7 +36,7 @@ public class AuthenticatedUser implements AutoCloseable { // co AuthenticatedUse
 
   public AuthenticatedUser(String user, String path)
     throws IOException, InterruptedException {
-    ugi = loginUserWithKeyTab(user, path); // co AuthenticatedUser-02-LoginKeytab Login the user with a given keytab.
+    ugi = loginUserWithKeyTab(user, path); // co AuthenticatedUser-02-LoginKeytab Log in the user with a given keytab.
     ugi.doAs(new PrivilegedExceptionAction<Void>() {
       @Override
       public Void run() throws Exception {
