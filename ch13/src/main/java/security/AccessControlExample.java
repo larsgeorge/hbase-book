@@ -43,7 +43,7 @@ public class AccessControlExample {
     superuser.doAs(new PrivilegedExceptionAction<Void>() {
       @Override
       public Void run() throws Exception {
-        Configuration conf = HBaseConfiguration.create();
+        Configuration conf = superuser.getConfiguration();
 
         HBaseHelper helper = HBaseHelper.getHelper(conf);
         helper.dropTable("testtable");
@@ -107,7 +107,8 @@ public class AccessControlExample {
     app1.printUserPermissions(tableName.toString());
 
     // ^^ AccessControlExample
-    System.out.println("Application: Attempting to scan table, will return nothing...");
+    System.out.println("Application: Attempting to scan table, will " +
+      "return nothing...");
     // When "hbase.security.access.early_out" is set to "true" you will
     // receive an "access denied" error instead!
     // vv AccessControlExample
@@ -138,10 +139,13 @@ public class AccessControlExample {
     // ^^ AccessControlExample
     System.out.println("Application: Scanning table, value not visible...");
     // vv AccessControlExample
-    app1.scan(tableName, new Scan(Bytes.toBytes("row-1"), // co AccessControlExample-11-ScanColumn Scanning the table does not show the write-only column, and a direct read of the column fails with an access denied error.
+    app1.scan(tableName, new Scan(Bytes.toBytes("row-1"), // co AccessControlExample-11-ScanColumn Scanning the table does not show the write-only column, and a direct read of the column will return empty.
       Bytes.toBytes("row-10")));
     // ^^ AccessControlExample
-    System.out.println("Application: Attempting to directly access column, will fail...");
+    System.out.println("Application: Attempting to directly access column, " +
+      "will return empty...");
+    // When "hbase.security.access.early_out" is set to "true" you will
+    // receive an "access denied" error instead!
     // vv AccessControlExample
     Get get = new Get(Bytes.toBytes("row-1"));
     get.addColumn(Bytes.toBytes("colfam1"), Bytes.toBytes("col-acl"));
@@ -162,7 +166,8 @@ public class AccessControlExample {
       Bytes.toBytes("row-10")));
 
     // ^^ AccessControlExample
-    System.out.println("Admin: Put a new cell with read permissions for the application...");
+    System.out.println("Admin: Put a new cell with read permissions for " +
+      "the application...");
     // vv AccessControlExample
     put = new Put(Bytes.toBytes("row-1"));
     put.addColumn(Bytes.toBytes("colfam1"), Bytes.toBytes("col-admin"),
@@ -172,7 +177,8 @@ public class AccessControlExample {
     admin.put(tableName, put);
     admin.printUserPermissions(tableName.getNameAsString());
     // ^^ AccessControlExample
-    System.out.println("Application: Scan table to see if admin column is readable...");
+    System.out.println("Application: Scan table to see if admin column " +
+      "is readable...");
     // vv AccessControlExample
     app1.scan(tableName, new Scan(Bytes.toBytes("row-1"),
       Bytes.toBytes("row-10")));

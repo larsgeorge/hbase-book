@@ -35,8 +35,18 @@ public class AuthenticatedUser implements AutoCloseable { // co AuthenticatedUse
   private Connection connection;
 
   public AuthenticatedUser(String user, String path)
-    throws IOException, InterruptedException {
+    throws Exception {
     ugi = loginUserWithKeyTab(user, path); // co AuthenticatedUser-02-LoginKeytab Log in the user with a given keytab.
+    openConnection();
+  }
+
+  private UserGroupInformation loginUserWithKeyTab(String user, String path)
+    throws IOException {
+    return UserGroupInformation.loginUserFromKeytabAndReturnUGI(user, path);
+  }
+
+  // Should be private, but public until HBASE-18473 is fixed. lg
+  public void openConnection() throws Exception {
     ugi.doAs(new PrivilegedExceptionAction<Void>() {
       @Override
       public Void run() throws Exception {
@@ -45,11 +55,6 @@ public class AuthenticatedUser implements AutoCloseable { // co AuthenticatedUse
         return null;
       }
     });
-  }
-
-  private UserGroupInformation loginUserWithKeyTab(String user, String path)
-      throws IOException {
-    return UserGroupInformation.loginUserFromKeytabAndReturnUGI(user, path);
   }
 
   public Connection getConnection() {
@@ -281,7 +286,12 @@ public class AuthenticatedUser implements AutoCloseable { // co AuthenticatedUse
           System.out.println("Starting scan...");
           int rows = 0;
           for (Result result: resultScanner) {
-            System.out.println("  " + result);
+            if (result.isEmpty()) continue;
+            for (Cell cell : result.listCells()) {
+              System.out.println("  " + cell + " -> " +
+                Bytes.toString(cell.getValueArray(), cell.getValueOffset(),
+                  cell.getValueLength()));
+            }
             rows++;
           }
           System.out.println("Found " + rows + " rows.");
@@ -289,7 +299,8 @@ public class AuthenticatedUser implements AutoCloseable { // co AuthenticatedUse
           table.close();
         } catch (Exception e) {
           System.out.println("Scan failed with: " +
-            e.getMessage().split("\n")[0]);
+            (e != null && e.getMessage() != null ?
+              e.getMessage().split("\n")[0] : e));
         }
         return null;
       }
@@ -306,7 +317,8 @@ public class AuthenticatedUser implements AutoCloseable { // co AuthenticatedUse
           table.put(put);
         } catch(Exception e) {
           System.out.println("Put failed with: " +
-            e.getMessage().split("\n")[0]);
+            (e != null && e.getMessage() != null ?
+              e.getMessage().split("\n")[0] : e));
         }
         return null;
       }
@@ -321,11 +333,19 @@ public class AuthenticatedUser implements AutoCloseable { // co AuthenticatedUse
         Table table = connection.getTable(tableName);
         try {
           Result result = table.get(get);
-          System.out.println("Get result: " + result);
+          System.out.println("Get result:");
+          if (!result.isEmpty()) {
+            for (Cell cell : result.listCells()) {
+              System.out.println("  " + cell + " -> " +
+                Bytes.toString(cell.getValueArray(), cell.getValueOffset(),
+                  cell.getValueLength()));
+            }
+          }
           return result;
         } catch(Exception e) {
           System.out.println("Get failed with: " +
-            e.getMessage().split("\n")[0]);
+            (e != null && e.getMessage() != null ?
+              e.getMessage().split("\n")[0] : e));
         }
         return null;
       }
