@@ -184,16 +184,18 @@ public class AccessControlExample {
     app1.get(tableName, get);
 
     // ^^ AccessControlExample
-    System.out.println("Admin: Revoking all access for application...");
+    System.out.println("Admin: Revoking access for application...");
     // vv AccessControlExample
     admin.revoke(tableName, app1.getShortUserName(), "colfam1", "col-1", // co AccessControlExample-13-RevokeAll Revoke the access permissions previously granted to the application.
       Permission.Action.values());
     admin.revoke(tableName, app1.getShortUserName(), "colfam1", "col-acl",
       Permission.Action.values());
     // ^^ AccessControlExample
-    System.out.println("Application: Attempting to scan, should fail...");
+    System.out.println("Application: Attempting to scan data...");
+    // When "hbase.security.access.early_out" is set to "true" you will
+    // receive an "access denied" error instead!
     // vv AccessControlExample
-    app1.scan(tableName, new Scan()); // co AccessControlExample-14-ScanFail Final test if revoking the permissions had an effect. The scan will fail with an access denied error.
+    app1.scan(tableName, new Scan()); // co AccessControlExample-14-ScanFinal Final test if revoking the permissions had an effect. The scan will only return the cell-level granted data (since it was not revoked).
   }
   // ^^ AccessControlExample
 }
