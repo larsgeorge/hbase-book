@@ -66,16 +66,17 @@ public class AccessControlExample {
         Table table = connection.getTable(tableName);
 
         List<SecurityCapability> sc = admin.getSecurityCapabilities(); // co AccessControlExample-04-ListCaps List the security capabilities as reported from the Master.
+        System.out.println("Available security capabilities:");
         for (SecurityCapability cap : sc) {
-          System.out.println(cap);
+          System.out.println("  " + cap);
         }
 
         System.out.println("Report AccessController features...");
-        System.out.println("Access Controller Running: " +
+        System.out.println("  Access Controller Running: " +
           AccessControlClient.isAccessControllerRunning(connection)); // co AccessControlExample-05-PrintAccCtlOpts Report the features enabled regarding access control.
-        System.out.println("Authorization Enabled: " +
+        System.out.println("  Authorization Enabled: " +
           AccessControlClient.isAuthorizationEnabled(connection));
-        System.out.println("Cell Authorization Enabled: " +
+        System.out.println("  Cell Authorization Enabled: " +
           AccessControlClient.isCellAuthorizationEnabled(connection));
 
         List<UserPermission> ups = null;
@@ -106,19 +107,21 @@ public class AccessControlExample {
     app1.printUserPermissions(tableName.toString());
 
     // ^^ AccessControlExample
-    System.out.println("Application: Attempting to scan table, should fail...");
+    System.out.println("Application: Attempting to scan table, will return nothing...");
+    // When "hbase.security.access.early_out" is set to "true" you will
+    // receive an "access denied" error instead!
     // vv AccessControlExample
-    app1.scan(tableName, new Scan()); // co AccessControlExample-07-ScanFail The scan will fail with an access denied message because the application user has no access permissions granted.
+    app1.scan(tableName, new Scan()); // co AccessControlExample-07-ScanFail The scan will not yield any results as no permissions are granted to the application.
     // ^^ AccessControlExample
     System.out.println("Admin: Grant table read access to application...");
     // vv AccessControlExample
     admin.grant(tableName, app1.getShortUserName(), "colfam1", "col-1",
       Permission.Action.READ);
-    app1.printUserPermissions(tableName.toString());
+    admin.printUserPermissions(tableName.toString());
     // ^^ AccessControlExample
     System.out.println("Application: Attempting to scan table again...");
     // vv AccessControlExample
-    app1.scan(tableName, new Scan()); // co AccessControlExample-08-ScanSuccessThe second scan will work and only return one column from the otherwise unrestricted scan.
+    app1.scan(tableName, new Scan()); // co AccessControlExample-08-ScanSuccess The second scan will return only one column from the otherwise unrestricted scan.
 
     // ^^ AccessControlExample
     System.out.println("Admin: Grant table write access to application...");
@@ -157,6 +160,28 @@ public class AccessControlExample {
     // vv AccessControlExample
     app1.scan(tableName, new Scan(Bytes.toBytes("row-1"),
       Bytes.toBytes("row-10")));
+
+    // ^^ AccessControlExample
+    System.out.println("Admin: Put a new cell with read permissions for the application...");
+    // vv AccessControlExample
+    put = new Put(Bytes.toBytes("row-1"));
+    put.addColumn(Bytes.toBytes("colfam1"), Bytes.toBytes("col-admin"),
+      Bytes.toBytes("val-admin"));
+    put.setACL(app1.getShortUserName(),
+      new Permission(Permission.Action.READ)); // co AccessControlExample-13-AddCellAcl Admin putting a cell with read permissions for the application.
+    admin.put(tableName, put);
+    admin.printUserPermissions(tableName.getNameAsString());
+    // ^^ AccessControlExample
+    System.out.println("Application: Scan table to see if admin column is readable...");
+    // vv AccessControlExample
+    app1.scan(tableName, new Scan(Bytes.toBytes("row-1"),
+      Bytes.toBytes("row-10")));
+    // ^^ AccessControlExample
+    System.out.println("Application: Directly access column...");
+    // vv AccessControlExample
+    get = new Get(Bytes.toBytes("row-1"));
+    get.addColumn(Bytes.toBytes("colfam1"), Bytes.toBytes("col-admin"));
+    app1.get(tableName, get);
 
     // ^^ AccessControlExample
     System.out.println("Admin: Revoking all access for application...");

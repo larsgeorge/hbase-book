@@ -288,7 +288,8 @@ public class AuthenticatedUser implements AutoCloseable { // co AuthenticatedUse
           resultScanner.close();
           table.close();
         } catch (Exception e) {
-          System.out.println("Scan failed with: " + e.getMessage());
+          System.out.println("Scan failed with: " +
+            e.getMessage().split("\n")[0]);
         }
         return null;
       }
@@ -304,7 +305,8 @@ public class AuthenticatedUser implements AutoCloseable { // co AuthenticatedUse
         try {
           table.put(put);
         } catch(Exception e) {
-          System.out.println("Put failed with: " + e);
+          System.out.println("Put failed with: " +
+            e.getMessage().split("\n")[0]);
         }
         return null;
       }
@@ -322,7 +324,8 @@ public class AuthenticatedUser implements AutoCloseable { // co AuthenticatedUse
           System.out.println("Get result: " + result);
           return result;
         } catch(Exception e) {
-          System.out.println("Get failed with: " + e);
+          System.out.println("Get failed with: " +
+            e.getMessage().split("\n")[0]);
         }
         return null;
       }
