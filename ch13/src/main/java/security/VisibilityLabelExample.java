@@ -204,7 +204,7 @@ public class VisibilityLabelExample {
       "\"medium\" for admin...");
     // vv VisibilityLabelExample
     setUserAuthorization(superuser, admin.getShortUserName(), // co VisibilityLabelExample-05-AddAuth Assign the labels to each user, in the required combination.
-      "low", "medium", "system");
+      "low", "medium");
     // ^^ VisibilityLabelExample
     System.out.println("Superuser: Add authorization \"low\" for application...");
     // vv VisibilityLabelExample
@@ -262,6 +262,13 @@ public class VisibilityLabelExample {
       new Scan().setAuthorizations(new Authorizations("low")));
     admin.scan(tableName,
       new Scan().setAuthorizations(new Authorizations("high")));
+
+    // ^^ VisibilityLabelExample
+    System.out.println("Superuser: Give application system label access and try scan again...");
+    // vv VisibilityLabelExample
+    setUserAuthorization(superuser, app1.getShortUserName(), "system");
+    printUserAuthorization(superuser, app1.getShortUserName());
+    app1.scan(tableName, new Scan());
 
     // ^^ VisibilityLabelExample
     System.out.println("Superuser: Remove labels from admin user and try scan again...");
