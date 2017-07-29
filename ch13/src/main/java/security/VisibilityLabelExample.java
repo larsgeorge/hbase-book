@@ -16,6 +16,7 @@ import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.client.security.SecurityCapability;
 import org.apache.hadoop.hbase.protobuf.generated.VisibilityLabelsProtos;
 import org.apache.hadoop.hbase.security.access.Permission;
+import org.apache.hadoop.hbase.security.visibility.Authorizations;
 import org.apache.hadoop.hbase.security.visibility.CellVisibility;
 import org.apache.hadoop.hbase.security.visibility.VisibilityClient;
 import org.apache.hadoop.hbase.util.Bytes;
@@ -82,6 +83,22 @@ public class VisibilityLabelExample {
           VisibilityClient.setAuths(user.getConnection(), labels, assignee);
         } catch (Throwable throwable) {
           System.out.println("setUserAuthorization() failed with: " +
+            throwable.getMessage().split("\n")[0]);
+        }
+        return null;
+      }
+    });
+  }
+
+  public static void removeUserAuthorization(final AuthenticatedUser user,
+    final String assignee, final String... labels) {
+    user.doAs(new PrivilegedAction<Void>() {
+      @Override
+      public Void run() {
+        try {
+          VisibilityClient.clearAuths(user.getConnection(), labels, assignee);
+        } catch (Throwable throwable) {
+          System.out.println("removeUserAuthorization() failed with: " +
             throwable.getMessage().split("\n")[0]);
         }
         return null;
@@ -233,8 +250,25 @@ public class VisibilityLabelExample {
     System.out.println("Admin: Scan table...");
     // vv VisibilityLabelExample
     admin.scan(tableName, new Scan()); // co VisibilityLabelExample-08-Scans Scan the table twice, as different users. The admin can see more than the application due to the visibility expressions.
+    // ^^ VisibilityLabelExample
     System.out.println("Application: Scan table...");
+    // vv VisibilityLabelExample
     app1.scan(tableName, new Scan());
+
+    // ^^ VisibilityLabelExample
+    System.out.println("Admin: Scan table again, but with reduced visbility...");
+    // vv VisibilityLabelExample
+    admin.scan(tableName,
+      new Scan().setAuthorizations(new Authorizations("low")));
+    admin.scan(tableName,
+      new Scan().setAuthorizations(new Authorizations("high")));
+
+    // ^^ VisibilityLabelExample
+    System.out.println("Superuser: Remove labels from admin user and try scan again...");
+    // vv VisibilityLabelExample
+    removeUserAuthorization(superuser, admin.getShortUserName(), "medium");
+    printUserAuthorization(superuser, admin.getShortUserName());
+    admin.scan(tableName, new Scan());
   }
   // ^^ VisibilityLabelExample
 
