@@ -67,6 +67,9 @@ PID_DIR: "/var/run"
 SSL_STORE_PASSWORD: sslsekret
 SSL_KEY_PASSWORD: sslsekret
 
+# The password used for the encryption key
+HBASE_CRYPTO_PASSWORD: kryptosekret
+
 # Set the Thrift implementation version to start (can be "1" or "2")
 HBASE_THRIFT_VERSION: 1
 

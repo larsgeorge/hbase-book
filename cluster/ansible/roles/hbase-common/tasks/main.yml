@@ -52,3 +52,18 @@
     - { src: 'etc/hbase/conf/hbase-policy.xml.j2', dest: '{{ PATHS_BY_OWNER["hbase"].config }}/hbase-policy.xml' }
     - { src: 'etc/hbase/conf/hbase-jaas.conf.j2', dest: '{{ PATHS_BY_OWNER["hbase"].config }}/hbase-jaas.conf' }
     - { src: 'etc/hbase/conf/log4j.properties.j2', dest: '{{ PATHS_BY_OWNER["hbase"].config }}/log4j.properties' }
+
+- name: Generate key and keystore for HBase table encryption
+  command: /usr/bin/keytool -certreq -keystore {{ KEYSTORE_DIR }}/hbase-crypto.jks -storetype jceks -storepass "{{ HBASE_CRYPTO_PASSWORD }}" -genseckey -keyalg AES -keysize 128 -alias hbase
+  args:
+    creates: "{{ KEYSTORE_DIR }}/hbase-crypto.jks"
+  when: SECURITY_ENABLED == true
+
+- name: Set access rights for keystore
+  file:
+    path={{ KEYSTORE_DIR }}/hbase-crypto.jks
+    state=file
+    owner=hbase
+    group=hadoop
+    mode=600
+  when: SECURITY_ENABLED == true

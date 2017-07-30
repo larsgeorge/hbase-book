@@ -249,5 +249,31 @@
     <name>hbase.thrift.support.proxyuser</name>
     <value>true</value>
   </property>
+  <!-- HBase per CF encryption-->
+  <property>
+    <name>hbase.crypto.keyprovider</name>
+    <value>org.apache.hadoop.hbase.io.crypto.KeyStoreKeyProvider</value>
+  </property>
+  <property>
+    <name>hbase.crypto.keyprovider.parameters</name>
+    <value>jceks://{{ KEYSTORE_DIR }}/hbase-crypto.jks?password={{ HBASE_CRYPTO_PASSWORD }}</value>
+  </property>
+  <!--property>
+    <name>hbase.crypto.master.key.name</name>
+    <value>my-alias</value>
+  </property-->
+  <!-- WAL encryption -->
+  <property>
+    <name>hbase.regionserver.hlog.reader.impl</name>
+    <value>org.apache.hadoop.hbase.regionserver.wal.SecureProtobufLogReader</value>
+  </property>
+  <property>
+    <name>hbase.regionserver.hlog.writer.impl</name>
+    <value>org.apache.hadoop.hbase.regionserver.wal.SecureProtobufLogWriter</value>
+  </property>
+  <property>
+    <name>hbase.regionserver.wal.encryption</name>
+    <value>true</value>
+  </property>
   {% endif %}
 </configuration>
