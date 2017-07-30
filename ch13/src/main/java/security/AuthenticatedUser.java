@@ -33,9 +33,11 @@ public class AuthenticatedUser implements AutoCloseable { // co AuthenticatedUse
   private UserGroupInformation ugi;
   private Configuration conf;
   private Connection connection;
+  private String name;
 
-  public AuthenticatedUser(String user, String path)
+  public AuthenticatedUser(String user, String path, String name)
     throws Exception {
+    this.name = name;
     ugi = loginUserWithKeyTab(user, path); // co AuthenticatedUser-02-LoginKeytab Log in the user with a given keytab.
     openConnection();
   }
@@ -101,6 +103,8 @@ public class AuthenticatedUser implements AutoCloseable { // co AuthenticatedUse
       public Void run() throws Exception {
         try {
           AccessControlClient.grant(connection, user, action);
+          System.out.println(name + ": Granted " + new Permission(action) +
+            " to " + user);
         } catch (Throwable throwable) {
           throw new RuntimeException(throwable);
         }
@@ -122,6 +126,8 @@ public class AuthenticatedUser implements AutoCloseable { // co AuthenticatedUse
             family != null ? Bytes.toBytes(family) : null,
             qualifier != null ? Bytes.toBytes(qualifier): null,
             action);
+          System.out.println(name + ": Granted " + new Permission(action) +
+            " to " + user);
         } catch (Throwable throwable) {
           throw new RuntimeException(throwable);
         }
@@ -155,6 +161,8 @@ public class AuthenticatedUser implements AutoCloseable { // co AuthenticatedUse
         }
         System.out.println("Processed " + rows + " rows and " +
           cells + " cells.");
+        System.out.println(name + ": Granted " + new Permission(action) +
+          " to " + user);
         return null;
       }
     });
@@ -171,6 +179,8 @@ public class AuthenticatedUser implements AutoCloseable { // co AuthenticatedUse
       public Void run() throws Exception {
         try {
           AccessControlClient.grant(connection, namespace, user, action);
+          System.out.println(name + ": Granted " + new Permission(action) +
+            " to " + user);
         } catch (Throwable throwable) {
           throw new RuntimeException(throwable);
         }
@@ -186,6 +196,8 @@ public class AuthenticatedUser implements AutoCloseable { // co AuthenticatedUse
       public Void run() throws Exception {
         try {
           AccessControlClient.revoke(connection, user, action);
+          System.out.println(name + ": Revoked " + new Permission(action)
+            + " to " + user);
         } catch (Throwable throwable) {
           throw new RuntimeException(throwable);
         }
@@ -207,6 +219,8 @@ public class AuthenticatedUser implements AutoCloseable { // co AuthenticatedUse
             family != null ? Bytes.toBytes(family) : null,
             qualifier != null ? Bytes.toBytes(qualifier): null,
             action);
+          System.out.println(name + ": Revoked " + new Permission(action) +
+            " to " + user);
         } catch (Throwable throwable) {
           throw new RuntimeException(throwable);
         }
@@ -226,6 +240,8 @@ public class AuthenticatedUser implements AutoCloseable { // co AuthenticatedUse
       public Void run() throws Exception {
         try {
           AccessControlClient.revoke(connection, namespace, user, action);
+          System.out.println(name + ": Revoked " + new Permission(action) +
+            " to " + user);
         } catch (Throwable throwable) {
           throw new RuntimeException(throwable);
         }
@@ -260,7 +276,7 @@ public class AuthenticatedUser implements AutoCloseable { // co AuthenticatedUse
         try {
           List<UserPermission> ups = ups = AccessControlClient.
             getUserPermissions(connection, tableRegex);
-          System.out.println("User permissions (" +
+          System.out.println(name + ": User permissions (" +
             (tableRegex != null ? tableRegex : "hbase:acl") + "):");
           int count = 0;
           for (UserPermission perm : ups) {
@@ -283,7 +299,7 @@ public class AuthenticatedUser implements AutoCloseable { // co AuthenticatedUse
         try {
           Table table = connection.getTable(tableName);
           ResultScanner resultScanner = table.getScanner(scan);
-          System.out.println("Starting scan...");
+          System.out.println(name + ": Starting scan...");
           int rows = 0;
           for (Result result: resultScanner) {
             if (result.isEmpty()) continue;
@@ -315,6 +331,7 @@ public class AuthenticatedUser implements AutoCloseable { // co AuthenticatedUse
         Table table = connection.getTable(tableName);
         try {
           table.put(put);
+          System.out.println(name + ": Put data into " + tableName);
         } catch(Exception e) {
           System.out.println("Put failed with: " +
             (e != null && e.getMessage() != null ?
@@ -333,7 +350,7 @@ public class AuthenticatedUser implements AutoCloseable { // co AuthenticatedUse
         Table table = connection.getTable(tableName);
         try {
           Result result = table.get(get);
-          System.out.println("Get result:");
+          System.out.println(name + ": Get result:");
           if (!result.isEmpty()) {
             for (Cell cell : result.listCells()) {
               System.out.println("  " + cell + " -> " +

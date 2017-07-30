@@ -5,7 +5,6 @@ import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
 
-import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.TableName;
 import org.apache.hadoop.hbase.client.Admin;
 import org.apache.hadoop.hbase.client.Connection;
@@ -30,11 +29,12 @@ public class AccessControlExample {
   public static void main(String[] args) throws Throwable {
     // vv AccessControlExample
     final AuthenticatedUser superuser = new AuthenticatedUser( // co AccessControlExample-01-LoginUsers Login the three user roles: superuser, global admin, and application user.
-      "hbase/master-1.hbase.book@HBASE.BOOK", "/tmp/hbase.keytab");
+      "hbase/master-1.hbase.book@HBASE.BOOK", "/tmp/hbase.keytab",
+      "Superuser");
     AuthenticatedUser admin = new AuthenticatedUser(
-      "hbasebook@HBASE.BOOK", "/tmp/hbasebook.keytab");
+      "hbasebook@HBASE.BOOK", "/tmp/hbasebook.keytab", "Admin");
     AuthenticatedUser app1 = new AuthenticatedUser(
-      "app1user1@HBASE.BOOK", "/tmp/app1user1.keytab");
+      "app1user1@HBASE.BOOK", "/tmp/app1user1.keytab", "Application");
 
     tableName = TableName.valueOf("testtable");
     // ^^ AccessControlExample
@@ -66,12 +66,12 @@ public class AccessControlExample {
         Table table = connection.getTable(tableName);
 
         List<SecurityCapability> sc = admin.getSecurityCapabilities(); // co AccessControlExample-04-ListCaps List the security capabilities as reported from the Master.
-        System.out.println("Available security capabilities:");
+        System.out.println("Superuser: Available security capabilities:");
         for (SecurityCapability cap : sc) {
           System.out.println("  " + cap);
         }
 
-        System.out.println("Report AccessController features...");
+        System.out.println("Superuser: Report AccessController features...");
         System.out.println("  Access Controller Running: " +
           AccessControlClient.isAccessControllerRunning(connection)); // co AccessControlExample-05-PrintAccCtlOpts Report the features enabled regarding access control.
         System.out.println("  Authorization Enabled: " +
@@ -82,7 +82,7 @@ public class AccessControlExample {
         List<UserPermission> ups = null;
         try {
           ups = AccessControlClient.getUserPermissions(connection, ".*"); // co AccessControlExample-06-PrintPerms Print the current permissions for all tables.
-          System.out.println("User permissions:");
+          System.out.println("Superuser: User permissions:");
           for (UserPermission perm : ups) {
             System.out.println("  " + perm);
           }

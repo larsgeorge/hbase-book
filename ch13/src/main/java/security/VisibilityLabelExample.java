@@ -76,11 +76,16 @@ public class VisibilityLabelExample {
 
   public static void setUserAuthorization(final AuthenticatedUser user,
     final String assignee, final String... labels) {
+    /*...*/
+    // ^^ VisibilityLabelExample
     user.doAs(new PrivilegedAction<Void>() {
       @Override
       public Void run() {
         try {
-          VisibilityClient.setAuths(user.getConnection(), labels, assignee);
+          // vv VisibilityLabelExample
+    /*  */VisibilityClient.setAuths(user.getConnection(), labels, assignee);
+    /*...*/
+          // ^^ VisibilityLabelExample
         } catch (Throwable throwable) {
           System.out.println("setUserAuthorization() failed with: " +
             throwable.getMessage().split("\n")[0]);
@@ -88,15 +93,21 @@ public class VisibilityLabelExample {
         return null;
       }
     });
+    // vv VisibilityLabelExample
   }
 
   public static void removeUserAuthorization(final AuthenticatedUser user,
     final String assignee, final String... labels) {
+    /*...*/
+    // ^^ VisibilityLabelExample
     user.doAs(new PrivilegedAction<Void>() {
       @Override
       public Void run() {
         try {
-          VisibilityClient.clearAuths(user.getConnection(), labels, assignee);
+          // vv VisibilityLabelExample
+    /*  */VisibilityClient.clearAuths(user.getConnection(), labels, assignee);
+    /*...*/
+          // ^^ VisibilityLabelExample
         } catch (Throwable throwable) {
           System.out.println("removeUserAuthorization() failed with: " +
             throwable.getMessage().split("\n")[0]);
@@ -104,23 +115,29 @@ public class VisibilityLabelExample {
         return null;
       }
     });
+    // vv VisibilityLabelExample
   }
 
   public static void printUserAuthorization(final AuthenticatedUser user,
     final String assignee) {
+    /*...*/
+    // ^^ VisibilityLabelExample
     user.doAs(new PrivilegedAction<Void>() {
       @Override
       public Void run() {
         try {
-          VisibilityLabelsProtos.GetAuthsResponse response =
-            VisibilityClient.getAuths(user.getConnection(), assignee);
-          System.out.println("User Authorizations for " + assignee + ":");
-          int count = 0;
-          for (ByteString auth : response.getAuthList()) {
-            System.out.println("  " + auth.toStringUtf8());
-            count++;
-          }
-          System.out.println("Got " + count + " user authorizations.");
+          // vv VisibilityLabelExample
+    /*  */VisibilityLabelsProtos.GetAuthsResponse response =
+    /*  */  VisibilityClient.getAuths(user.getConnection(), assignee);
+    /*  */System.out.println("User Authorizations for " + assignee + ":");
+    /*  */int count = 0;
+    /*  */for (ByteString auth : response.getAuthList()) {
+    /*  */  System.out.println("  " + auth.toStringUtf8());
+    /*  */  count++;
+    /*  */}
+    /*  */System.out.println("Got " + count + " user authorizations.");
+    /*...*/
+          // ^^ VisibilityLabelExample
         } catch (Throwable throwable) {
           System.out.println("printUserAuthorization() failed with: " +
             throwable.getMessage().split("\n")[0]);
@@ -128,19 +145,22 @@ public class VisibilityLabelExample {
         return null;
       }
     });
+    // vv VisibilityLabelExample
   }
 
   public static void main(String[] args) throws Throwable {
-    final AuthenticatedUser superuser = new AuthenticatedUser(
-      "hbase/master-1.hbase.book@HBASE.BOOK", "/tmp/hbase.keytab");
-    final AuthenticatedUser admin = new AuthenticatedUser(
-      "hbasebook@HBASE.BOOK", "/tmp/hbasebook.keytab");
-    final AuthenticatedUser app1 = new AuthenticatedUser(
-      "app1user1@HBASE.BOOK", "/tmp/app1user1.keytab");
-
-    tableName = TableName.valueOf("testtable");
     /*...*/
     // ^^ VisibilityLabelExample
+    final AuthenticatedUser superuser = new AuthenticatedUser(
+      "hbase/master-1.hbase.book@HBASE.BOOK", "/tmp/hbase.keytab",
+      "Superuser");
+    final AuthenticatedUser admin = new AuthenticatedUser(
+      "hbasebook@HBASE.BOOK", "/tmp/hbasebook.keytab", "Admin");
+    final AuthenticatedUser app1 = new AuthenticatedUser(
+      "app1user1@HBASE.BOOK", "/tmp/app1user1.keytab", "Application");
+
+    tableName = TableName.valueOf("testtable");
+
     System.out.println("Superuser: Preparing table and data...");
     superuser.doAs(new PrivilegedExceptionAction<Void>() {
       @Override
@@ -151,14 +171,14 @@ public class VisibilityLabelExample {
         helper.dropTable("testtable");
         helper.createTable("testtable", "colfam1");
 
-        System.out.println("Adding rows to table...");
+        System.out.println("Superuser: Adding rows to table...");
         helper.fillTable("testtable", 1, 2, 2, "colfam1");
         helper.close();
         return null;
       }
     });
-    // vv VisibilityLabelExample
 
+    // vv VisibilityLabelExample
     System.out.println("Superuser: Checking cluster settings...");
     superuser.doAs(new PrivilegedExceptionAction<Void>() {
       @Override
@@ -167,13 +187,13 @@ public class VisibilityLabelExample {
         Admin admin = connection.getAdmin();
 
         List<SecurityCapability> sc = admin.getSecurityCapabilities();
-        System.out.println("Available security capabilities:");
+        System.out.println("Superuser: Available security capabilities:");
         for (SecurityCapability cap : sc) {
           System.out.println("  " + cap);
         }
         admin.close();
 
-        System.out.println("Report Visibility features...");
+        System.out.println("Superuser: Report Visibility features...");
         System.out.println("  Visibility Controller Running: " +
           VisibilityClient.isCellVisibilityEnabled(connection)); // co VisibilityLabelExample-02-CheckStatus Determine if the visibility labels are enabled on the cluster.
         return null;
@@ -242,40 +262,47 @@ public class VisibilityLabelExample {
     // vv VisibilityLabelExample
     put = new Put(Bytes.toBytes("row-99"));
     put.addColumn(Bytes.toBytes("colfam1"), Bytes.toBytes("col-low-medium"),
-      Bytes.toBytes("low "));
+      Bytes.toBytes("low or medium visibility"));
     put.setCellVisibility(new CellVisibility("low | medium"));
     admin.put(tableName, put);
 
     // ^^ VisibilityLabelExample
-    System.out.println("Admin: Scan table...");
+    System.out.println("Admin & Application: Scan table to check results...");
     // vv VisibilityLabelExample
     admin.scan(tableName, new Scan()); // co VisibilityLabelExample-08-Scans Scan the table twice, as different users. The admin can see more than the application due to the visibility expressions.
-    // ^^ VisibilityLabelExample
-    System.out.println("Application: Scan table...");
-    // vv VisibilityLabelExample
     app1.scan(tableName, new Scan());
 
     // ^^ VisibilityLabelExample
     System.out.println("Admin: Scan table again, but with reduced visbility...");
     // vv VisibilityLabelExample
     admin.scan(tableName,
-      new Scan().setAuthorizations(new Authorizations("low"))); // co VisibilityLabelExample-09-SetAuthScan Lower and raise the visibility for the scans. Result will include subset of cells for former and no labelled cell at all for latter.
+      new Scan().setAuthorizations(new Authorizations("low"))); // co VisibilityLabelExample-09-SetAuthScan1 Lower the visibility for the scans. Result will include subset of cells.
     admin.scan(tableName,
-      new Scan().setAuthorizations(new Authorizations("high")));
+      new Scan().setAuthorizations(new Authorizations("high")));  // co VisibilityLabelExample-10-SetAuthScan2 Raise the visibility for the scans. Result will include no labelled cell as the user is not allowed to see those.
 
     // ^^ VisibilityLabelExample
     System.out.println("Superuser: Give application system label access and try scan again...");
     // vv VisibilityLabelExample
-    setUserAuthorization(superuser, app1.getShortUserName(), "system"); // co VisibilityLabelExample-10-System Assign special "system" label to application, retry the scan and see how it returns all labelled cells now.
+    setUserAuthorization(superuser, app1.getShortUserName(), "system"); // co VisibilityLabelExample-11-System Assign special "system" label to application, retry the scan and see how it returns all labelled cells now.
     printUserAuthorization(superuser, app1.getShortUserName());
     app1.scan(tableName, new Scan());
 
     // ^^ VisibilityLabelExample
     System.out.println("Superuser: Remove labels from admin user and try scan again...");
     // vv VisibilityLabelExample
-    removeUserAuthorization(superuser, admin.getShortUserName(), "medium"); // co VisibilityLabelExample-11-ClearAuth Remove one label from admin and use scan to show the reduced output.
+    removeUserAuthorization(superuser, admin.getShortUserName(), "medium"); // co VisibilityLabelExample-12-ClearAuth Remove one label from admin and use scan to show the reduced output.
     printUserAuthorization(superuser, admin.getShortUserName());
     admin.scan(tableName, new Scan());
+
+    // ^^ VisibilityLabelExample
+    System.out.println("Superuser & Admin: Revoke all ACL based access...");
+    // vv VisibilityLabelExample
+    admin.revoke(tableName, app1.getShortUserName(), null, null,
+      Permission.Action.values()); // admin first, or else it has no rights left
+    superuser.revoke(admin.getShortUserName(), Permission.Action.values());
+    app1.scan(tableName, new Scan());
+
+    removeUserAuthorization(superuser, app1.getShortUserName(), "system");
   }
   // ^^ VisibilityLabelExample
 
