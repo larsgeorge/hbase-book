@@ -101,30 +101,7 @@
     <name>hbase.security.authorization</name>
     <value>true</value>
   </property>
-  <property>
-    <!-- Enable full cell-level ACL evaluation -->
-    <name>hbase.security.access.early_out</name>
-    <value>false</value>
-  </property>
-  <property>
-    <name>hbase.coprocessor.master.classes</name>
-    <value>org.apache.hadoop.hbase.security.access.AccessController,
-      org.apache.hadoop.hbase.security.visibility.VisibilityController</value>
-  </property>
-  <property>
-    <name>hbase.coprocessor.region.classes</name>
-    <value>org.apache.hadoop.hbase.security.access.AccessController,
-      org.apache.hadoop.hbase.security.visibility.VisibilityController,
-      org.apache.hadoop.hbase.security.token.TokenProvider</value>
-  </property>
-  <property>
-    <name>hbase.coprocessor.regionserver.classes</name>
-    <value>org.apache.hadoop.hbase.security.access.AccessController</value>
-  </property>
-  <property>
-    <name>hbase.security.exec.permission.checks</name>
-    <value>true</value>
-  </property>
+  <!-- Enable SASL to ZooKeeper -->
   <property>
     <name>hbase.zookeeper.property.authProvider.1</name>
     <value>org.apache.zookeeper.server.auth.SASLAuthenticationProvider</value>
@@ -138,6 +115,72 @@
   <!-- Enables SSL for the web based UIs (including gateway servers) -->
   <property>
     <name>hbase.ssl.enabled</name>
+    <value>true</value>
+  </property>
+
+  <!-- Coprocessors for ACLs, Visibility Labels, and Tokens -->
+  <property>
+    <name>hbase.coprocessor.master.classes</name>
+    <value>org.apache.hadoop.hbase.security.access.AccessController,
+      org.apache.hadoop.hbase.security.visibility.VisibilityController</value>
+  </property>
+  <property>
+    <name>hbase.coprocessor.region.classes</name>
+    <value>org.apache.hadoop.hbase.security.access.AccessController,
+      org.apache.hadoop.hbase.security.visibility.VisibilityController,
+      org.apache.hadoop.hbase.security.access.SecureBulkLoadEndpoint,
+      org.apache.hadoop.hbase.security.token.TokenProvider</value>
+  </property>
+  <property>
+    <name>hbase.coprocessor.regionserver.classes</name>
+    <value>org.apache.hadoop.hbase.security.access.AccessController</value>
+  </property>
+  <!-- Executable ACL for Coprocessor Endpoints -->
+  <property>
+    <name>hbase.security.exec.permission.checks</name>
+    <value>true</value>
+  </property>
+  <property>
+    <!-- Enable full cell-level ACL evaluation -->
+    <name>hbase.security.access.early_out</name>
+    <value>false</value>
+  </property>
+  <!-- Check auth on label for user before writes -->
+  <property>
+    <name>hbase.security.visibility.mutations.checkauth</name>
+    <value>false</value>
+  </property>
+
+  <!-- HBase per CF encryption-->
+  <property>
+    <name>hbase.crypto.keyprovider</name>
+    <value>org.apache.hadoop.hbase.io.crypto.KeyStoreKeyProvider</value>
+  </property>
+  <property>
+    <name>hbase.crypto.keyprovider.parameters</name>
+    <value>jceks://{{ KEYSTORE_DIR }}/hbase-crypto.jks?password={{ HBASE_CRYPTO_PASSWORD }}</value>
+  </property>
+  <property>
+    <!-- Required when the alias in the keystore differs from the HBase user -->
+    <name>hbase.crypto.master.key.name</name>
+    <value>hbase</value>
+  </property>
+  <property>
+    <!-- For key rotation, the alias of the previous key -->
+    <name>hbase.crypto.master.alternate.key.name</name>
+    <value>hbase.old</value>
+  </property>
+  <!-- WAL encryption -->
+  <property>
+    <name>hbase.regionserver.hlog.reader.impl</name>
+    <value>org.apache.hadoop.hbase.regionserver.wal.SecureProtobufLogReader</value>
+  </property>
+  <property>
+    <name>hbase.regionserver.hlog.writer.impl</name>
+    <value>org.apache.hadoop.hbase.regionserver.wal.SecureProtobufLogWriter</value>
+  </property>
+  <property>
+    <name>hbase.regionserver.wal.encryption</name>
     <value>true</value>
   </property>
 
@@ -249,31 +292,5 @@
     <name>hbase.thrift.support.proxyuser</name>
     <value>true</value>
   </property>
-  <!-- HBase per CF encryption-->
-  <property>
-    <name>hbase.crypto.keyprovider</name>
-    <value>org.apache.hadoop.hbase.io.crypto.KeyStoreKeyProvider</value>
-  </property>
-  <property>
-    <name>hbase.crypto.keyprovider.parameters</name>
-    <value>jceks://{{ KEYSTORE_DIR }}/hbase-crypto.jks?password={{ HBASE_CRYPTO_PASSWORD }}</value>
-  </property>
-  <!--property>
-    <name>hbase.crypto.master.key.name</name>
-    <value>my-alias</value>
-  </property-->
-  <!-- WAL encryption -->
-  <property>
-    <name>hbase.regionserver.hlog.reader.impl</name>
-    <value>org.apache.hadoop.hbase.regionserver.wal.SecureProtobufLogReader</value>
-  </property>
-  <property>
-    <name>hbase.regionserver.hlog.writer.impl</name>
-    <value>org.apache.hadoop.hbase.regionserver.wal.SecureProtobufLogWriter</value>
-  </property>
-  <property>
-    <name>hbase.regionserver.wal.encryption</name>
-    <value>true</value>
-  </property>
-  {% endif %}
+  {%- endif %}
 </configuration>
