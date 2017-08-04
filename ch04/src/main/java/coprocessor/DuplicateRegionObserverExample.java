@@ -67,12 +67,12 @@ public class DuplicateRegionObserverExample extends BaseRegionObserver {
     Connection connection = ConnectionFactory.createConnection(conf);
     TableName tableName = TableName.valueOf("testtable");
 
-    HTableDescriptor htd = new HTableDescriptor(tableName)
-      .addFamily(new HColumnDescriptor("colfam1"))
-      .addCoprocessor(DuplicateRegionObserverExample.class.getCanonicalName(),
-        null, Coprocessor.PRIORITY_USER, null)
-      .addCoprocessor(DuplicateRegionObserverExample.class.getCanonicalName(),
-        null, Coprocessor.PRIORITY_USER, null);
+    HTableDescriptor htd = new HTableDescriptor(tableName);
+    htd.addFamily(new HColumnDescriptor("colfam1"));
+    htd.addCoprocessor(DuplicateRegionObserverExample.class.getCanonicalName(),
+      null, Coprocessor.PRIORITY_USER, null);
+    htd.addCoprocessor(DuplicateRegionObserverExample.class.getCanonicalName(),
+      null, Coprocessor.PRIORITY_USER, null);
 
     // ^^ DuplicateRegionObserverExample
     /* Does not work as expected! Will throw the following exception:

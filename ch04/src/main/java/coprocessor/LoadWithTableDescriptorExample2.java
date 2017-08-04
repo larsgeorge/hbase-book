@@ -25,10 +25,10 @@ public class LoadWithTableDescriptorExample2 {
     TableName tableName = TableName.valueOf("testtable");
 
     // vv LoadWithTableDescriptorExample2
-    HTableDescriptor htd = new HTableDescriptor(tableName) // co LoadWithTableDescriptorExample2-1-Create Use fluent interface to create and configure the instance.
-      .addFamily(new HColumnDescriptor("colfam1"))
-      /*[*/.addCoprocessor(RegionObserverExample.class.getCanonicalName(),
-        null, Coprocessor.PRIORITY_USER, null);/*]*/ // co LoadWithTableDescriptorExample2-2-AddCP Use the provided method to add the coprocessor.
+    HTableDescriptor htd = new HTableDescriptor(tableName); // co LoadWithTableDescriptorExample2-1-Create Use fluent interface to create and configure the instance.
+    htd.addFamily(new HColumnDescriptor("colfam1"));
+    /*[*/htd.addCoprocessor(RegionObserverExample.class.getCanonicalName(),
+      null, Coprocessor.PRIORITY_USER, null);/*]*/ // co LoadWithTableDescriptorExample2-2-AddCP Use the provided method to add the coprocessor.
 
     Admin admin = connection.getAdmin();
     admin.createTable(htd);
