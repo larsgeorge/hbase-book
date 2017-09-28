@@ -51,7 +51,7 @@ public class BufferedMutatorExample {
       public void onException(RetriesExhaustedWithDetailsException e,
         BufferedMutator mutator) {
         for (int i = 0; i < e.getNumExceptions(); i++) { // co BufferedMutatorExample-02-OnException Handle callback in case of an exception.
-          LOG.info("Failed to sent put: " + e.getRow(i)); // co BufferedMutatorExample-03-PrintRow Generically retrieve the mutation that failed, using the common superclass.
+          LOG.info("Failed to send put: " + e.getRow(i)); // co BufferedMutatorExample-03-PrintRow Generically retrieve the mutation that failed, using the common superclass.
         }
       }
     };

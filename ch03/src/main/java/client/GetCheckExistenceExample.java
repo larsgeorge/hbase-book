@@ -55,7 +55,7 @@ public class GetCheckExistenceExample {
       Bytes.toBytes("qual1"));
 
     System.out.println("Get 1 Exists: " + result1.getExists());
-    System.out.println("Get 1 Size: " + result1.size()); // co GetCheckExistenceExample-3-Result1 Exists is "true", while no cel was actually returned.
+    System.out.println("Get 1 Size: " + result1.size()); // co GetCheckExistenceExample-3-Result1 Exists is "true", while no cell was actually returned.
     System.out.println("Get 1 Value: " + Bytes.toString(val));
 
     Get get2 = new Get(Bytes.toBytes("row2"));

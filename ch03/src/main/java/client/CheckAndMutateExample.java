@@ -61,13 +61,13 @@ public class CheckAndMutateExample {
     System.out.println("Mutate 1 successful: " + res1);
 
     Put put2 = new Put(Bytes.toBytes("row1"));
-    put2.addColumn(Bytes.toBytes("colfam2"), Bytes.toBytes("qual1"), // co CheckAndMutateExample-1-Put1 Update the checked column to have a value greater than what we check for.
+    put2.addColumn(Bytes.toBytes("colfam2"), Bytes.toBytes("qual1"), // co CheckAndMutateExample-2-Put1 Update the checked column to have a value greater than what we check for.
       4, Bytes.toBytes("val2"));
     table.put(put2);
 
     boolean res2 = table.checkAndMutate(Bytes.toBytes("row1"),
       Bytes.toBytes("colfam2"), Bytes.toBytes("qual1"),
-      CompareFilter.CompareOp.LESS, Bytes.toBytes("val1"), mutations); // co CheckAndMutateExample-1-Check2 Now "val1" is less than "val2" (binary comparison) and we expect "true" to be printed on the console.
+      CompareFilter.CompareOp.LESS, Bytes.toBytes("val1"), mutations); // co CheckAndMutateExample-3-Check2 Now "val1" is less than "val2" (binary comparison) and we expect "true" to be printed on the console.
     System.out.println("Mutate 2 successful: " + res2);
 
     // ^^ CheckAndMutateExample

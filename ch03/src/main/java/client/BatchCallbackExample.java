@@ -49,39 +49,39 @@ public class BatchCallbackExample {
     Table table = connection.getTable(TableName.valueOf("testtable"));
 
     // vv BatchCallbackExample
-    List<Row> batch = new ArrayList<Row>(); // co BatchCallbackExample-2-CreateList Create a list to hold all values.
+    List<Row> batch = new ArrayList<Row>(); // co BatchCallbackExample-1-CreateList Create a list to hold all values.
 
     Put put = new Put(ROW2);
-    put.addColumn(COLFAM2, QUAL1, 4, Bytes.toBytes("val5")); // co BatchCallbackExample-3-AddPut Add a Put instance.
+    put.addColumn(COLFAM2, QUAL1, 4, Bytes.toBytes("val5")); // co BatchCallbackExample-2-AddPut Add a Put instance.
     batch.add(put);
 
     Get get1 = new Get(ROW1);
-    get1.addColumn(COLFAM1, QUAL1); // co BatchCallbackExample-4-AddGet Add a Get instance for a different row.
+    get1.addColumn(COLFAM1, QUAL1); // co BatchCallbackExample-3-AddGet Add a Get instance for a different row.
     batch.add(get1);
 
     Delete delete = new Delete(ROW1);
-    delete.addColumns(COLFAM1, QUAL2); // co BatchCallbackExample-5-AddDelete Add a Delete instance.
+    delete.addColumns(COLFAM1, QUAL2); // co BatchCallbackExample-4-AddDelete Add a Delete instance.
     batch.add(delete);
 
     Get get2 = new Get(ROW2);
-    get2.addFamily(Bytes.toBytes("BOGUS")); // co BatchCallbackExample-6-AddBogus Add a Get instance that will fail.
+    get2.addFamily(Bytes.toBytes("BOGUS")); // co BatchCallbackExample-5-AddBogus Add a Get instance that will fail.
     batch.add(get2);
 
-    Object[] results = new Object[batch.size()]; // co BatchCallbackExample-7-CreateResult Create result array.
+    Object[] results = new Object[batch.size()]; // co BatchCallbackExample-6-CreateResult Create result array.
     try {
       table.batchCallback(batch, results, new Batch.Callback<Result>() {
         @Override
         public void update(byte[] region, byte[] row, Result result) {
-          System.out.println("Received callback for row[" + 
+          System.out.println("Received callback for row[" +
             Bytes.toString(row) + "] -> " + result);
         }
       });
     } catch (Exception e) {
-      System.err.println("Error: " + e); // co BatchCallbackExample-8-Print Print error that was caught.
+      System.err.println("Error: " + e); // co BatchCallbackExample-7-Print Print error that was caught.
     }
 
     for (int i = 0; i < results.length; i++) {
-      System.out.println("Result[" + i + "]: type = " + // co BatchCallbackExample-9-Dump Print all results and class types.
+      System.out.println("Result[" + i + "]: type = " + // co BatchCallbackExample-8-Dump Print all results and class types.
         results[i].getClass().getSimpleName() + "; " + results[i]);
     }
     // ^^ BatchCallbackExample
