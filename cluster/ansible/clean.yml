@@ -93,6 +93,7 @@
         path={{ item.path }}
         state=absent
       with_items:
+        - { path: '{{ HADOOP_CONFIG }}/nn_format_result' }
         - { path: '{{ HADOOP_DATA }}' }
 
 - hosts: masters
