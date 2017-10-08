@@ -49,7 +49,7 @@ MONITORING_ENABLED: false
 # probably won't be a need to touch these.
 PACKAGE_BASE: "/opt"  # all installed software will be put in subdirectories of this folder
 CONFIG_BASE: "/etc" # config files will be placed in subdirectories of this folder
-VAR_RUN_BASE: "/var/opt"
+VAR_RUN_BASE: "/var/opt" # all execution related files are placed in subdirectories of this folder
 HADOOP_DATA: "/data/hadoop/hdfs" # the Hadoop data directory, all HDFS data will be stored in this directory
 ZOOKEEPER_DATA: "/data/zookeeper" # Zookeeper data will be stored here
 

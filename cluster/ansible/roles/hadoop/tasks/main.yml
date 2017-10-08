@@ -6,7 +6,13 @@
 #   - Installs also the Hadoop related tarballs etc.
 
 - name: Create Hadoop related directories (secure mode)
-  file: path={{ item.path }} owner={{ item.owner }} group=hadoop mode={{ item.mode }} recurse=yes state=directory
+  file:
+    path={{ item.path }}
+    owner={{ item.owner }}
+    group=hadoop
+    mode={{ item.mode }}
+    recurse=yes
+    state=directory
   with_items:
     - { path: '{{ HADOOP_DATA }}', owner: 'hdfs', mode: 755 }
     - { path: '{{ HADOOP_DATA }}/nn', owner: 'hdfs', mode: 700 }
@@ -18,7 +24,13 @@
   when: SECURITY_ENABLED == true
 
 - name: Create Hadoop related directories (non-secure mode)
-  file: path={{ item.path }} owner={{ item.owner }} group=hadoop mode={{ item.mode }} recurse=yes state=directory
+  file:
+    path={{ item.path }}
+    owner={{ item.owner }}
+    group=hadoop
+    mode={{ item.mode }}
+    recurse=yes
+    state=directory
   with_items:
     - { path: '{{ HADOOP_DATA }}/nn', owner: 'hadoop', mode: 775 }
     - { path: '{{ VAR_RUN_BASE }}/yarn/logs', owner: 'hadoop', mode: 775 }
@@ -29,27 +41,52 @@
   when: SECURITY_ENABLED == false
 
 - name: Download Hadoop
-  get_url: url={{ HADOOP_DOWNLOAD_LINK }}/hadoop-{{ HADOOP_VERSION }}/hadoop-{{ HADOOP_VERSION }}.tar.gz dest=/tmp/hadoop-{{ HADOOP_VERSION }}.tar.gz mode=0644
+  get_url:
+    url={{ HADOOP_DOWNLOAD_LINK }}/hadoop-{{ HADOOP_VERSION }}/hadoop-{{ HADOOP_VERSION }}.tar.gz
+    dest=/tmp/hadoop-{{ HADOOP_VERSION }}.tar.gz
+    mode=0644
   when: REMOTE_FETCH_TARBALLS == true
 
 - name: Untar Hadoop
-  unarchive: src=/tmp/hadoop-{{ HADOOP_VERSION }}.tar.gz dest={{ PACKAGE_BASE }} owner=root group=hadoop copy=no creates={{ PACKAGE_BASE }}/hadoop-{{ HADOOP_VERSION }}
+  unarchive:
+    src=/tmp/hadoop-{{ HADOOP_VERSION }}.tar.gz
+    dest={{ PACKAGE_BASE }}
+    owner=root
+    group=hadoop
+    copy=no
+    creates={{ PACKAGE_BASE }}/hadoop-{{ HADOOP_VERSION }}
   when: REMOTE_FETCH_TARBALLS == true
 
 #- name: Download Hadoop to local machine
 #  local_action: get_url url={{ HADOOP_DOWNLOAD_LINK }}/hadoop-{{ HADOOP_VERSION }}/hadoop-{{ HADOOP_VERSION }}.tar.gz dest=files/download/hadoop-{{ HADOOP_VERSION }}.tar.gz mode=0644
 
 - name: Untar Hadoop
-  unarchive: src=files/downloads/hadoop-{{ HADOOP_VERSION }}.tar.gz dest={{ PACKAGE_BASE }} owner=root group=hadoop copy=yes creates={{ PACKAGE_BASE }}/hadoop-{{ HADOOP_VERSION }}
+  unarchive:
+    src=files/downloads/hadoop-{{ HADOOP_VERSION }}.tar.gz
+    dest={{ PACKAGE_BASE }}
+    owner=root
+    group=hadoop
+    copy=yes
+    creates={{ PACKAGE_BASE }}/hadoop-{{ HADOOP_VERSION }}
   when: REMOTE_FETCH_TARBALLS == false
 
 - name: Symlink Hadoop
-  file: src={{ PACKAGE_BASE }}/hadoop-{{ HADOOP_VERSION }} path={{ PACKAGE_BASE }}/hadoop state=link owner=hadoop group=hadoop
+  file:
+    src={{ PACKAGE_BASE }}/hadoop-{{ HADOOP_VERSION }}
+    path={{ HADOOP_HOME }}
+    owner=hadoop
+    group=hadoop
+    state=link
 
 #TODO: Add Hue download and build
 
 - name: Put Hadoop configuration in place
-  template: src={{ item.src }} dest={{ item.dest }} owner=hdfs group=hadoop mode=0644
+  template:
+    src={{ item.src }}
+    dest={{ item.dest }}
+    owner=hdfs
+    group=hadoop
+    mode=0644
   with_items:
     - { src: "etc/hadoop/conf/hadoop-env.sh.j2", dest: "{{ HADOOP_CONFIG }}/hadoop-env.sh" }
     - { src: "etc/hadoop/conf/yarn-env.sh.j2", dest: "{{ HADOOP_CONFIG }}/yarn-env.sh" }
@@ -64,10 +101,19 @@
     - { src: "etc/hadoop/conf/log4j.properties", dest: "{{ HADOOP_CONFIG }}/log4j.properties" }
 
 - name: Put container executor configuration in place
-  template: src=etc/hadoop/conf/container-executor.cfg.j2 dest={{ HADOOP_HOME }}/etc/hadoop/container-executor.cfg owner=root group=hadoop mode=0400
+  template:
+    src=etc/hadoop/conf/container-executor.cfg.j2
+    dest={{ HADOOP_HOME }}/etc/hadoop/container-executor.cfg
+    owner=root
+    group=hadoop
+    mode=0400
 
 - name: Ensure correct permissions on container-executor binary
-  file: path={{ HADOOP_HOME }}/bin/container-executor owner=root group=hadoop mode=6050
+  file:
+    path={{ HADOOP_HOME }}/bin/container-executor
+    owner=root
+    group=hadoop
+    mode=6050
 
 - name: Format namenode
   shell: /opt/hadoop/bin/hdfs namenode -format -force >> {{ HADOOP_CONFIG }}/nn_format_result
@@ -99,7 +145,13 @@
 #  copy: src=etc/init.d/ dest=/etc/init.d/ owner=root group=root mode=755 backup=yes
 
 - name: Create services
-  template: src=etc/systemd/system/{{ item.src }} dest=/etc/systemd/system/{{ item.dest }} owner=root group=root mode=755 backup=yes
+  template:
+    src=etc/systemd/system/{{ item.src }}
+    dest=/etc/systemd/system/{{ item.dest }}
+    owner=root
+    group=root
+    mode=755
+    backup=yes
   with_items:
     - { src: "namenode.service.j2", dest: "namenode.service"}
     - { src: "datanode.service.j2", dest: "datanode.service"}

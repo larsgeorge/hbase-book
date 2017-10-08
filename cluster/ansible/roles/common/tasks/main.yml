@@ -106,7 +106,7 @@
     - ntpd
   when: ansible_os_family == 'RedHat'
 
-- name: Overwrite vagrant changes to /etc/hosts
+- name: Overwrite Vagrant changes to /etc/hosts
   copy: src=hosts dest=/etc/hosts owner=root group=root
 
 - name: Create Hadoop system user accounts and shared hadoop group

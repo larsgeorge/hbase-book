@@ -6,7 +6,13 @@
 #   - Installs also the Hadoop related tarballs etc.
 
 - name: Create Hadoop related directories
-  file: path={{ item.path }} owner={{ item.owner }} group=hadoop mode={{ item.mode }} recurse=yes state=directory
+  file:
+    path={{ item.path }}
+    owner={{ item.owner }}
+    group=hadoop
+    mode={{ item.mode }}
+    recurse=yes
+    state=directory
   with_items:
     - { path: '{{ ZOOKEEPER_CONFIG }}', owner: 'zookeeper', mode: 775 }
     - { path: '{{ VAR_RUN_BASE }}/zookeeper/logs', owner: 'zookeeper', mode: 775 }
@@ -14,22 +20,47 @@
     - { path: '{{ ZOOKEEPER_DATA }}', owner: 'zookeeper', mode: 775 }
 
 - name: Download Zookeeper
-  get_url: url={{ ZOOKEEPER_DOWNLOAD_LINK }}/zookeeper-{{ ZOOKEEPER_VERSION }}/zookeeper-{{ ZOOKEEPER_VERSION }}.tar.gz dest=/tmp/zookeeper-{{ ZOOKEEPER_VERSION }}.tar.gz mode=0644
+  get_url:
+    url={{ ZOOKEEPER_DOWNLOAD_LINK }}/zookeeper-{{ ZOOKEEPER_VERSION }}/zookeeper-{{ ZOOKEEPER_VERSION }}.tar.gz
+    dest=/tmp/zookeeper-{{ ZOOKEEPER_VERSION }}.tar.gz
+    mode=0644
   when: REMOTE_FETCH_TARBALLS == true
 
 - name: Untar Zookeeper
-  unarchive: src=/tmp/zookeeper-{{ ZOOKEEPER_VERSION }}.tar.gz dest={{ PACKAGE_BASE }} owner=zookeeper group=hadoop copy=no creates={{ PACKAGE_BASE }}/zookeeper-{{ ZOOKEEPER_VERSION }}
+  unarchive:
+    src=/tmp/zookeeper-{{ ZOOKEEPER_VERSION }}.tar.gz
+    dest={{ PACKAGE_BASE }}
+    owner=zookeeper
+    group=hadoop
+    copy=no
+    creates={{ PACKAGE_BASE }}/zookeeper-{{ ZOOKEEPER_VERSION }}
   when: REMOTE_FETCH_TARBALLS == true
 
 - name: Untar Zookeeper
-  unarchive: src=files/downloads/zookeeper-{{ ZOOKEEPER_VERSION }}.tar.gz dest={{ PACKAGE_BASE }} owner=zookeeper group=hadoop copy=yes creates={{ PACKAGE_BASE }}/zookeeper-{{ ZOOKEEPER_VERSION }}
+  unarchive:
+    src=files/downloads/zookeeper-{{ ZOOKEEPER_VERSION }}.tar.gz
+    dest={{ PACKAGE_BASE }}
+    owner=zookeeper
+    group=hadoop
+    copy=yes
+    creates={{ PACKAGE_BASE }}/zookeeper-{{ ZOOKEEPER_VERSION }}
   when: REMOTE_FETCH_TARBALLS == false
 
 - name: Symlink Zookeeper
-  file: src={{ PACKAGE_BASE }}/zookeeper-{{ ZOOKEEPER_VERSION }} path={{ ZOOKEEPER_HOME }} state=link owner=zookeeper group=hadoop
+  file:
+    src={{ PACKAGE_BASE }}/zookeeper-{{ ZOOKEEPER_VERSION }}
+    path={{ ZOOKEEPER_HOME }}
+    owner=zookeeper
+    group=hadoop
+    state=link
 
 - name: Put Zookeeper configuration in place
-  template: src={{ item.src }} dest={{ item.dest }} owner=zookeeper group=hadoop mode=0644
+  template:
+    src={{ item.src }}
+    dest={{ item.dest }}
+    owner=zookeeper
+    group=hadoop
+    mode=0644
   with_items:
     - { src: "etc/zookeeper/zoo.cfg.j2", dest: "{{ ZOOKEEPER_CONFIG }}/zoo.cfg" }
     - { src: "etc/zookeeper/log4j.properties.j2", dest: "{{ ZOOKEEPER_CONFIG }}/log4j.properties" }

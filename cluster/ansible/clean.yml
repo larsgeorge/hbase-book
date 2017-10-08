@@ -1,0 +1,220 @@
+---
+# Playbook to clean up all services on the relevant machines
+#
+# Notes:
+# - Add "zookeeper", "hadoop", and "hbase" tags to target only named service
+#
+# Examples:
+# - Clean ZooKeeper data only:
+#   $ ansible-playbook clean.yml --tags "zookeeper"
+# - Clean HBase data:
+#   $ ansible-playbook clean.yml --tags "hbase"
+
+# TODO: data dirs, config dirs, user/groups, keytabs, certs, env vars/defaults
+
+# HBase - Note that there is no data section for HBase, use $ hbase clean
+
+- hosts: masters
+  tags:
+    - hbase
+    - hbase-masters
+    - config
+    - config-hbase
+    - config-hbase-masters
+  tasks:
+    - name: Remove HBase configuration related directories
+      file:
+        path={{ item.path }}
+        state=absent
+      with_items:
+        - { path: '{{ HBASE_CONFIG }}' }
+
+- hosts: masters
+  tags:
+    - hbase
+    - hbase-masters
+    - exec
+    - exec-hbase
+    - exec-hbase-masters
+  tasks:
+    - name: Remove HBase execution related directories
+      file:
+        path={{ item.path }}
+        state=absent
+      with_items:
+        - { path: '{{ HBASE_HOME }}' }
+        - { path: '{{ PACKAGE_BASE }}/hbase-{{ HBASE_VERSION }}' }
+        - { path: '{{ VAR_RUN_BASE }}/hbase' }
+
+- hosts: workers
+  tags:
+    - hbase
+    - hbase-workers
+    - config
+    - config-hbase
+    - config-hbase-workers
+  tasks:
+    - name: Remove HBase configuration related directories
+      file:
+        path={{ item.path }}
+        state=absent
+      with_items:
+        - { path: '{{ HBASE_CONFIG }}' }
+
+- hosts: workers
+  tags:
+    - hbase
+    - hbase-workers
+    - exec
+    - exec-hbase
+    - exec-hbase-workers
+  tasks:
+    - name: Remove HBase execution related directories
+      file:
+        path={{ item.path }}
+        state=absent
+      with_items:
+        - { path: '{{ HBASE_HOME }}' }
+        - { path: '{{ PACKAGE_BASE }}/hbase-{{ HBASE_VERSION }}' }
+        - { path: '{{ VAR_RUN_BASE }}/hbase' }
+
+# Hadoop Core
+
+- hosts: masters
+  tags:
+    - hadoop
+    - hadoop-masters
+    - data
+    - data-hadoop
+    - data-hadoop-masters
+  tasks:
+    - name: Remove Hadoop data related directories
+      file:
+        path={{ item.path }}
+        state=absent
+      with_items:
+        - { path: '{{ HADOOP_DATA }}' }
+
+- hosts: masters
+  tags:
+    - hadoop
+    - hadoop-masters
+    - config
+    - config-hadoop
+    - config-hadoop-masters
+  tasks:
+    - name: Remove Hadoop configuration related directories
+      file:
+        path={{ item.path }}
+        state=absent
+      with_items:
+        - { path: '{{ HADOOP_CONFIG }}' }
+
+- hosts: masters
+  tags:
+    - hadoop
+    - hadoop-masters
+    - exec
+    - exec-hadoop
+    - exec-hadoop-masters
+  tasks:
+    - name: Remove Hadoop execution related directories
+      file:
+        path={{ item.path }}
+        state=absent
+      with_items:
+        - { path: '{{ HADOOP_HOME }}' }
+        - { path: '{{ PACKAGE_BASE }}/hadoop-{{ HADOOP_VERSION }}' }
+        - { path: '{{ VAR_RUN_BASE }}/hadoop' }
+        - { path: '{{ VAR_RUN_BASE }}/yarn' }
+
+- hosts: workers
+  tags:
+    - hadoop
+    - hadoop-workers
+    - data
+    - data-hadoop
+    - data-hadoop-workers
+  tasks:
+    - name: Remove Hadoop data related directories
+      file:
+        path={{ item.path }}
+        state=absent
+      with_items:
+        - { path: '{{ HADOOP_DATA }}' }
+
+- hosts: workers
+  tags:
+    - hadoop
+    - hadoop-workers
+    - config
+    - config-hadoop
+    - config-hadoop-workers
+  tasks:
+    - name: Remove Hadoop configuration related directories
+      file:
+        path={{ item.path }}
+        state=absent
+      with_items:
+        - { path: '{{ HADOOP_CONFIG }}' }
+
+- hosts: workers
+  tags:
+    - hadoop
+    - hadoop-workers
+    - exec
+    - exec-hadoop
+    - exec-hadoop-workers
+  tasks:
+    - name: Remove Hadoop execution related directories
+      file:
+        path={{ item.path }}
+        state=absent
+      with_items:
+        - { path: '{{ HADOOP_HOME }}' }
+        - { path: '{{ PACKAGE_BASE }}/hadoop-{{ HADOOP_VERSION }}' }
+        - { path: '{{ VAR_RUN_BASE }}/hadoop' }
+        - { path: '{{ VAR_RUN_BASE }}/yarn' }
+
+# Zookeeper
+
+- hosts: zookeepers
+  tags:
+    - zookeeper
+    - data
+    - data-zookeeper
+  tasks:
+    - name: Remove ZooKeeper data related directories
+      file:
+        path={{ item.path }}
+        state=absent
+      with_items:
+        - { path: '{{ ZOOKEEPER_DATA }}' }
+
+- hosts: zookeepers
+  tags:
+    - zookeeper
+    - config
+    - config-zookeeper
+  tasks:
+    - name: Remove ZooKeeper configuration related directories
+      file:
+        path={{ item.path }}
+        state=absent
+      with_items:
+        - { path: '{{ ZOOKEEPER_CONFIG }}' }
+
+- hosts: zookeepers
+  tags:
+    - zookeeper
+    - exec
+    - exec-zookeeper
+  tasks:
+    - name: Remove ZooKeeper data related directories
+      file:
+        path={{ item.path }}
+        state=absent
+      with_items:
+        - { path: '{{ ZOOKEEPER_HOME }}' }
+        - { path: '{{ PACKAGE_BASE }}/zookeeper-{{ ZOOKEEPER_VERSION }}' }
+        - { path: '{{ VAR_RUN_BASE }}/zookeeper' }
