@@ -149,9 +149,13 @@
 
 # Purpose: Create HBase root path in HDFS as privileged user
 #
+# The task is to create the HBase root now, as before the install playbook
+# cannot do that, as HDFS is not yet running. So we delay the creation to this
+# place to ensure HDFS is available.
+#
 # Notes:
 #   - Executed on single master server only.
-#   - Needs a `hdfs` principal ticket.
+#   - Needs a `hdfs` principal ticket in secure mode.
 - hosts: hbase_master
   tags:
     - hbase
@@ -170,24 +174,22 @@
       shell: "{{ HADOOP_HOME }}/bin/hdfs dfs -ls /"
       register: hdfs_list_root
       changed_when: false
-      when:
-        - SECURITY_ENABLED == true
 
     - debug: var=hdfs_list_root.stdout_lines
-      when:
-        - SECURITY_ENABLED == true
 
     - name: Create HBase root directory
       shell: "{{ HADOOP_HOME }}/bin/hdfs dfs -mkdir {{ HBASE_ROOT_DIR }}"
+      become: yes
+      become_user: "{{ HADOOP_USERS[0] }}"
       when:
         - hdfs_list_root.stdout.find('{{ HBASE_ROOT_DIR }}') == -1
-        - SECURITY_ENABLED == true
 
     - name: Set HBase root directory access
       shell: "{{ HADOOP_HOME }}/bin/hdfs dfs -chown hbase:hadoop {{ HBASE_ROOT_DIR }}"
+      become: yes
+      become_user: "{{ HADOOP_USERS[0] }}"
       when:
         - hdfs_list_root.stdout.find('{{ HBASE_ROOT_DIR }}') == -1
-        - SECURITY_ENABLED == true
 
 - hosts: workers
   tags:
