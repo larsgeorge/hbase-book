@@ -48,7 +48,10 @@
     - { name: 'net.ipv6.conf.default.disable_ipv6', value: '1', state: 'present' }
 
 - name: Disable transparent huge page defragmentation
-  command: echo never > /sys/kernel/mm/transparent_hugepage/defrag
+  shell: echo never > /sys/kernel/mm/transparent_hugepage/defrag
+
+- name: Disable transparent huge pages
+  shell: echo never > /sys/kernel/mm/transparent_hugepage/enabled
 
 - name: Set hostname
   hostname: name={{ inventory_hostname }}.{{ CLUSTER_DOMAIN }}
