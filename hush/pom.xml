@@ -42,7 +42,7 @@
     <requiredMavenVersion>[2.1,)</requiredMavenVersion>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.build.outputEncoding>UTF-8</project.build.outputEncoding>
-    <jetty.version>9.2.6.v20141205</jetty.version>
+    <jetty.version>9.4.34.v20201102</jetty.version>
     <hbase.version>1.0.0</hbase.version>
   </properties>
 
